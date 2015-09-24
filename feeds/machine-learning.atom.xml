@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/machine-learning.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2014-11-14T00:00:00+08:00</updated><entry><title>最大熵</title><link href="https://wugh.github.io/posts/2014/11/maxent/" rel="alternate"></link><updated>2014-11-14T00:00:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2014-11-14:posts/2014/11/maxent/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;最大熵原理&lt;/h3&gt;
+&lt;p&gt;最大熵原理指的是当我们在估计概率分布的时候，这个概率分布符合已知信息的约束并且&amp;nbsp;该分布是最均匀的。从熵的角度考虑就是要让这个分布符合约束并且熵最大。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The principle of maximum entropy states that, subject to precisely stated
+prior data (such as a proposition that expresses testable information), the
+probability distribution which best represents the current state of knowledge
+is the one with largest&amp;nbsp;entropy.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;现在考虑一个文本分类的例子，假设我们有4个类别的文本分别是：economics、
+sports、politics和art。因为文本只能被分成4个类别，假设现在没有额外的信息，&amp;nbsp;那么约束只有以下的1个
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(economics)+p(sports)+p(politics)+p(art)=1$$&lt;/div&gt;
+&lt;p&gt;
+那么我们希望得到得概率分布尽量均匀，就会得到下面结果
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(economics)=p(sports)=p(politics)=p(art)=0.25$$&lt;/div&gt;
+&lt;p&gt;
+现在假设我们有一个先验信息是60%的文档是economics或者sports类别的，那么我们的&amp;nbsp;概率分布就会有以下两个约束
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(economics)+p(sports)=0.6$$&lt;/div&gt;
+&lt;div class="math"&gt;$$p(economics)+p(sports)+p(politics)+p(art)=1$$&lt;/div&gt;
+&lt;p&gt;
+考虑以上两个约束又希望使得我们的分布均匀，将会得到下面的结果
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{align}
+\notag
+p(economics)&amp;amp;=0.30\cr
+\notag
+p(sports)&amp;amp;=0.30\cr
+\notag
+p(politics)&amp;amp;=0.20\cr
+\notag
+p(art)&amp;amp;=0.20 
+\end{align}
+$$&lt;/div&gt;
+&lt;p&gt;
+但是随着对数据的观察，可能又会对引入其他约束。这时候需要解决两个问题，首先是如
+何来定量描述分布的均匀；其次是如何在考虑约束的条件下使得分布均匀。最大熵的基本
+思路就是选择一个与给定事实一致的模型（满足约束），并且要使得模型对未知事实不做&amp;nbsp;假设（使得分布尽量均匀）。&lt;/p&gt;
+&lt;h3&gt;最大熵建模&lt;/h3&gt;
+&lt;p&gt;我们继续考虑上面提到的文本分类的例子，假设用最简单的&lt;a href="http://en.wikipedia.org/wiki/Bag-of-words_model" title="Bag-of-words model"&gt;词袋模型&lt;/a&gt;来表示文档，&amp;nbsp;每个文档都可以表示成一个词频向量，例如下面的简单的例子&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;Doc1&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;John&lt;/span&gt; &lt;span class="n"&gt;likes&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="n"&gt;watch&lt;/span&gt; &lt;span class="n"&gt;movies&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;Mary&lt;/span&gt; &lt;span class="n"&gt;likes&lt;/span&gt; &lt;span class="n"&gt;movies&lt;/span&gt; &lt;span class="n"&gt;too&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;span class="n"&gt;Doc2&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;John&lt;/span&gt; &lt;span class="n"&gt;also&lt;/span&gt; &lt;span class="n"&gt;likes&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="n"&gt;watch&lt;/span&gt; &lt;span class="n"&gt;football&lt;/span&gt; &lt;span class="n"&gt;games&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;得到词表如下:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;{
+    &amp;quot;John&amp;quot;: 1,
+    &amp;quot;likes&amp;quot;: 2,
+    &amp;quot;to&amp;quot;: 3,
+    &amp;quot;watch&amp;quot;: 4,
+    &amp;quot;movies&amp;quot;: 5,
+    &amp;quot;also&amp;quot;: 6,
+    &amp;quot;football&amp;quot;: 7,
+    &amp;quot;games&amp;quot;: 8,
+    &amp;quot;Mary&amp;quot;: 9,
+    &amp;quot;too&amp;quot;: 10
+}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;所以可以把Doc1和Doc2表示成两个10维的向量，如下:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;Doc1: [1, 2, 1, 1, 2, 0, 0, 0, 1, 1]
+Doc2: [1, 1, 1, 1, 0, 1, 1, 1, 0, 0]
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;我们把当个文档用&lt;span class="math"&gt;\(x\)&lt;/span&gt;表示，文档类别用&lt;span class="math"&gt;\(y\)&lt;/span&gt;表示，根据上面的描述&lt;span class="math"&gt;\(y\)&lt;/span&gt;会有4个类别，跟
+&lt;a href="http://en.wikipedia.org/wiki/Logistic_regression" title="Logistic regression"&gt;Logistic Regression&lt;/a&gt;类似，我们要建模一个判别模型&lt;span class="math"&gt;\(p(y|x)\)&lt;/span&gt;，即给定
+一个文档&lt;span class="math"&gt;\(x\)&lt;/span&gt;，我们的模型可以得出这篇文档属于特定类别&lt;span class="math"&gt;\(y\)&lt;/span&gt;的概率。如果用&lt;span class="math"&gt;\(\mathcal{P}\)&lt;/span&gt;
+表示所有的条件概率分布，那么&lt;span class="math"&gt;\(p(y|x)\)&lt;/span&gt;就是&lt;span class="math"&gt;\(\mathcal{P}\)&lt;/span&gt;中的一个元素。&lt;/p&gt;
+&lt;h4&gt;训练数据&lt;/h4&gt;
+&lt;p&gt;我们可以把的&lt;span class="math"&gt;\(N\)&lt;/span&gt;个训练数据表示成&lt;span class="math"&gt;\(\\{(x_1,y_1),\cdots,(x_N,y_N)\\}\)&lt;/span&gt;，且&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(x_i\in X\)&lt;/span&gt;，其中&lt;span class="math"&gt;\(X\)&lt;/span&gt;表示所有的文档类别&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(y_i\in Y\)&lt;/span&gt;，其中&lt;span class="math"&gt;\(Y\)&lt;/span&gt;表示训练文档集合，每个文档用词频向量表示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;从训练数据样本中我们可以估计出一个经验的联合概率分布
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\tilde{p}(x,y)=\frac{1}{N}\times \text{the number of times (x,y) appears}$$&lt;/div&gt;
+&lt;h4&gt;特征和约束&lt;/h4&gt;
+&lt;p&gt;最大熵建模的过程中特征函数（简称特征）主要是为了描述训练样本的统计量，例如&amp;nbsp;建模的时候我们可能会考虑当ball这个词出现的时候，文档属于sports的概率是9/10。&lt;/p&gt;
+&lt;p&gt;为了描述ball出现时文档属于sports类别的事实我们引入特征函数（指示函数或者特征）
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+f_{ball,sports} (x,y)=\begin{cases}
+1 &amp;amp; \text{if y=sports and ball appears in d} \cr
+0 &amp;amp; \text{otherwise}
+\end{cases}
+$$&lt;/div&gt;
+&lt;p&gt;
+考虑经验分布&lt;span class="math"&gt;\(\tilde{p}(x,y)\)&lt;/span&gt;下&lt;span class="math"&gt;\(f\)&lt;/span&gt;的期望值，这个期望值就是我们关注的统计量（如
+果对上面那个特征函数按照经验分布求期望，得到的东西就是当ball这个词出现的时候文&amp;nbsp;档属于sports的概率），记为
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+\tilde{p}(f)\equiv \sum_{x,y}{\tilde{p}(x,y)f(x,y)}
+\end{equation}
+\label{eq:empricalException}
+$$&lt;/div&gt;
+&lt;p&gt;
+其实样本的任何统计量都可以通过特征函数的期望值来表示。&lt;/p&gt;
+&lt;p&gt;如果我们发现了一些有用的统计量，我们就可以要求我们的模型也要遵循这个信息。我们
+通过约束模型在特征函数&lt;span class="math"&gt;\(f\)&lt;/span&gt;上的期望值来遵循这个统计量，对于模型&lt;span class="math"&gt;\(p(y|x)\)&lt;/span&gt;特征函数
+&lt;span class="math"&gt;\(f\)&lt;/span&gt;的期望值为
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+p(f)\equiv \sum_{x,y}{\tilde{p}(x)p(y|x)f(x,y)}
+\label{eq:modelException}
+\end{equation}
+$$&lt;/div&gt;
+&lt;p&gt;
+其中&lt;span class="math"&gt;\(\tilde{p}(x)\)&lt;/span&gt;是训练样本中&lt;span class="math"&gt;\(x\)&lt;/span&gt;的经验分布。我们通过约束模型下特征函数的期望&amp;nbsp;值等于样本中特征函数的期望值，如下所示
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+p(f) = \tilde{p}(f)
+\label{eq:constriant}
+\end{equation}
+$$&lt;/div&gt;
+&lt;p&gt;把前面的&lt;span class="math"&gt;\(\ref{eq:empricalException}\)&lt;/span&gt;，&lt;span class="math"&gt;\(\ref{eq:modelException}\)&lt;/span&gt;和
+&lt;span class="math"&gt;\(\ref{eq:constriant}\)&lt;/span&gt;综合起来得意得到下面的约束&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\sum_{x,y}{\tilde{p}(x)p(y|x)f(x,y)} = \sum_{x,y}{\tilde{p}(x,y)f(x,y)}
+$$&lt;/div&gt;
+&lt;p&gt;这样我们只需要考虑那些满足&lt;span class="math"&gt;\(\ref{eq:constriant}\)&lt;/span&gt;的模型&lt;span class="math"&gt;\(p(y|x)\)&lt;/span&gt;。总的来说
+我们用&lt;span class="math"&gt;\(\tilde{p}(f)\)&lt;/span&gt;表示样本数据中的统计特征，同时也要求我们的模型要表示出
+这种特征（&lt;span class="math"&gt;\(p(f)=\tilde{p}(f)\)&lt;/span&gt;）。&lt;/p&gt;
+&lt;p&gt;假设我们现在有&lt;span class="math"&gt;\(n\)&lt;/span&gt;个我们认为很重要的特征函数&lt;span class="math"&gt;\(f_i\)&lt;/span&gt;，我们希望我们的模型遵循这些
+特征在训练数据中所表现出的统计信息，那么&lt;span class="math"&gt;\(p\)&lt;/span&gt;就应该是&lt;span class="math"&gt;\(\mathcal{P}\)&lt;/span&gt;的一个子集
+&lt;span class="math"&gt;\(\mathcal{C}\)&lt;/span&gt;，定义如下
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+\mathcal{C} = \big\{p \in P \text{ | } p(f_i)=\tilde{p}(f_i) \text{ for i } \in \{1,2,\cdots,n\}\big\}
+\label{eq:distsubset}
+\end{equation}
+$$&lt;/div&gt;
+&lt;p&gt;
+下图解释为概率分布添加约束的过程，图中&lt;span class="math"&gt;\(\mathcal{P}\)&lt;/span&gt;表示一个在3个变量上的概率分
+布，如果我们没有设置任何约束那么所有的概率分布都是可以的如图(a)所示；如果我们
+添加一个线性约束&lt;span class="math"&gt;\(\mathcal{C}_1\)&lt;/span&gt;那么我们的概率分布只能落在图(b)中&lt;span class="math"&gt;\(mathcal{C}_1\)&lt;/span&gt;
+这个线上面；此时如果再添加一个约束我们就能确定概率分布&lt;span class="math"&gt;\(p\)&lt;/span&gt;，如果第二个线性约束
+&lt;span class="math"&gt;\(\mathcal{C}_2\)&lt;/span&gt;和&lt;span class="math"&gt;\(\mathcal{C}_1\)&lt;/span&gt;不冲突（有交点），那么这个交点就是我们要求的概
+率分布&lt;span class="math"&gt;\(p\)&lt;/span&gt;，如图(c)所示；如果两个约束冲突，例如第一个约束要求第1点的概率是&lt;span class="math"&gt;\(1/3\)&lt;/span&gt;
+而第二个约束是要求第3点的概率是&lt;span class="math"&gt;\(3/4\)&lt;/span&gt;，那么会得到图(d)的结果。由于我们的约束都
+是从训练样本中抽取的，所以约束之间不可能冲突，而且我们的约束无法像图(c)一样唯
+一确定&lt;span class="math"&gt;\(p\)&lt;/span&gt;，换句话说&lt;span class="math"&gt;\(\mathcal{C}=\mathcal{C}_1\cap\mathcal{C}_2\cdots\cap\mathcal{C}_n\)&lt;/span&gt;
+所确定的模型有无数个。
+&lt;img alt="simplex" src="https://lh4.googleusercontent.com/LPIaifIMioNyOki7VgsM9zLlbDukQDnoCJb-GrXHy6w=w757-h712-no" title="simplex" /&gt;&lt;/p&gt;
+&lt;p&gt;在所有的模型&lt;span class="math"&gt;\(p\in\mathcal{C}\)&lt;/span&gt;中我们需要根据最大熵原理选择一个最均匀的，我们用
+&lt;a href="http://en.wikipedia.org/wiki/Conditional_entropy" title="条件熵"&gt;条件熵&lt;/a&gt;量化度量条件分布&lt;span class="math"&gt;\(p(y|x)\)&lt;/span&gt;的均匀程度
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+H(p)\equiv -\sum_{x,y}{\tilde{p}(x)p(y|x)\log{p(y|x)}}
+\label{eq:conditionalentropy}
+\end{equation}
+$$&lt;/div&gt;
+&lt;p&gt;
+条件熵的取值其下界是0（没有不确定性），上界是&lt;span class="math"&gt;\(\log{|Y|}\)&lt;/span&gt;（在所有&lt;span class="math"&gt;\(y\)&lt;/span&gt;的取值上均
+匀分布）。我们的目的就是要从&lt;span class="math"&gt;\(\mathcal{C}\)&lt;/span&gt;里面找到一个模型&lt;span class="math"&gt;\(p^*\in\mathcal{C}\)&lt;/span&gt;使
+得&lt;span class="math"&gt;\(H(p)\)&lt;/span&gt;最大，即
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+p^*= \mathop{\arg\,\max}\limits_{p\in\mathcal{C}}H(p)
+\end{equation}
+$$&lt;/div&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="MaxEnt"></category></entry><entry><title>MDP入门</title><link href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/" rel="alternate"></link><updated>2014-04-25T19:19:36+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2014-04-25:posts/2014/04/an-introduction-to-mdp/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;介绍&lt;/h3&gt;
+&lt;p&gt;&lt;span class="caps"&gt;MDP&lt;/span&gt;（Markov Decision
+Process）由5元组构成&lt;span class="math"&gt;\(MDP(S,A,{P_{sa}},\gamma,R)\)&lt;/span&gt;，具体的&amp;nbsp;参数介绍如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(S\)&lt;/span&gt;：状态集合&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(A\)&lt;/span&gt;：动作集合&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(P_{sa}\)&lt;/span&gt;：状态转移概率分布，&lt;span class="math"&gt;\(P_{sa}(s')\)&lt;/span&gt;表示在&lt;span class="math"&gt;\(s\)&lt;/span&gt;状态下采取
+  &lt;span class="math"&gt;\(s\)&lt;/span&gt;动作，转移到&lt;span class="math"&gt;\(s'\)&lt;/span&gt;的概率，&lt;span class="math"&gt;\(P_{sa}(s')\geq0\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(\gamma\)&lt;/span&gt;：折扣系数取值范围&lt;span class="math"&gt;\(0\leq\gamma\le1\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(R\)&lt;/span&gt;：回报函数，&lt;span class="math"&gt;\(R:S\mapsto&amp;nbsp;\mathbb{R}\)&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面举一个例子来说明&lt;span class="caps"&gt;MDP&lt;/span&gt;的参数，假设一个机器人在如所描述的
+网格中走动，灰色代表障碍物，当机器人走到&lt;span class="math"&gt;\((4,3)\)&lt;/span&gt;位置将获得&lt;span class="math"&gt;\(+1\)&lt;/span&gt;的回报，走到
+&lt;span class="math"&gt;\((4,2)\)&lt;/span&gt;位置回报为&lt;span class="math"&gt;\(-1\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="MDP简单例子" src="https://lh4.googleusercontent.com/-xF3xfrxs4N4/U1o_5aTmagI/AAAAAAAAAKA/SQXvpDaCnAM/w335-h268-no/simple-pomdp.png" /&gt;
+&lt;img alt="动作执行受噪声干扰" src="https://lh6.googleusercontent.com/-H2AkMXDTFqA/U1o_RmjBCyI/AAAAAAAAAJQ/LR0UgmMFaWE/w236-h181-no/noisy.png" /&gt;&lt;/p&gt;
+&lt;p&gt;如果用&lt;span class="caps"&gt;MDP&lt;/span&gt;来描述这个例子，那么&lt;span class="math"&gt;\(S\)&lt;/span&gt;就有&lt;span class="math"&gt;\(11\)&lt;/span&gt;中取值，机器人可能处在除了障碍物的其他
+位置；&lt;span class="math"&gt;\(A\)&lt;/span&gt;就有&lt;span class="math"&gt;\(4\)&lt;/span&gt;种取值，机器人可以往&lt;span class="math"&gt;\({N,S,E,W}\)&lt;/span&gt;四个方向走；假设现在处于&lt;span class="math"&gt;\([3,1]\)&lt;/span&gt;
+位置，采取动作&lt;span class="math"&gt;\(N\)&lt;/span&gt;（虽然命令机器人向前走，但是由于噪声的影响，可能机器人会向左
+或者向右走，如），假设&lt;span class="math"&gt;\(P_{[3,1]N}\)&lt;/span&gt;分布如下
+&lt;span class="math"&gt;\(P_{[3,1]N}([3,2])=0.8\)&lt;/span&gt;，&lt;span class="math"&gt;\(P_{[3,1]N}([2,1])=0.1\)&lt;/span&gt;，&lt;span class="math"&gt;\(P_{[3,1]N}([4,1])=0.1\)&lt;/span&gt;，
+&lt;span class="math"&gt;\(P_{[3,1]N}([1,1])=0\)&lt;/span&gt;等（除了相邻的位置，其他位置都无法到达，所以为&lt;span class="math"&gt;\(0\)&lt;/span&gt;）；回报
+函数&lt;span class="math"&gt;\(R\)&lt;/span&gt;，&lt;span class="math"&gt;\(R([4,2])=-1\)&lt;/span&gt;，&lt;span class="math"&gt;\(R([4,3])=+1\)&lt;/span&gt;，对于其他位置而言&lt;span class="math"&gt;\(R(s)=-0.02\)&lt;/span&gt;，因为当机器&amp;nbsp;人每走动一步都需要消耗电量，所以对于中间状态回报是一个比较小的负数。&lt;/p&gt;
+&lt;p&gt;对于的描述，状态的变化过程如下描述，假设&lt;span class="math"&gt;\(0\)&lt;/span&gt;时刻状态是&lt;span class="math"&gt;\(s_0\)&lt;/span&gt;
+，然后选择一个动作&lt;span class="math"&gt;\(a_0\)&lt;/span&gt;，根据&lt;span class="math"&gt;\(s\_1 \thicksim P_{s_0a_0}\)&lt;/span&gt;分布选择目标状态&lt;span class="math"&gt;\(s_1\)&lt;/span&gt;，再选择
+动作&lt;span class="math"&gt;\(a_1\)&lt;/span&gt;，根据&lt;span class="math"&gt;\(s\_2 \thicksim P_{s_1a_1}\)&lt;/span&gt;选择目标状态&lt;span class="math"&gt;\(s_2\)&lt;/span&gt;，依此类推状态序列。
+对于这个状态变化序列，可以计算总的回报值（Total&amp;nbsp;Payoff）。&lt;/p&gt;
+&lt;p&gt;初始状态是&lt;span class="math"&gt;\(s_0\)&lt;/span&gt;的总回报定义如下，&lt;span class="math"&gt;\(0\leq \gamma \le 1\)&lt;/span&gt;：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$R(s_0) + \gamma R(s_1) + \gamma^2 R(s_2) + \dots
+    \label{eq:totalpayoff}$$&lt;/div&gt;
+&lt;p&gt;
+总的回报是当前的回报，加上未来的回报，但是距离当前越远回报值权重越小，为了使得
+总的回报值最大，我们需要选择一组最优动作序列&lt;span class="math"&gt;\((a_0,a_1,\dots)\)&lt;/span&gt;使得总回报的期望最大：&lt;/p&gt;
+&lt;div class="math"&gt;$$E[R(s_0) + \gamma R(s_1) + \gamma^2 R(s_2) + \dots]
+  \label{eq:expectedpayoff}$$&lt;/div&gt;
+&lt;p&gt;最后还需要引入一个定义&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;：策略&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;指的是，在给定状态选择一个动作，映射关系
+为：&lt;span class="math"&gt;\(S\mapsto A\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;所以选择一个最优的动作序列，就是说要找到一个最优的&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;，对于
+能够求解出如的最优&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;，下面的章节会解释如何求解&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;。&lt;/p&gt;
+&lt;h3&gt;&lt;span class="caps"&gt;MDP&lt;/span&gt;求解&lt;/h3&gt;
+&lt;p&gt;本节我们需要定义几个辅助变量：&lt;span class="math"&gt;\(V^{\pi}\)&lt;/span&gt;，&lt;span class="math"&gt;\(V^*\)&lt;/span&gt;和&lt;span class="math"&gt;\(\pi^*\)&lt;/span&gt;，下面将逐步介绍&amp;nbsp;定义。&lt;/p&gt;
+&lt;h4&gt;&lt;span class="math"&gt;\(V^\pi\)&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;对于任意&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;都可以定义一个值函数&lt;span class="math"&gt;\(V^{\pi}\)&lt;/span&gt;（映射关系是&lt;span class="math"&gt;\(S\mapsto \mathbb{R}\)&lt;/span&gt;）
+，&lt;span class="math"&gt;\(V^{\pi}\)&lt;/span&gt;指的是从状态&lt;span class="math"&gt;\(s\)&lt;/span&gt;开始并执行策略&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;之后所得到的总回报值的期望：&lt;/p&gt;
+&lt;div class="math"&gt;$$V^{\pi}=E\Big[R(s_0) + \gamma R(s_1) + \dots|\pi, s_0=s\Big]
+    \label{eq:vpi}$$&lt;/div&gt;
+&lt;p&gt;下面是一个具体的例子，如是一个&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;，是与之
+对应的&lt;span class="math"&gt;\(V^\pi\)&lt;/span&gt;，实际上这个策略&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;并不是非常好，因为对于很多状态执行该策略
+后趋向于走到&lt;span class="math"&gt;\(-1\)&lt;/span&gt;位置而不是&lt;span class="math"&gt;\(+1\)&lt;/span&gt;位置。中下面两行执行的动作
+使得机器人偏向走到&lt;span class="math"&gt;\(-1\)&lt;/span&gt;位置，所以他们的总回报的期望值是负数，对于最上面一行偏向
+于走到&lt;span class="math"&gt;\(+1\)&lt;/span&gt;位置，所以总回报都是正的。所以对于下两行的位置这个策略非常差，但是&amp;nbsp;对于最上面那行这个策略就显得不错。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="其中一个pi" src="https://lh3.googleusercontent.com/-KK3A9W7jYOw/U1pCqa0KNJI/AAAAAAAAAK4/PHJxlkP6L34/w336-h264-no/one-pi.png" /&gt;
+&lt;img alt="pi对应的V" src="https://lh5.googleusercontent.com/-CF7Lg0ZiM04/U1pCrDwhq5I/AAAAAAAAALI/d6t4EaQoQtU/w332-h271-no/v-pi.png" /&gt;&lt;/p&gt;
+&lt;p&gt;下面要对&lt;span class="math"&gt;\(V^\pi\)&lt;/span&gt;做一个推导使得&lt;span class="math"&gt;\(V\pi\)&lt;/span&gt;更容易计算，这里假设当前状态&lt;span class="math"&gt;\(s\)&lt;/span&gt;会转移到状态
+&lt;span class="math"&gt;\(s'\)&lt;/span&gt;。中的&lt;span class="math"&gt;\(P_{s\pi(s)}(s')\)&lt;/span&gt;描述的是&lt;span class="math"&gt;\(s\)&lt;/span&gt;状态下采取一个动作
+（这个动作由&lt;span class="math"&gt;\(\pi(s)\)&lt;/span&gt;来确定）转移到&lt;span class="math"&gt;\(s'\)&lt;/span&gt;状态的概率分布，因此式子中的求和描述的就
+是一个求期望的过程，总回报值的期望是当前回报加上未来回报值的期望，
+也称作贝尔曼方程（Bellman’s&amp;nbsp;Equations）。&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{align}
+  V^\pi(s) &amp;amp;= E\Big[R(s_0) + \gamma \Big(R(s_1) + \gamma R(s_2) + \dots\Big)\Big|\pi,s_0=s\Big] \cr
+  &amp;amp;= R(s) + \gamma \sum_{s'}{P_{s\pi(s)}(s')V^\pi(s')}
+\label{eq:bellman}
+\end{align}$$&lt;/div&gt;
+&lt;p&gt;对于的例子，如果针对每个状态都写出方程，
+那么就可以得到&lt;span class="math"&gt;\(11\)&lt;/span&gt;个线性方程组，并且有&lt;span class="math"&gt;\(11\)&lt;/span&gt;个未知数（每个状态都有一个&lt;span class="math"&gt;\(V^pi(s)\)&lt;/span&gt;），
+可以通过求解这个方程组得到&lt;span class="math"&gt;\(V^\pi\)&lt;/span&gt;。按照的策略，我们可以计算
+&lt;span class="math"&gt;\([3,1]\)&lt;/span&gt;位置的&lt;span class="math"&gt;\(V^\pi\)&lt;/span&gt;： &lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{split}
+  V^\pi([3,1]) = &amp;amp;R([3,1]) + \cr
+  &amp;amp; \gamma[0.8V\pi([3,2]) + 0.1V\pi([4,1]) + 0.1V\pi([2,1])]
+\end{split}$$&lt;/div&gt;
+&lt;h4&gt;&lt;span class="math"&gt;\(V^*\)&lt;/span&gt; 和 &lt;span class="math"&gt;\(\pi^*\)&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;最优值函数&lt;span class="math"&gt;\(V^*(s)\)&lt;/span&gt;定义如下：&lt;/p&gt;
+&lt;p&gt;&lt;span class="math"&gt;\(V^*(s)\)&lt;/span&gt;是最优值函数，值得是找到一个&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;使得对于所有的状态&lt;span class="math"&gt;\(V^\pi(s)\)&lt;/span&gt;最大。&lt;/p&gt;
+&lt;div class="math"&gt;\begin{equation}
+V^*(s) = \max_x V^\pi(s)
+    \label{eq:vstar}
+\end{equation}&lt;/div&gt;
+&lt;p&gt;集合和可以得到&lt;span class="math"&gt;\(V^*\)&lt;/span&gt;的贝尔曼方程：&lt;/p&gt;
+&lt;div class="math"&gt;\begin{equation}
+V^\*(s) = R(s) + \max\_a \gamma \sum\_{s'}{P_{sa}(s')V^*(s')} 
+  \label{eq:vstarbellman}
+\end{equation}&lt;/div&gt;
+&lt;p&gt;根据最优值函数的贝尔曼方程，把中的常数项&lt;span class="math"&gt;\(R(s)\)&lt;/span&gt;和
+常数系数&lt;span class="math"&gt;\(\gamma\)&lt;/span&gt;去掉（处于状态&lt;span class="math"&gt;\(s\)&lt;/span&gt;时，对于所有的&lt;span class="math"&gt;\(a\)&lt;/span&gt;这两个系数都相等），
+就可以得到最优策略&lt;span class="math"&gt;\(\pi^*(s)\)&lt;/span&gt;的求解公式：&lt;/p&gt;
+&lt;div class="math"&gt;\begin{equation}
+\pi^\*(s) = arg\,max\_a \sum_{s'}{P_{sa}(s')V^*(s')} 
+  \label{eq:bestpi}
+\end{equation}&lt;/div&gt;
+&lt;p&gt;由可以看出&lt;span class="math"&gt;\(\pi^\*(s) $其实依赖于\)&lt;/span&gt;V^*(s) &lt;span class="math"&gt;\(，所以现在
+的主要目标是要想办法求解\)&lt;/span&gt;V^*(s) &lt;span class="math"&gt;\(。根据的定义，最直接的
+方法就是穷举所有的\)&lt;/span&gt; \pi &lt;span class="math"&gt;\(，但是穷举的情况会非常多，例如有\)&lt;/span&gt;11&lt;span class="math"&gt;\(个状态，\)&lt;/span&gt;4&lt;span class="math"&gt;\(个动作
+那么就有\)&lt;/span&gt;4^11&lt;span class="math"&gt;\(种组合，搜索空间呈指数增长，不大合理，下面将介绍值迭代
+（Value Iteration）和策略迭代（Policy Iteration）方法来求解\)&lt;/span&gt;V^*(s)$。&lt;/p&gt;
+&lt;p&gt;算法所描述的是值迭代的过程，初始化时对于所有的&lt;span class="math"&gt;\(s\)&lt;/span&gt;对应的
+&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;为&lt;span class="math"&gt;\(0\)&lt;/span&gt;，接着对于每个&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;，这里的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;有两种更新方式。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="值迭代" src="https://lh6.googleusercontent.com/-UQBih3c_8qs/U1pCqW8ff0I/AAAAAAAAAK0/roPWXS7vjt4/w592-h211-no/mdp-vi.png" /&gt;&lt;/p&gt;
+&lt;p&gt;第一种是对于所有的状态计算出式子右边的部分，然后同时更新所有的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;,这种称作
+同步更新（Synchronous Update）；另一种叫做异步更新（Asynchronous
+Update），假设我们按照固定的状态顺序更新&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;，那么首先会更新第1个状态
+的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;，接着是第2个状态的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;、第3个状态的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;、第4个状态的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;
+，如果在更新第5个状态的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;用到的&lt;span class="math"&gt;\(V(s')\)&lt;/span&gt;恰好是第1、2、3、4状态的，
+那么我们使用的&lt;span class="math"&gt;\(V(s')\)&lt;/span&gt;是前面几次迭代更新的版本。两种方法中异步更新会
+收敛地稍微快一点，值迭代会使得&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;不断地向&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;接近，如
+是最后求解出来的&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="左图是\(V^*\)且\gamma=.99，右图是对应的\(\pi^*\)" src="https://lh5.googleusercontent.com/-fjw0qaYgma8/U1pEI0vjrsI/AAAAAAAAAL0/IWGM0WljS0o/w790-h274-no/bestv-and-pi.png" /&gt;&lt;/p&gt;
+&lt;p&gt;求解出&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;之后，根据就可以计算&lt;span class="math"&gt;\(\pi^\*(s)\)&lt;/span&gt;，
+下面举一个例子计算&lt;span class="math"&gt;\(\pi([3,1])\)&lt;/span&gt;的最优策略，结合，可以
+计算出采取各个动作的未来总回报的期望，假设机器人碰到墙壁之后会回到
+原来的位置，所以机器人向&lt;span class="math"&gt;\(E\)&lt;/span&gt;走的时候有&lt;span class="math"&gt;\(0.1\)&lt;/span&gt;的可能性会碰到墙壁然后又
+返回到&lt;span class="math"&gt;\([3,1]\)&lt;/span&gt;位置。 &lt;/p&gt;
+&lt;div class="math"&gt;\begin{aligned}
+    E: &amp;amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.75 + 0.1\*0.69 + 0.1\*0.71 = 0.74\cr
+    N: &amp;amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.69 + 0.1\*0.75 + 0.1\*0.49 = 0.676\cr
+    W: &amp;amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.49 + 0.1\*0.69 + 0.1\*0.71 = 0.532\cr
+    S: &amp;amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.71 + 0.1\*0.75 + 0.1\*0.49 = 0.692
+\end{aligned}&lt;/div&gt;
+&lt;p&gt;对比&lt;span class="math"&gt;\(4\)&lt;/span&gt;个方向的未来总回报的期望值之后，发现采取&lt;span class="math"&gt;\(E\)&lt;/span&gt;动作之后得到的值最大，
+所以在&lt;span class="math"&gt;\([3,1]\)&lt;/span&gt;位置会采取动作&lt;span class="math"&gt;\(E\)&lt;/span&gt;。对每个状态都计算最优动作之后就可以得到如&amp;nbsp;所示的结果。&lt;/p&gt;
+&lt;p&gt;描述完值迭代之后，下面简单描述一下策略迭代求解&lt;span class="math"&gt;\(V^*(s)\)&lt;/span&gt;，策略迭代会使得最后
+&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;趋近于&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;并且&lt;span class="math"&gt;\(\pi(s)\)&lt;/span&gt;趋近于&lt;span class="math"&gt;\(\pi^\*(s)\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="策略迭代" src="https://lh6.googleusercontent.com/-PUy_N8kv0-Y/U1pCqTatGDI/AAAAAAAAALE/CQMTpfOJC4Q/w612-h258-no/mdp-pi.png" /&gt;&lt;/p&gt;
+&lt;p&gt;当状态数量少的时候可以采用策略迭代，因为这时候求解贝尔曼方程比较快速，但是当
+状态数非常多，例如有100万个状态，那么求解贝尔曼方程的代价可能会太大，就应该&amp;nbsp;考虑使用值迭代。&lt;/p&gt;
+&lt;p&gt;这里还需要讨论一下如何求解&lt;span class="math"&gt;\(P_{sa}\)&lt;/span&gt;，一般来说可以用最大似然估计来估计。&lt;/p&gt;
+&lt;div class="math"&gt;\begin{equation}
+\begin{split}
+    P_{sa}(s') &amp;amp;= \frac{\text{在}s\text{状态下采取动作a到达状态}s'\text{的次数}}
+    {\text{在}s\text{状态下采取动作}a\text{的次数}} \cr
+    &amp;amp;\Big(\text{如果得到}\frac{0}{0}\text{的情况就用}\frac{1}{|s|}\text{替换}\Big)
+  \end{split}
+  \label{eq:psa}
+\end{equation}&lt;/div&gt;
+&lt;h4&gt;求解过程总结&lt;/h4&gt;
+&lt;p&gt;把上文提到的求解&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;、&lt;span class="math"&gt;\(\pi^\*(s)\)&lt;/span&gt;和&lt;span class="math"&gt;\(P_{sa}\)&lt;/span&gt;的方法结合起来就可以构成一个完整
+的求解&lt;span class="caps"&gt;MDP&lt;/span&gt;的方法。首先采取策略&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;之后可以观测到一些状态转移的数据，用这些
+数据来重新估计&lt;span class="math"&gt;\(P_{sa}\)&lt;/span&gt;，接着用值迭代的方式来求解当前&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;和&lt;span class="math"&gt;\(P_{sa}\)&lt;/span&gt;前提
+下的&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;（值迭代的初始&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;可以使用上一轮迭代的&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;），
+最后再利用这个&lt;span class="math"&gt;\(V^*(s)\)&lt;/span&gt;来更新&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;。
+&lt;img alt="整个过程" src="https://lh4.googleusercontent.com/-nQTOBVmMB7k/U1pDwlnexpI/AAAAAAAAALg/xCTEPw5oAWY/w810-h290-no/put-together.png" /&gt;&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="MDP"></category></entry></feed>

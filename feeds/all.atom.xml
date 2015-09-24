@@ -1,0 +1,1311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/all.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2015-01-08T21:08:00+08:00</updated><entry><title>Linux通过Pulse混合麦克风和音频输出</title><link href="https://wugh.github.io/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/" rel="alternate"></link><updated>2015-01-08T21:08:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2015-01-08:posts/2015/01/linux-pulse-mix-mic-and-computer-audio/</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;由于想在语音识别时候给麦克风加噪声，所以就在思考有没有办法通过混合麦克风输入和
+电脑的音频输出混合起来实现加噪声的效果呢？经过Google找到以下的&lt;a href="https://www.youtube.com/watch?v=8hkCE7ETJRM"&gt;解决办法
+&lt;/a&gt;，这种方法依赖
+&lt;a href="http://zh.wikipedia.org/wiki/PulseAudio" title="PulseAudio"&gt;PulseAudio&lt;/a&gt;。&lt;/p&gt;
+&lt;h3&gt;安装工具&lt;/h3&gt;
+&lt;p&gt;首先需要安装
+&lt;a href="http://freedesktop.org/software/pulseaudio/pavucontrol/"&gt;pavucontrol&lt;/a&gt;用来管理&amp;nbsp;Pulse。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge -a media-sound/pavucontrol
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;修改配置文件&lt;/h3&gt;
+&lt;p&gt;修改配置文件&lt;code&gt;/etc/pulse/default.pa&lt;/code&gt;，添加以下模块&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;load-module module-null-sink 
+load-module module-loopback
+load-module module-loopback
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;然后重启电脑或者重启Pulse服务器。&lt;/p&gt;
+&lt;p&gt;上面的步骤也可以不重启Pulse服务器，直接通过&lt;code&gt;pacmd&lt;/code&gt;这个命令行工具配置Pulse服务&amp;nbsp;器，可以在这个命令行的交互工具中，执行以上三个命令。&lt;/p&gt;
+&lt;h3&gt;通过pavucontrol配置音频混合&lt;/h3&gt;
+&lt;p&gt;我们添加了两个loopback，这时候就可以在pavucontrol的Playback标签页下面看到
+两个新的Loopback，需要把&lt;code&gt;Show&lt;/code&gt;这个过滤器选择为&lt;code&gt;All Streams&lt;/code&gt;，结果如下图所示：
+&lt;img alt="Playback" src="https://lh6.googleusercontent.com/-aDr4tBprMqM/VK6GWnCs-VI/AAAAAAAAAQc/jsJ4DAqzRKM/w893-h572-no/Playback.png" title="Playback" /&gt;
+这两个Loopback一个是麦克风（Loopback from Bulit-in Audio Analog Stero）另一个
+是电脑的音频输出（Loopback of Monitor of Bult-in Audio Analog Stero），需要把
+这两个的输出设定成&lt;code&gt;Null Output&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;接着需要设定一下我们录音的时候使用哪个声音源，设置如下图
+&lt;img alt="Record" src="https://lh4.googleusercontent.com/-JXDur6hvBYA/VK6GWzMAxDI/AAAAAAAAAQg/J4BoCtqtUVk/w890-h578-no/record.png" title="Record" /&gt;
+可以看到&lt;code&gt;ALSA Capture from&lt;/code&gt;被我们设置成&lt;code&gt;Monitor of Null Output&lt;/code&gt;，相当于把Null
+这个设备的输出当作声音源进行捕获，而Null这个设备输出是麦克风和电脑声音的混合，&amp;nbsp;所以可以正常工作。&lt;/p&gt;</summary><category term="pulse"></category><category term="录音"></category></entry><entry><title>最大熵</title><link href="https://wugh.github.io/posts/2014/11/maxent/" rel="alternate"></link><updated>2014-11-14T00:00:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2014-11-14:posts/2014/11/maxent/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;最大熵原理&lt;/h3&gt;
+&lt;p&gt;最大熵原理指的是当我们在估计概率分布的时候，这个概率分布符合已知信息的约束并且&amp;nbsp;该分布是最均匀的。从熵的角度考虑就是要让这个分布符合约束并且熵最大。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The principle of maximum entropy states that, subject to precisely stated
+prior data (such as a proposition that expresses testable information), the
+probability distribution which best represents the current state of knowledge
+is the one with largest&amp;nbsp;entropy.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;现在考虑一个文本分类的例子，假设我们有4个类别的文本分别是：economics、
+sports、politics和art。因为文本只能被分成4个类别，假设现在没有额外的信息，&amp;nbsp;那么约束只有以下的1个
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(economics)+p(sports)+p(politics)+p(art)=1$$&lt;/div&gt;
+&lt;p&gt;
+那么我们希望得到得概率分布尽量均匀，就会得到下面结果
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(economics)=p(sports)=p(politics)=p(art)=0.25$$&lt;/div&gt;
+&lt;p&gt;
+现在假设我们有一个先验信息是60%的文档是economics或者sports类别的，那么我们的&amp;nbsp;概率分布就会有以下两个约束
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(economics)+p(sports)=0.6$$&lt;/div&gt;
+&lt;div class="math"&gt;$$p(economics)+p(sports)+p(politics)+p(art)=1$$&lt;/div&gt;
+&lt;p&gt;
+考虑以上两个约束又希望使得我们的分布均匀，将会得到下面的结果
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{align}
+\notag
+p(economics)&amp;amp;=0.30\cr
+\notag
+p(sports)&amp;amp;=0.30\cr
+\notag
+p(politics)&amp;amp;=0.20\cr
+\notag
+p(art)&amp;amp;=0.20 
+\end{align}
+$$&lt;/div&gt;
+&lt;p&gt;
+但是随着对数据的观察，可能又会对引入其他约束。这时候需要解决两个问题，首先是如
+何来定量描述分布的均匀；其次是如何在考虑约束的条件下使得分布均匀。最大熵的基本
+思路就是选择一个与给定事实一致的模型（满足约束），并且要使得模型对未知事实不做&amp;nbsp;假设（使得分布尽量均匀）。&lt;/p&gt;
+&lt;h3&gt;最大熵建模&lt;/h3&gt;
+&lt;p&gt;我们继续考虑上面提到的文本分类的例子，假设用最简单的&lt;a href="http://en.wikipedia.org/wiki/Bag-of-words_model" title="Bag-of-words model"&gt;词袋模型&lt;/a&gt;来表示文档，&amp;nbsp;每个文档都可以表示成一个词频向量，例如下面的简单的例子&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;Doc1&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;John&lt;/span&gt; &lt;span class="n"&gt;likes&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="n"&gt;watch&lt;/span&gt; &lt;span class="n"&gt;movies&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;Mary&lt;/span&gt; &lt;span class="n"&gt;likes&lt;/span&gt; &lt;span class="n"&gt;movies&lt;/span&gt; &lt;span class="n"&gt;too&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;span class="n"&gt;Doc2&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;John&lt;/span&gt; &lt;span class="n"&gt;also&lt;/span&gt; &lt;span class="n"&gt;likes&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="n"&gt;watch&lt;/span&gt; &lt;span class="n"&gt;football&lt;/span&gt; &lt;span class="n"&gt;games&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;得到词表如下:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;{
+    &amp;quot;John&amp;quot;: 1,
+    &amp;quot;likes&amp;quot;: 2,
+    &amp;quot;to&amp;quot;: 3,
+    &amp;quot;watch&amp;quot;: 4,
+    &amp;quot;movies&amp;quot;: 5,
+    &amp;quot;also&amp;quot;: 6,
+    &amp;quot;football&amp;quot;: 7,
+    &amp;quot;games&amp;quot;: 8,
+    &amp;quot;Mary&amp;quot;: 9,
+    &amp;quot;too&amp;quot;: 10
+}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;所以可以把Doc1和Doc2表示成两个10维的向量，如下:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;Doc1: [1, 2, 1, 1, 2, 0, 0, 0, 1, 1]
+Doc2: [1, 1, 1, 1, 0, 1, 1, 1, 0, 0]
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;我们把当个文档用&lt;span class="math"&gt;\(x\)&lt;/span&gt;表示，文档类别用&lt;span class="math"&gt;\(y\)&lt;/span&gt;表示，根据上面的描述&lt;span class="math"&gt;\(y\)&lt;/span&gt;会有4个类别，跟
+&lt;a href="http://en.wikipedia.org/wiki/Logistic_regression" title="Logistic regression"&gt;Logistic Regression&lt;/a&gt;类似，我们要建模一个判别模型&lt;span class="math"&gt;\(p(y|x)\)&lt;/span&gt;，即给定
+一个文档&lt;span class="math"&gt;\(x\)&lt;/span&gt;，我们的模型可以得出这篇文档属于特定类别&lt;span class="math"&gt;\(y\)&lt;/span&gt;的概率。如果用&lt;span class="math"&gt;\(\mathcal{P}\)&lt;/span&gt;
+表示所有的条件概率分布，那么&lt;span class="math"&gt;\(p(y|x)\)&lt;/span&gt;就是&lt;span class="math"&gt;\(\mathcal{P}\)&lt;/span&gt;中的一个元素。&lt;/p&gt;
+&lt;h4&gt;训练数据&lt;/h4&gt;
+&lt;p&gt;我们可以把的&lt;span class="math"&gt;\(N\)&lt;/span&gt;个训练数据表示成&lt;span class="math"&gt;\(\\{(x_1,y_1),\cdots,(x_N,y_N)\\}\)&lt;/span&gt;，且&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(x_i\in X\)&lt;/span&gt;，其中&lt;span class="math"&gt;\(X\)&lt;/span&gt;表示所有的文档类别&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(y_i\in Y\)&lt;/span&gt;，其中&lt;span class="math"&gt;\(Y\)&lt;/span&gt;表示训练文档集合，每个文档用词频向量表示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;从训练数据样本中我们可以估计出一个经验的联合概率分布
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\tilde{p}(x,y)=\frac{1}{N}\times \text{the number of times (x,y) appears}$$&lt;/div&gt;
+&lt;h4&gt;特征和约束&lt;/h4&gt;
+&lt;p&gt;最大熵建模的过程中特征函数（简称特征）主要是为了描述训练样本的统计量，例如&amp;nbsp;建模的时候我们可能会考虑当ball这个词出现的时候，文档属于sports的概率是9/10。&lt;/p&gt;
+&lt;p&gt;为了描述ball出现时文档属于sports类别的事实我们引入特征函数（指示函数或者特征）
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+f_{ball,sports} (x,y)=\begin{cases}
+1 &amp;amp; \text{if y=sports and ball appears in d} \cr
+0 &amp;amp; \text{otherwise}
+\end{cases}
+$$&lt;/div&gt;
+&lt;p&gt;
+考虑经验分布&lt;span class="math"&gt;\(\tilde{p}(x,y)\)&lt;/span&gt;下&lt;span class="math"&gt;\(f\)&lt;/span&gt;的期望值，这个期望值就是我们关注的统计量（如
+果对上面那个特征函数按照经验分布求期望，得到的东西就是当ball这个词出现的时候文&amp;nbsp;档属于sports的概率），记为
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+\tilde{p}(f)\equiv \sum_{x,y}{\tilde{p}(x,y)f(x,y)}
+\end{equation}
+\label{eq:empricalException}
+$$&lt;/div&gt;
+&lt;p&gt;
+其实样本的任何统计量都可以通过特征函数的期望值来表示。&lt;/p&gt;
+&lt;p&gt;如果我们发现了一些有用的统计量，我们就可以要求我们的模型也要遵循这个信息。我们
+通过约束模型在特征函数&lt;span class="math"&gt;\(f\)&lt;/span&gt;上的期望值来遵循这个统计量，对于模型&lt;span class="math"&gt;\(p(y|x)\)&lt;/span&gt;特征函数
+&lt;span class="math"&gt;\(f\)&lt;/span&gt;的期望值为
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+p(f)\equiv \sum_{x,y}{\tilde{p}(x)p(y|x)f(x,y)}
+\label{eq:modelException}
+\end{equation}
+$$&lt;/div&gt;
+&lt;p&gt;
+其中&lt;span class="math"&gt;\(\tilde{p}(x)\)&lt;/span&gt;是训练样本中&lt;span class="math"&gt;\(x\)&lt;/span&gt;的经验分布。我们通过约束模型下特征函数的期望&amp;nbsp;值等于样本中特征函数的期望值，如下所示
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+p(f) = \tilde{p}(f)
+\label{eq:constriant}
+\end{equation}
+$$&lt;/div&gt;
+&lt;p&gt;把前面的&lt;span class="math"&gt;\(\ref{eq:empricalException}\)&lt;/span&gt;，&lt;span class="math"&gt;\(\ref{eq:modelException}\)&lt;/span&gt;和
+&lt;span class="math"&gt;\(\ref{eq:constriant}\)&lt;/span&gt;综合起来得意得到下面的约束&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\sum_{x,y}{\tilde{p}(x)p(y|x)f(x,y)} = \sum_{x,y}{\tilde{p}(x,y)f(x,y)}
+$$&lt;/div&gt;
+&lt;p&gt;这样我们只需要考虑那些满足&lt;span class="math"&gt;\(\ref{eq:constriant}\)&lt;/span&gt;的模型&lt;span class="math"&gt;\(p(y|x)\)&lt;/span&gt;。总的来说
+我们用&lt;span class="math"&gt;\(\tilde{p}(f)\)&lt;/span&gt;表示样本数据中的统计特征，同时也要求我们的模型要表示出
+这种特征（&lt;span class="math"&gt;\(p(f)=\tilde{p}(f)\)&lt;/span&gt;）。&lt;/p&gt;
+&lt;p&gt;假设我们现在有&lt;span class="math"&gt;\(n\)&lt;/span&gt;个我们认为很重要的特征函数&lt;span class="math"&gt;\(f_i\)&lt;/span&gt;，我们希望我们的模型遵循这些
+特征在训练数据中所表现出的统计信息，那么&lt;span class="math"&gt;\(p\)&lt;/span&gt;就应该是&lt;span class="math"&gt;\(\mathcal{P}\)&lt;/span&gt;的一个子集
+&lt;span class="math"&gt;\(\mathcal{C}\)&lt;/span&gt;，定义如下
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+\mathcal{C} = \big\{p \in P \text{ | } p(f_i)=\tilde{p}(f_i) \text{ for i } \in \{1,2,\cdots,n\}\big\}
+\label{eq:distsubset}
+\end{equation}
+$$&lt;/div&gt;
+&lt;p&gt;
+下图解释为概率分布添加约束的过程，图中&lt;span class="math"&gt;\(\mathcal{P}\)&lt;/span&gt;表示一个在3个变量上的概率分
+布，如果我们没有设置任何约束那么所有的概率分布都是可以的如图(a)所示；如果我们
+添加一个线性约束&lt;span class="math"&gt;\(\mathcal{C}_1\)&lt;/span&gt;那么我们的概率分布只能落在图(b)中&lt;span class="math"&gt;\(mathcal{C}_1\)&lt;/span&gt;
+这个线上面；此时如果再添加一个约束我们就能确定概率分布&lt;span class="math"&gt;\(p\)&lt;/span&gt;，如果第二个线性约束
+&lt;span class="math"&gt;\(\mathcal{C}_2\)&lt;/span&gt;和&lt;span class="math"&gt;\(\mathcal{C}_1\)&lt;/span&gt;不冲突（有交点），那么这个交点就是我们要求的概
+率分布&lt;span class="math"&gt;\(p\)&lt;/span&gt;，如图(c)所示；如果两个约束冲突，例如第一个约束要求第1点的概率是&lt;span class="math"&gt;\(1/3\)&lt;/span&gt;
+而第二个约束是要求第3点的概率是&lt;span class="math"&gt;\(3/4\)&lt;/span&gt;，那么会得到图(d)的结果。由于我们的约束都
+是从训练样本中抽取的，所以约束之间不可能冲突，而且我们的约束无法像图(c)一样唯
+一确定&lt;span class="math"&gt;\(p\)&lt;/span&gt;，换句话说&lt;span class="math"&gt;\(\mathcal{C}=\mathcal{C}_1\cap\mathcal{C}_2\cdots\cap\mathcal{C}_n\)&lt;/span&gt;
+所确定的模型有无数个。
+&lt;img alt="simplex" src="https://lh4.googleusercontent.com/LPIaifIMioNyOki7VgsM9zLlbDukQDnoCJb-GrXHy6w=w757-h712-no" title="simplex" /&gt;&lt;/p&gt;
+&lt;p&gt;在所有的模型&lt;span class="math"&gt;\(p\in\mathcal{C}\)&lt;/span&gt;中我们需要根据最大熵原理选择一个最均匀的，我们用
+&lt;a href="http://en.wikipedia.org/wiki/Conditional_entropy" title="条件熵"&gt;条件熵&lt;/a&gt;量化度量条件分布&lt;span class="math"&gt;\(p(y|x)\)&lt;/span&gt;的均匀程度
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+H(p)\equiv -\sum_{x,y}{\tilde{p}(x)p(y|x)\log{p(y|x)}}
+\label{eq:conditionalentropy}
+\end{equation}
+$$&lt;/div&gt;
+&lt;p&gt;
+条件熵的取值其下界是0（没有不确定性），上界是&lt;span class="math"&gt;\(\log{|Y|}\)&lt;/span&gt;（在所有&lt;span class="math"&gt;\(y\)&lt;/span&gt;的取值上均
+匀分布）。我们的目的就是要从&lt;span class="math"&gt;\(\mathcal{C}\)&lt;/span&gt;里面找到一个模型&lt;span class="math"&gt;\(p^*\in\mathcal{C}\)&lt;/span&gt;使
+得&lt;span class="math"&gt;\(H(p)\)&lt;/span&gt;最大，即
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{equation}
+p^*= \mathop{\arg\,\max}\limits_{p\in\mathcal{C}}H(p)
+\end{equation}
+$$&lt;/div&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="MaxEnt"></category></entry><entry><title>MDP入门</title><link href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/" rel="alternate"></link><updated>2014-04-25T19:19:36+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2014-04-25:posts/2014/04/an-introduction-to-mdp/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;介绍&lt;/h3&gt;
+&lt;p&gt;&lt;span class="caps"&gt;MDP&lt;/span&gt;（Markov Decision
+Process）由5元组构成&lt;span class="math"&gt;\(MDP(S,A,{P_{sa}},\gamma,R)\)&lt;/span&gt;，具体的&amp;nbsp;参数介绍如下：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(S\)&lt;/span&gt;：状态集合&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(A\)&lt;/span&gt;：动作集合&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(P_{sa}\)&lt;/span&gt;：状态转移概率分布，&lt;span class="math"&gt;\(P_{sa}(s')\)&lt;/span&gt;表示在&lt;span class="math"&gt;\(s\)&lt;/span&gt;状态下采取
+  &lt;span class="math"&gt;\(s\)&lt;/span&gt;动作，转移到&lt;span class="math"&gt;\(s'\)&lt;/span&gt;的概率，&lt;span class="math"&gt;\(P_{sa}(s')\geq0\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(\gamma\)&lt;/span&gt;：折扣系数取值范围&lt;span class="math"&gt;\(0\leq\gamma\le1\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(R\)&lt;/span&gt;：回报函数，&lt;span class="math"&gt;\(R:S\mapsto&amp;nbsp;\mathbb{R}\)&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面举一个例子来说明&lt;span class="caps"&gt;MDP&lt;/span&gt;的参数，假设一个机器人在如所描述的
+网格中走动，灰色代表障碍物，当机器人走到&lt;span class="math"&gt;\((4,3)\)&lt;/span&gt;位置将获得&lt;span class="math"&gt;\(+1\)&lt;/span&gt;的回报，走到
+&lt;span class="math"&gt;\((4,2)\)&lt;/span&gt;位置回报为&lt;span class="math"&gt;\(-1\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="MDP简单例子" src="https://lh4.googleusercontent.com/-xF3xfrxs4N4/U1o_5aTmagI/AAAAAAAAAKA/SQXvpDaCnAM/w335-h268-no/simple-pomdp.png" /&gt;
+&lt;img alt="动作执行受噪声干扰" src="https://lh6.googleusercontent.com/-H2AkMXDTFqA/U1o_RmjBCyI/AAAAAAAAAJQ/LR0UgmMFaWE/w236-h181-no/noisy.png" /&gt;&lt;/p&gt;
+&lt;p&gt;如果用&lt;span class="caps"&gt;MDP&lt;/span&gt;来描述这个例子，那么&lt;span class="math"&gt;\(S\)&lt;/span&gt;就有&lt;span class="math"&gt;\(11\)&lt;/span&gt;中取值，机器人可能处在除了障碍物的其他
+位置；&lt;span class="math"&gt;\(A\)&lt;/span&gt;就有&lt;span class="math"&gt;\(4\)&lt;/span&gt;种取值，机器人可以往&lt;span class="math"&gt;\({N,S,E,W}\)&lt;/span&gt;四个方向走；假设现在处于&lt;span class="math"&gt;\([3,1]\)&lt;/span&gt;
+位置，采取动作&lt;span class="math"&gt;\(N\)&lt;/span&gt;（虽然命令机器人向前走，但是由于噪声的影响，可能机器人会向左
+或者向右走，如），假设&lt;span class="math"&gt;\(P_{[3,1]N}\)&lt;/span&gt;分布如下
+&lt;span class="math"&gt;\(P_{[3,1]N}([3,2])=0.8\)&lt;/span&gt;，&lt;span class="math"&gt;\(P_{[3,1]N}([2,1])=0.1\)&lt;/span&gt;，&lt;span class="math"&gt;\(P_{[3,1]N}([4,1])=0.1\)&lt;/span&gt;，
+&lt;span class="math"&gt;\(P_{[3,1]N}([1,1])=0\)&lt;/span&gt;等（除了相邻的位置，其他位置都无法到达，所以为&lt;span class="math"&gt;\(0\)&lt;/span&gt;）；回报
+函数&lt;span class="math"&gt;\(R\)&lt;/span&gt;，&lt;span class="math"&gt;\(R([4,2])=-1\)&lt;/span&gt;，&lt;span class="math"&gt;\(R([4,3])=+1\)&lt;/span&gt;，对于其他位置而言&lt;span class="math"&gt;\(R(s)=-0.02\)&lt;/span&gt;，因为当机器&amp;nbsp;人每走动一步都需要消耗电量，所以对于中间状态回报是一个比较小的负数。&lt;/p&gt;
+&lt;p&gt;对于的描述，状态的变化过程如下描述，假设&lt;span class="math"&gt;\(0\)&lt;/span&gt;时刻状态是&lt;span class="math"&gt;\(s_0\)&lt;/span&gt;
+，然后选择一个动作&lt;span class="math"&gt;\(a_0\)&lt;/span&gt;，根据&lt;span class="math"&gt;\(s\_1 \thicksim P_{s_0a_0}\)&lt;/span&gt;分布选择目标状态&lt;span class="math"&gt;\(s_1\)&lt;/span&gt;，再选择
+动作&lt;span class="math"&gt;\(a_1\)&lt;/span&gt;，根据&lt;span class="math"&gt;\(s\_2 \thicksim P_{s_1a_1}\)&lt;/span&gt;选择目标状态&lt;span class="math"&gt;\(s_2\)&lt;/span&gt;，依此类推状态序列。
+对于这个状态变化序列，可以计算总的回报值（Total&amp;nbsp;Payoff）。&lt;/p&gt;
+&lt;p&gt;初始状态是&lt;span class="math"&gt;\(s_0\)&lt;/span&gt;的总回报定义如下，&lt;span class="math"&gt;\(0\leq \gamma \le 1\)&lt;/span&gt;：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$R(s_0) + \gamma R(s_1) + \gamma^2 R(s_2) + \dots
+    \label{eq:totalpayoff}$$&lt;/div&gt;
+&lt;p&gt;
+总的回报是当前的回报，加上未来的回报，但是距离当前越远回报值权重越小，为了使得
+总的回报值最大，我们需要选择一组最优动作序列&lt;span class="math"&gt;\((a_0,a_1,\dots)\)&lt;/span&gt;使得总回报的期望最大：&lt;/p&gt;
+&lt;div class="math"&gt;$$E[R(s_0) + \gamma R(s_1) + \gamma^2 R(s_2) + \dots]
+  \label{eq:expectedpayoff}$$&lt;/div&gt;
+&lt;p&gt;最后还需要引入一个定义&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;：策略&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;指的是，在给定状态选择一个动作，映射关系
+为：&lt;span class="math"&gt;\(S\mapsto A\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;所以选择一个最优的动作序列，就是说要找到一个最优的&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;，对于
+能够求解出如的最优&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;，下面的章节会解释如何求解&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;。&lt;/p&gt;
+&lt;h3&gt;&lt;span class="caps"&gt;MDP&lt;/span&gt;求解&lt;/h3&gt;
+&lt;p&gt;本节我们需要定义几个辅助变量：&lt;span class="math"&gt;\(V^{\pi}\)&lt;/span&gt;，&lt;span class="math"&gt;\(V^*\)&lt;/span&gt;和&lt;span class="math"&gt;\(\pi^*\)&lt;/span&gt;，下面将逐步介绍&amp;nbsp;定义。&lt;/p&gt;
+&lt;h4&gt;&lt;span class="math"&gt;\(V^\pi\)&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;对于任意&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;都可以定义一个值函数&lt;span class="math"&gt;\(V^{\pi}\)&lt;/span&gt;（映射关系是&lt;span class="math"&gt;\(S\mapsto \mathbb{R}\)&lt;/span&gt;）
+，&lt;span class="math"&gt;\(V^{\pi}\)&lt;/span&gt;指的是从状态&lt;span class="math"&gt;\(s\)&lt;/span&gt;开始并执行策略&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;之后所得到的总回报值的期望：&lt;/p&gt;
+&lt;div class="math"&gt;$$V^{\pi}=E\Big[R(s_0) + \gamma R(s_1) + \dots|\pi, s_0=s\Big]
+    \label{eq:vpi}$$&lt;/div&gt;
+&lt;p&gt;下面是一个具体的例子，如是一个&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;，是与之
+对应的&lt;span class="math"&gt;\(V^\pi\)&lt;/span&gt;，实际上这个策略&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;并不是非常好，因为对于很多状态执行该策略
+后趋向于走到&lt;span class="math"&gt;\(-1\)&lt;/span&gt;位置而不是&lt;span class="math"&gt;\(+1\)&lt;/span&gt;位置。中下面两行执行的动作
+使得机器人偏向走到&lt;span class="math"&gt;\(-1\)&lt;/span&gt;位置，所以他们的总回报的期望值是负数，对于最上面一行偏向
+于走到&lt;span class="math"&gt;\(+1\)&lt;/span&gt;位置，所以总回报都是正的。所以对于下两行的位置这个策略非常差，但是&amp;nbsp;对于最上面那行这个策略就显得不错。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="其中一个pi" src="https://lh3.googleusercontent.com/-KK3A9W7jYOw/U1pCqa0KNJI/AAAAAAAAAK4/PHJxlkP6L34/w336-h264-no/one-pi.png" /&gt;
+&lt;img alt="pi对应的V" src="https://lh5.googleusercontent.com/-CF7Lg0ZiM04/U1pCrDwhq5I/AAAAAAAAALI/d6t4EaQoQtU/w332-h271-no/v-pi.png" /&gt;&lt;/p&gt;
+&lt;p&gt;下面要对&lt;span class="math"&gt;\(V^\pi\)&lt;/span&gt;做一个推导使得&lt;span class="math"&gt;\(V\pi\)&lt;/span&gt;更容易计算，这里假设当前状态&lt;span class="math"&gt;\(s\)&lt;/span&gt;会转移到状态
+&lt;span class="math"&gt;\(s'\)&lt;/span&gt;。中的&lt;span class="math"&gt;\(P_{s\pi(s)}(s')\)&lt;/span&gt;描述的是&lt;span class="math"&gt;\(s\)&lt;/span&gt;状态下采取一个动作
+（这个动作由&lt;span class="math"&gt;\(\pi(s)\)&lt;/span&gt;来确定）转移到&lt;span class="math"&gt;\(s'\)&lt;/span&gt;状态的概率分布，因此式子中的求和描述的就
+是一个求期望的过程，总回报值的期望是当前回报加上未来回报值的期望，
+也称作贝尔曼方程（Bellman’s&amp;nbsp;Equations）。&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{align}
+  V^\pi(s) &amp;amp;= E\Big[R(s_0) + \gamma \Big(R(s_1) + \gamma R(s_2) + \dots\Big)\Big|\pi,s_0=s\Big] \cr
+  &amp;amp;= R(s) + \gamma \sum_{s'}{P_{s\pi(s)}(s')V^\pi(s')}
+\label{eq:bellman}
+\end{align}$$&lt;/div&gt;
+&lt;p&gt;对于的例子，如果针对每个状态都写出方程，
+那么就可以得到&lt;span class="math"&gt;\(11\)&lt;/span&gt;个线性方程组，并且有&lt;span class="math"&gt;\(11\)&lt;/span&gt;个未知数（每个状态都有一个&lt;span class="math"&gt;\(V^pi(s)\)&lt;/span&gt;），
+可以通过求解这个方程组得到&lt;span class="math"&gt;\(V^\pi\)&lt;/span&gt;。按照的策略，我们可以计算
+&lt;span class="math"&gt;\([3,1]\)&lt;/span&gt;位置的&lt;span class="math"&gt;\(V^\pi\)&lt;/span&gt;： &lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{split}
+  V^\pi([3,1]) = &amp;amp;R([3,1]) + \cr
+  &amp;amp; \gamma[0.8V\pi([3,2]) + 0.1V\pi([4,1]) + 0.1V\pi([2,1])]
+\end{split}$$&lt;/div&gt;
+&lt;h4&gt;&lt;span class="math"&gt;\(V^*\)&lt;/span&gt; 和 &lt;span class="math"&gt;\(\pi^*\)&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;最优值函数&lt;span class="math"&gt;\(V^*(s)\)&lt;/span&gt;定义如下：&lt;/p&gt;
+&lt;p&gt;&lt;span class="math"&gt;\(V^*(s)\)&lt;/span&gt;是最优值函数，值得是找到一个&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;使得对于所有的状态&lt;span class="math"&gt;\(V^\pi(s)\)&lt;/span&gt;最大。&lt;/p&gt;
+&lt;div class="math"&gt;\begin{equation}
+V^*(s) = \max_x V^\pi(s)
+    \label{eq:vstar}
+\end{equation}&lt;/div&gt;
+&lt;p&gt;集合和可以得到&lt;span class="math"&gt;\(V^*\)&lt;/span&gt;的贝尔曼方程：&lt;/p&gt;
+&lt;div class="math"&gt;\begin{equation}
+V^\*(s) = R(s) + \max\_a \gamma \sum\_{s'}{P_{sa}(s')V^*(s')} 
+  \label{eq:vstarbellman}
+\end{equation}&lt;/div&gt;
+&lt;p&gt;根据最优值函数的贝尔曼方程，把中的常数项&lt;span class="math"&gt;\(R(s)\)&lt;/span&gt;和
+常数系数&lt;span class="math"&gt;\(\gamma\)&lt;/span&gt;去掉（处于状态&lt;span class="math"&gt;\(s\)&lt;/span&gt;时，对于所有的&lt;span class="math"&gt;\(a\)&lt;/span&gt;这两个系数都相等），
+就可以得到最优策略&lt;span class="math"&gt;\(\pi^*(s)\)&lt;/span&gt;的求解公式：&lt;/p&gt;
+&lt;div class="math"&gt;\begin{equation}
+\pi^\*(s) = arg\,max\_a \sum_{s'}{P_{sa}(s')V^*(s')} 
+  \label{eq:bestpi}
+\end{equation}&lt;/div&gt;
+&lt;p&gt;由可以看出&lt;span class="math"&gt;\(\pi^\*(s) $其实依赖于\)&lt;/span&gt;V^*(s) &lt;span class="math"&gt;\(，所以现在
+的主要目标是要想办法求解\)&lt;/span&gt;V^*(s) &lt;span class="math"&gt;\(。根据的定义，最直接的
+方法就是穷举所有的\)&lt;/span&gt; \pi &lt;span class="math"&gt;\(，但是穷举的情况会非常多，例如有\)&lt;/span&gt;11&lt;span class="math"&gt;\(个状态，\)&lt;/span&gt;4&lt;span class="math"&gt;\(个动作
+那么就有\)&lt;/span&gt;4^11&lt;span class="math"&gt;\(种组合，搜索空间呈指数增长，不大合理，下面将介绍值迭代
+（Value Iteration）和策略迭代（Policy Iteration）方法来求解\)&lt;/span&gt;V^*(s)$。&lt;/p&gt;
+&lt;p&gt;算法所描述的是值迭代的过程，初始化时对于所有的&lt;span class="math"&gt;\(s\)&lt;/span&gt;对应的
+&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;为&lt;span class="math"&gt;\(0\)&lt;/span&gt;，接着对于每个&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;，这里的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;有两种更新方式。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="值迭代" src="https://lh6.googleusercontent.com/-UQBih3c_8qs/U1pCqW8ff0I/AAAAAAAAAK0/roPWXS7vjt4/w592-h211-no/mdp-vi.png" /&gt;&lt;/p&gt;
+&lt;p&gt;第一种是对于所有的状态计算出式子右边的部分，然后同时更新所有的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;,这种称作
+同步更新（Synchronous Update）；另一种叫做异步更新（Asynchronous
+Update），假设我们按照固定的状态顺序更新&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;，那么首先会更新第1个状态
+的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;，接着是第2个状态的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;、第3个状态的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;、第4个状态的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;
+，如果在更新第5个状态的&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;用到的&lt;span class="math"&gt;\(V(s')\)&lt;/span&gt;恰好是第1、2、3、4状态的，
+那么我们使用的&lt;span class="math"&gt;\(V(s')\)&lt;/span&gt;是前面几次迭代更新的版本。两种方法中异步更新会
+收敛地稍微快一点，值迭代会使得&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;不断地向&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;接近，如
+是最后求解出来的&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="左图是\(V^*\)且\gamma=.99，右图是对应的\(\pi^*\)" src="https://lh5.googleusercontent.com/-fjw0qaYgma8/U1pEI0vjrsI/AAAAAAAAAL0/IWGM0WljS0o/w790-h274-no/bestv-and-pi.png" /&gt;&lt;/p&gt;
+&lt;p&gt;求解出&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;之后，根据就可以计算&lt;span class="math"&gt;\(\pi^\*(s)\)&lt;/span&gt;，
+下面举一个例子计算&lt;span class="math"&gt;\(\pi([3,1])\)&lt;/span&gt;的最优策略，结合，可以
+计算出采取各个动作的未来总回报的期望，假设机器人碰到墙壁之后会回到
+原来的位置，所以机器人向&lt;span class="math"&gt;\(E\)&lt;/span&gt;走的时候有&lt;span class="math"&gt;\(0.1\)&lt;/span&gt;的可能性会碰到墙壁然后又
+返回到&lt;span class="math"&gt;\([3,1]\)&lt;/span&gt;位置。 &lt;/p&gt;
+&lt;div class="math"&gt;\begin{aligned}
+    E: &amp;amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.75 + 0.1\*0.69 + 0.1\*0.71 = 0.74\cr
+    N: &amp;amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.69 + 0.1\*0.75 + 0.1\*0.49 = 0.676\cr
+    W: &amp;amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.49 + 0.1\*0.69 + 0.1\*0.71 = 0.532\cr
+    S: &amp;amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.71 + 0.1\*0.75 + 0.1\*0.49 = 0.692
+\end{aligned}&lt;/div&gt;
+&lt;p&gt;对比&lt;span class="math"&gt;\(4\)&lt;/span&gt;个方向的未来总回报的期望值之后，发现采取&lt;span class="math"&gt;\(E\)&lt;/span&gt;动作之后得到的值最大，
+所以在&lt;span class="math"&gt;\([3,1]\)&lt;/span&gt;位置会采取动作&lt;span class="math"&gt;\(E\)&lt;/span&gt;。对每个状态都计算最优动作之后就可以得到如&amp;nbsp;所示的结果。&lt;/p&gt;
+&lt;p&gt;描述完值迭代之后，下面简单描述一下策略迭代求解&lt;span class="math"&gt;\(V^*(s)\)&lt;/span&gt;，策略迭代会使得最后
+&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;趋近于&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;并且&lt;span class="math"&gt;\(\pi(s)\)&lt;/span&gt;趋近于&lt;span class="math"&gt;\(\pi^\*(s)\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="策略迭代" src="https://lh6.googleusercontent.com/-PUy_N8kv0-Y/U1pCqTatGDI/AAAAAAAAALE/CQMTpfOJC4Q/w612-h258-no/mdp-pi.png" /&gt;&lt;/p&gt;
+&lt;p&gt;当状态数量少的时候可以采用策略迭代，因为这时候求解贝尔曼方程比较快速，但是当
+状态数非常多，例如有100万个状态，那么求解贝尔曼方程的代价可能会太大，就应该&amp;nbsp;考虑使用值迭代。&lt;/p&gt;
+&lt;p&gt;这里还需要讨论一下如何求解&lt;span class="math"&gt;\(P_{sa}\)&lt;/span&gt;，一般来说可以用最大似然估计来估计。&lt;/p&gt;
+&lt;div class="math"&gt;\begin{equation}
+\begin{split}
+    P_{sa}(s') &amp;amp;= \frac{\text{在}s\text{状态下采取动作a到达状态}s'\text{的次数}}
+    {\text{在}s\text{状态下采取动作}a\text{的次数}} \cr
+    &amp;amp;\Big(\text{如果得到}\frac{0}{0}\text{的情况就用}\frac{1}{|s|}\text{替换}\Big)
+  \end{split}
+  \label{eq:psa}
+\end{equation}&lt;/div&gt;
+&lt;h4&gt;求解过程总结&lt;/h4&gt;
+&lt;p&gt;把上文提到的求解&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;、&lt;span class="math"&gt;\(\pi^\*(s)\)&lt;/span&gt;和&lt;span class="math"&gt;\(P_{sa}\)&lt;/span&gt;的方法结合起来就可以构成一个完整
+的求解&lt;span class="caps"&gt;MDP&lt;/span&gt;的方法。首先采取策略&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;之后可以观测到一些状态转移的数据，用这些
+数据来重新估计&lt;span class="math"&gt;\(P_{sa}\)&lt;/span&gt;，接着用值迭代的方式来求解当前&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;和&lt;span class="math"&gt;\(P_{sa}\)&lt;/span&gt;前提
+下的&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;（值迭代的初始&lt;span class="math"&gt;\(V(s)\)&lt;/span&gt;可以使用上一轮迭代的&lt;span class="math"&gt;\(V^\*(s)\)&lt;/span&gt;），
+最后再利用这个&lt;span class="math"&gt;\(V^*(s)\)&lt;/span&gt;来更新&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;。
+&lt;img alt="整个过程" src="https://lh4.googleusercontent.com/-nQTOBVmMB7k/U1pDwlnexpI/AAAAAAAAALg/xCTEPw5oAWY/w810-h290-no/put-together.png" /&gt;&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="MDP"></category></entry><entry><title>文本分类</title><link href="https://wugh.github.io/posts/2013/11/text-classification/" rel="alternate"></link><updated>2013-11-25T09:08:37+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-25:posts/2013/11/text-classification/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;1&amp;nbsp;概述&lt;/h3&gt;
+&lt;p&gt;最近做了一个简单的文本分类程序，在这篇博客里面记录具体的分类流程。一般来说包括&amp;nbsp;以下几个步骤：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;语料获取&lt;/li&gt;
+&lt;li&gt;文本预处理&lt;/li&gt;
+&lt;li&gt;特征值提取&lt;/li&gt;
+&lt;li&gt;训练分类器&lt;/li&gt;
+&lt;li&gt;评估分类性能&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;下文将分析上面每个步骤的具体实现过程。&lt;/p&gt;
+&lt;h3&gt;2&amp;nbsp;语料获取&lt;/h3&gt;
+&lt;p&gt;语料获取可以采用爬虫来获得，在实现的过程中从网易上获取了十个类别的新闻语料，分
+别是：时政、军事、教育、娱乐、房产、女人、财经、体育、科技和旅游。关于爬虫怎么
+写可以参考&lt;a href="http://blog.pluskid.org/?p=366" title="Scrapy 轻松
+定制网络爬虫"&gt;Scrapy 轻松定制网络爬虫&lt;/a&gt;，这篇文章对于学习&lt;a href="http://scrapy.org" title="scrapy"&gt;Scrapy&lt;/a&gt;框架非常有
+用，但是文章较老，很多接口可能很多都被丢弃，新的接口参考&lt;a href="http://doc.scrapy.org/en/latest/intro/tutorial.html"&gt;Scrapy
+Tutorial&lt;/a&gt;。如果实在懒得爬
+语料可以用我获取好的数据，对数据做一个简单说明，总共有测试语料10万篇，每种新闻
+各1万篇；测试语料1万篇，每种新闻1千篇，点击&lt;a href="https://drive.google.com/file/d/0BywGHFgHsfRbSGVSbDhGLXVrUzg/edit?usp=sharing" title="新闻语料"&gt;这里
+&lt;/a&gt;下载，语料示例如下，&lt;code&gt;URL::&lt;/code&gt;和&lt;code&gt;END&lt;/code&gt;之间是一篇文章：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;URL::http://politics.people.com.cn/n/2012/1120/c14562-19635416.html 2012-11-20
+贵州毕节5名男孩取暖致死 副区长等8人被免职
+“中国网事”记者获悉，毕节市委19日晚研究决定，对5名男孩意外死亡事件负有领导和管理责任的七星关区分管民政工作的副区长唐兴全、分管教育工作的副区长高守军等8人分别进行停职或免职处理。(记者王丽)
+END::
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;3&amp;nbsp;语料预处理&lt;/h3&gt;
+&lt;p&gt;得到语料之后需要对语料做预处理，预处理的过程包括：分词、去停用词、去低频词等。&lt;/p&gt;
+&lt;h4&gt;3.1&amp;nbsp;分词和去停用词&lt;/h4&gt;
+&lt;p&gt;现在有很多可以免费使用的分词工具，包括：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="http://code.google.com/p/fudannlp/" title="FudanNLP"&gt;FudanNLP&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://ictclas.nlpir.org/" title="nlpir"&gt;中科院分词&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/ansjsun/ansj_seg" title="ansj seg"&gt;ansj分词&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/fxsjy/jieba" title="jieba"&gt;jieba分词&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;本文使用的是&lt;a href="http://code.google.com/p/fudannlp/" title="FudanNLP"&gt;FudanNLP&lt;/a&gt;中文自然语言处理工具包，如何分词请参考
+&lt;a href="https://code.google.com/p/fudannlp/wiki/QuickStart" title="QuickStart"&gt;QuickStart&lt;/a&gt;和
+&lt;a href="https://fudannlp.googlecode.com/svn/FudanNLP-1.5-API/java-docs/index.html" title="Api Doc"&gt;APIDoc&lt;/a&gt;，由于代码比较多，文章中仅仅贴出部分函数代码：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    &lt;span class="kd"&gt;public&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;doSeg&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;infile&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;outfile&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="kd"&gt;throws&lt;/span&gt; &lt;span class="n"&gt;IOException&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+        &lt;span class="c1"&gt;// 切分一个大文件很消耗时间&lt;/span&gt;
+        &lt;span class="c1"&gt;// 因此如果输出文件存在就抛出异常&lt;/span&gt;
+        &lt;span class="c1"&gt;// 让用户确保不会产生覆盖文件&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;File&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;outfile&lt;/span&gt;&lt;span class="o"&gt;).&lt;/span&gt;&lt;span class="na"&gt;exists&lt;/span&gt;&lt;span class="o"&gt;())&lt;/span&gt;
+            &lt;span class="k"&gt;throw&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;IOException&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;outfile&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s"&gt;&amp;quot; is existed&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+
+        &lt;span class="n"&gt;LineIterator&lt;/span&gt; &lt;span class="n"&gt;it&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;FileUtils&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;lineIterator&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;File&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;infile&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="n"&gt;encoding&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="n"&gt;BufferedWriter&lt;/span&gt; &lt;span class="n"&gt;bw&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;try&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;bw&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;BufferedWriter&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;OutputStreamWriter&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;FileOutputStream&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;outfile&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt; &lt;span class="n"&gt;encoding&lt;/span&gt;&lt;span class="o"&gt;));&lt;/span&gt;
+            &lt;span class="n"&gt;StringBuilder&lt;/span&gt; &lt;span class="n"&gt;stringBuilder&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;StringBuilder&lt;/span&gt;&lt;span class="o"&gt;();&lt;/span&gt;
+            &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;it&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;hasNext&lt;/span&gt;&lt;span class="o"&gt;())&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+                &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;it&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;nextLine&lt;/span&gt;&lt;span class="o"&gt;().&lt;/span&gt;&lt;span class="na"&gt;trim&lt;/span&gt;&lt;span class="o"&gt;();&lt;/span&gt;
+                &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;isEmpty&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;startsWith&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;URL::&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;
+                    &lt;span class="k"&gt;continue&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+                &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;startsWith&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;END::&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)){&lt;/span&gt;
+                    &lt;span class="n"&gt;stringBuilder&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;append&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;\n&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+                    &lt;span class="n"&gt;bw&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;write&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;stringBuilder&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;toString&lt;/span&gt;&lt;span class="o"&gt;());&lt;/span&gt;
+                    &lt;span class="n"&gt;stringBuilder&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;StringBuilder&lt;/span&gt;&lt;span class="o"&gt;();&lt;/span&gt;
+                    &lt;span class="k"&gt;continue&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+                &lt;span class="o"&gt;}&lt;/span&gt;
+                &lt;span class="c1"&gt;// seg line&lt;/span&gt;
+                &lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="o"&gt;[]&lt;/span&gt; &lt;span class="n"&gt;words&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;segTagger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;tag2Array&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="c1"&gt;// 对分词的结果去除停用词&lt;/span&gt;
+                &lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;baseWords&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;stopWords&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;phraseDel&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;words&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+                &lt;span class="n"&gt;stringBuilder&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;append&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Joiner&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;on&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class="o"&gt;).&lt;/span&gt;&lt;span class="na"&gt;join&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;baseWords&lt;/span&gt;&lt;span class="o"&gt;));&lt;/span&gt;
+                &lt;span class="n"&gt;stringBuilder&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;append&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="o"&gt;}&lt;/span&gt;
+        &lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="k"&gt;finally&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;it&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;close&lt;/span&gt;&lt;span class="o"&gt;();&lt;/span&gt;
+            &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;bw&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+                &lt;span class="n"&gt;bw&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;close&lt;/span&gt;&lt;span class="o"&gt;();&lt;/span&gt;
+            &lt;span class="o"&gt;}&lt;/span&gt;
+        &lt;span class="o"&gt;}&lt;/span&gt;
+    &lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上述代码中通过&lt;code&gt;segTagger.tag2Array(line)&lt;/code&gt;分词，得到的分词结果是一个数组，再对分
+词的结果去除停用词&lt;code&gt;stopWords.phraseDel(words)&lt;/code&gt;。这里的&lt;code&gt;segTagger&lt;/code&gt;和&lt;code&gt;stopWords&lt;/code&gt;
+都是有&lt;a href="http://code.google.com/p/fudannlp/" title="FudanNLP"&gt;FudanNLP&lt;/a&gt;提供的类。在语料中，一篇文章的正文是&lt;code&gt;URL::&lt;/code&gt;和&lt;code&gt;END::&lt;/code&gt;
+之间的部分，代码中逐行分词，然后把分词和去停用词的多行合并成一行，最后得到的一&amp;nbsp;篇文章就是一行。&lt;/p&gt;
+&lt;h4&gt;3.2&amp;nbsp;去除低频词&lt;/h4&gt;
+&lt;p&gt;通过分词和去除停用词之后，语料库中的词汇表规模（不同的词的数目）还是非常的大，
+10万篇语料处理之后，词汇表有69万个词。这么大的词汇表对于后面我们计算特征值非常
+不利，例如用最简单的&lt;code&gt;TF(term frequency)&lt;/code&gt;计算特征，要把每篇文章转换成一个词频向
+量，而这个向量的长度就是我们的词汇表大小，如果这个表太大的话，会有很多词频为0，
+直接导致数据稀疏问题，而且也会有很多噪声。从词汇表里面去除一些词的方法，最简单&amp;nbsp;的是采用词频过滤，即词频低于多少的词就忽略，下面描述具体做法。&lt;/p&gt;
+&lt;p&gt;首先，我们要在整个训练集合上统计所有词的频率分布，这里用&lt;code&gt;JAVA&lt;/code&gt;的&lt;code&gt;HashMap&lt;/code&gt;就能实
+现，以词为键，词出现的次数（词频）为值，整个语料库遍历之后，就得到每个词分别在
+语料库里面出现多少次，最后对这个&lt;code&gt;HashMap&lt;/code&gt;做一个按值降序排序，越早出现的词那么词
+频就越高。下图是我统计的一个累计词频分布图，累积地统计个词的出现次数占总次数的
+比例，发现少部分词占有了大部分的词频。更多有意思的词频规律参考
+&lt;a href="https://zh.wikipedia.org/wiki/%E9%BD%8A%E5%A4%AB%E5%AE%9A%E5%BE%8B"&gt;Zipf&amp;#8217;s law&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="zipflaw" src="https://lh6.googleusercontent.com/-HfKjKnkAcu8/UpVqb8RwgWI/AAAAAAAABIk/k2cOKixBkOA/w1415-h1028-no/image.png" /&gt;&lt;/p&gt;
+&lt;p&gt;本文最终取前3万个词频最高的词作为词汇表，这3万个词，总的出现次数已经占到总次数
+的90%。当然从词汇表里面去除一些词还有更高级的做法，例如：计算每个词对整个语料库
+的信息增益，取信息增益最高的多少个词作为词汇表，信息增益是什么，请参考&lt;a href="http://www.blogjava.net/zhenandaci/archive/2009/03/24/261701.html"&gt;这里
+&lt;/a&gt;，具体实现
+参考&lt;a href="http://www.cnblogs.com/zhangchaoyang/articles/2236475.html"&gt;这里&lt;/a&gt;；也可以
+用&lt;a href="http://zh.wikipedia.org/wiki/TF-IDF" title="if idf"&gt;&lt;span class="caps"&gt;TF&lt;/span&gt;-&lt;span class="caps"&gt;IDF&lt;/span&gt;&lt;/a&gt;来度量词的重要性。&lt;/p&gt;
+&lt;h3&gt;4&amp;nbsp;特征提取&lt;/h3&gt;
+&lt;p&gt;特征提取的目地是把文本转换成特征向量，为后面的分类器训练做数据准备。最经典的方
+法应该就是&lt;a href="http://zh.wikipedia.org/wiki/%E5%90%91%E9%87%8F%E7%A9%BA%E9%96%93%E6%A8%A1%E5%9E%8B" title="vector space model"&gt;向量空间模型
+&lt;/a&gt;，更复杂的方法可以用
+&lt;a href="http://en.wikipedia.org/wiki/Latent_Dirichlet_allocation" title="LDA"&gt;&lt;span class="caps"&gt;LDA&lt;/span&gt;&lt;/a&gt;等。下面分
+别介绍向量空间模型和&lt;span class="caps"&gt;LDA&lt;/span&gt;。&lt;/p&gt;
+&lt;h4&gt;4.1&amp;nbsp;向量空间模型&lt;/h4&gt;
+&lt;p&gt;向量空间模型就是把词汇表的每个词都当作特征的一个维度，特征的取值是这个词在这篇
+文章中出现的次数。现在假设词汇表有六个词，分别是：&lt;code&gt;上海 海关 建立 任务 提醒 机制&lt;/code&gt;
+，下面示例如何把文章换转成一个向量，假设语料库里面有两篇文章
+&lt;span class="math"&gt;\(d_1\)&lt;/span&gt;和&lt;span class="math"&gt;\(d_2\)&lt;/span&gt;&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{aligned}
+&amp;amp;d_1: 上海\quad{}海关\quad{}建立\quad{}任务\quad{}上海\cr
+&amp;amp;d_2: 上海\quad{}建立\quad{}任务\quad{}提醒
+\end{aligned} 
+$$&lt;/div&gt;
+&lt;p&gt;把词汇表的词依次记作: &lt;span class="math"&gt;\(w_1\ w_2\ w_3\ w_4\ w_5\ w_6\)&lt;/span&gt;，就可以统计文章中每个词出
+现的次数。以&lt;span class="math"&gt;\(d_1\)&lt;/span&gt;为例子，在&lt;span class="math"&gt;\(d_1\)&lt;/span&gt;中，&lt;span class="math"&gt;\(w_1\)&lt;/span&gt;（上海）出现2次，&lt;span class="math"&gt;\(w_2\)&lt;/span&gt;出现1次，&lt;span class="math"&gt;\(w_3\)&lt;/span&gt;出
+现1次，&lt;span class="math"&gt;\(w_4\)&lt;/span&gt;出现1次，&lt;span class="math"&gt;\(w_5,w_6\)&lt;/span&gt;出现0次，最终向量形式为：&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{aligned}
+&amp;amp; v: w_1\quad{}w_2\quad{}w_3\quad{}w_4\quad{}w_5\quad{}w_6\cr
+&amp;amp; d_1: 2\quad{}1\quad{}1\quad{}1\quad{}0\quad{}0\cr
+&amp;amp; d_2: 1\quad{}0\quad{}1\quad{}1\quad{}1\quad{}0
+\end{aligned}
+$$&lt;/div&gt;
+&lt;p&gt;这样就可以把每个文档都转换成一个词频向量，用这个词频向量就可以计算两个文档之间&amp;nbsp;的相似度，即求两个文档词频向量的余弦相似度，相似度越接近1代表越相似：&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\cos{\theta} = \frac{\mathbf{d_1} \cdot \mathbf{d_2}}{\left\| \mathbf{d_1} \right\| \left \| \mathbf{d_2} \right\|}
+$$&lt;/div&gt;
+&lt;p&gt;当然这里的词频特征也可以用更为合理的&lt;code&gt;IF-IDF&lt;/code&gt;特征取代，具体请参考&lt;a href="http://zh.wikipedia.org/wiki/向量空間模型" title="VSM"&gt;这里
+&lt;/a&gt;的计算过程。&lt;/p&gt;
+&lt;h4&gt;4.2 用&lt;span class="caps"&gt;LDA&lt;/span&gt;提取特征(&lt;span class="caps"&gt;OPTIONAL&lt;/span&gt;)&lt;/h4&gt;
+&lt;p&gt;其次我们可以使用&lt;span class="caps"&gt;LDA&lt;/span&gt;把每篇文档表示成主题的一个分布，然后用这个主题分布当作特征向
+量来训练分类器。可以使用&lt;a href="http://jgibblda.sourceforge.net/" title="JGbibbsLDA"&gt;JGibbsLDA&lt;/a&gt;将训练语料转换成关于主题的分布。由于我们再预处理步骤已经把每篇预处
+理好的文档变成一行，接下来我们就可以把训练语料转换成&lt;code&gt;JGibbsLDA&lt;/code&gt;需要的格式。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;[M]
+[document1]
+[document2]
+...
+[documentM]
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;code&gt;[M]&lt;/code&gt;表示文档总数，没一行是一篇文档，&lt;code&gt;[documenti]&lt;/code&gt;表示语料库里面的第&lt;code&gt;i&lt;/code&gt;篇文档，
+每篇文档总用有&lt;code&gt;Ni&lt;/code&gt;个词：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;[documenti] = [wordi1] [wordi2] ... [wordiNi]
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;用&lt;code&gt;JGibbsLDA&lt;/code&gt;训练得到的输出结果中，名为&lt;code&gt;&amp;lt;model_name&amp;gt;.theta&lt;/code&gt;的文件包含了每篇文档
+的主题分布&lt;span class="math"&gt;\(p(topic_t|document_m)\)&lt;/span&gt;，一行是一个文档，每列是一个主题。&lt;/p&gt;
+&lt;h3&gt;5&amp;nbsp;训练分类器&lt;/h3&gt;
+&lt;p&gt;得到每个文档的特征向量之后，训练的过程可以采用各种各样的分类器，例如：朴素贝叶
+斯、神经网络、&lt;span class="caps"&gt;SVM&lt;/span&gt;等。本文以&lt;span class="caps"&gt;SVM&lt;/span&gt;为例子简要描述一下分类过程，&lt;span class="caps"&gt;SVM&lt;/span&gt;可以使用
+&lt;a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/" title="LIBSVM"&gt;&lt;span class="caps"&gt;LIBSVM&lt;/span&gt;&lt;/a&gt;这个库。首先要把特征向量整理成&lt;a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/" title="LIBSVM"&gt;&lt;span class="caps"&gt;LIBSVM&lt;/span&gt;&lt;/a&gt;的输入格式，然后&amp;nbsp;再进行训练。&lt;/p&gt;
+&lt;h4&gt;5.1&amp;nbsp;特征格式转换&lt;/h4&gt;
+&lt;p&gt;由于训练语料里面我们知道每篇文章的类别，因为我们是分文件存储每个类别的文档，可
+以把10个类别打上标签&lt;code&gt;0~9&lt;/code&gt;，表示用0来表示1类新闻，1来表示另一种新闻，依此类推。
+&lt;a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/" title="LIBSVM"&gt;&lt;span class="caps"&gt;LIBSVM&lt;/span&gt;&lt;/a&gt;的输入格式如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&amp;lt;label&amp;gt; &amp;lt;index1&amp;gt;:&amp;lt;value1&amp;gt; &amp;lt;index2&amp;gt;:&amp;lt;value2&amp;gt; …
+                      …
+&amp;lt;label&amp;gt; &amp;lt;index1&amp;gt;:&amp;lt;value1&amp;gt; &amp;lt;index2&amp;gt;:&amp;lt;value2&amp;gt; …
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;假设我们上面举例的&lt;span class="math"&gt;\(d_1\)&lt;/span&gt;文档属于0这个标签，&lt;span class="math"&gt;\(d_2\)&lt;/span&gt;这个文档属于1这个标签，那么这两&amp;nbsp;篇文档可以表示成如下格式：&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{aligned}
+d_1: 2\quad{}1\quad{}1\quad{}1\quad{}0\quad{}0\cr
+d_2: 1\quad{}0\quad{}1\quad{}1\quad{}1\quad{}0\cr
+\Rightarrow\cr
+d_1: 0\quad{}1:2\quad{}2:1\quad{}3:1\quad{}4:1\quad{}5:0\quad{}6:0\cr
+d_2: 1\quad{}1:1\quad{}2:0\quad{}3:1\quad{}4:1\quad{}5:1\quad{}6:0\cr
+\end{aligned}
+$$&lt;/div&gt;
+&lt;h4&gt;5.2&amp;nbsp;训练&lt;/h4&gt;
+&lt;p&gt;训练过程直接使用&lt;a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/" title="LIBSVM"&gt;&lt;span class="caps"&gt;LIBSVM&lt;/span&gt;&lt;/a&gt;的&lt;code&gt;C&lt;/code&gt;代码编译好的可执行文件&lt;code&gt;svm-train&lt;/code&gt;，训练之
+前可以用&lt;code&gt;svm-scale&lt;/code&gt;对数据进行归一化，假设整理好的训练语料为&lt;code&gt;train.txt&lt;/code&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# 归一化训练语料&lt;/span&gt;
+&lt;span class="c"&gt;# 把特征取值范围保存到train.range文件，方便对测试语料归一化&lt;/span&gt;
+./svm-scale -s train.range train.txt &amp;gt; train.scale
+&lt;span class="c"&gt;# 训练svm模型&lt;/span&gt;
+&lt;span class="c"&gt;# type: C-SVC&lt;/span&gt;
+&lt;span class="c"&gt;# kernel type: radial basis function: exp(-gamma*|u-v|^2)&lt;/span&gt;
+&lt;span class="c"&gt;# gamma: 0.5&lt;/span&gt;
+&lt;span class="c"&gt;# C of C-SVC: 4&lt;/span&gt;
+&lt;span class="c"&gt;# 训练语料: train.scale&lt;/span&gt;
+&lt;span class="c"&gt;# 保存模型: train.scale.model&lt;/span&gt;
+./svm-train -s &lt;span class="m"&gt;1&lt;/span&gt; -t &lt;span class="m"&gt;2&lt;/span&gt; -g 0.5 -c &lt;span class="m"&gt;4&lt;/span&gt; train.scale train.scale.model
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;6&amp;nbsp;测试分类器性能&lt;/h3&gt;
+&lt;p&gt;测试的主要流程如下图，首先也要讲过训练过程的预处理和特征提取，再将特征向量转换
+成&lt;a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/" title="LIBSVM"&gt;&lt;span class="caps"&gt;LIBSVM&lt;/span&gt;&lt;/a&gt;需要的格式，最后用编译好的&lt;code&gt;svm-predict&lt;/code&gt;可执行文件进行分类，最
+后取得的准确率为&lt;code&gt;0.8592%&lt;/code&gt;。
+&lt;img alt="chartflow" src="https://lh6.googleusercontent.com/-mr3DkEOvdPo/UpWXaMkzhFI/AAAAAAAABIw/8q2RCP99MjU/w839-h646-no/test.png" /&gt;&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="文本分类"></category><category term="SVM"></category></entry><entry><title>hexo数学公式</title><link href="https://wugh.github.io/posts/2013/11/hexo-math-equation/" rel="alternate"></link><updated>2013-11-12T12:20:30+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-12:posts/2013/11/hexo-math-equation/</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;在使用&lt;a href="https://github.com/tommy351/hexo" title="Hexo"&gt;Hexo&lt;/a&gt;写博客的时候无法插入数学公
+式，通过调研发现&lt;a href="http://www.mathjax.org/" title="MathJax"&gt;MathJax&lt;/a&gt;可以很好的在网页里&amp;nbsp;面显示数学公式，并且能够支持很多浏览器，下面分步骤描述生成公式的方法。&lt;/p&gt;
+&lt;h3&gt;修改主题&lt;/h3&gt;
+&lt;p&gt;MathJax的&lt;a href="http://docs.mathjax.org/en/latest/platforms/index.html"&gt;官方文档&lt;/a&gt;说只
+要在每个页面的&lt;code&gt;head&lt;/code&gt;标签里面插入下面的&lt;code&gt;javascript&lt;/code&gt;代码：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;script &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;
+   &lt;span class="na"&gt;src=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;接下来的步骤就是要把这个代码加入所有的文章页面里面，这里参考
+&lt;a href="https://github.com/nuklly/hexo-theme-greyshade" title="hexo theme
+greyshade"&gt;greyshade&lt;/a&gt;中对这段代码的处理方式，在主题目录&lt;code&gt;themes/light/layout/_partial/&lt;/code&gt;下
+新建一个文件&lt;code&gt;mathjax.ejs&lt;/code&gt;，内容如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;&amp;lt;!-- mathjax config similar to math.stackexchange --&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;script &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/x-mathjax-config&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class="nx"&gt;MathJax&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Hub&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Config&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
+    &lt;span class="nx"&gt;tex2jax&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;inlineMath&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;\\(&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;\\)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+      &lt;span class="nx"&gt;processEscapes&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;script &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/x-mathjax-config&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nx"&gt;MathJax&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Hub&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Config&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
+      &lt;span class="nx"&gt;tex2jax&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;skipTags&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;script&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;noscript&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;style&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;textarea&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;pre&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;code&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+      &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;script &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/x-mathjax-config&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nx"&gt;MathJax&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Hub&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Queue&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;all&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;MathJax&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Hub&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getAllJax&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="nx"&gt;all&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;length&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nx"&gt;all&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nx"&gt;SourceElement&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="nx"&gt;parentNode&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;className&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39; has-jax&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;script &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;src=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;然后在&lt;code&gt;themes/light/layout/_partial/&lt;/code&gt;目录下的&lt;code&gt;head.ejs&lt;/code&gt;里面添加以下几行：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;theme&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mathjax&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="x"&gt;    &lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%-&lt;/span&gt; &lt;span class="n"&gt;partial&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;mathjax&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这几行的意思是如果在主题的&lt;code&gt;_config.xml&lt;/code&gt;里面把&lt;code&gt;mathjax&lt;/code&gt;变量设置成&lt;code&gt;true&lt;/code&gt;那么就把
+&lt;code&gt;mathjax.ejs&lt;/code&gt;包含进来，所以还需要在&lt;code&gt;themes/_config.xml&lt;/code&gt;里面添加：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;mathjax&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;配置完之后生成的网页里面都包含有&lt;code&gt;mathjax&lt;/code&gt;需要的一段&lt;code&gt;script&lt;/code&gt;。&lt;/p&gt;
+&lt;h3&gt;生成公式&lt;/h3&gt;
+&lt;p&gt;有些&lt;code&gt;MarkDown&lt;/code&gt;渲染器本来支持，例如
+&lt;a href="https://github.com/gettalong/kramdown" title="kramdown"&gt;kramdown&lt;/a&gt;。但是这个是&lt;code&gt;Ruby&lt;/code&gt;
+写的，&lt;code&gt;Hexo&lt;/code&gt;无法支持，&lt;code&gt;Hexo&lt;/code&gt;官方的&lt;code&gt;MarkDown&lt;/code&gt;渲染器也无法对公式进行处理，现在
+还可以采用&lt;a href="https://github.com/wzpan/hexo-renderer-pandoc"&gt;hexo pandoc render&lt;/a&gt;&amp;nbsp;来进行渲染&lt;/p&gt;
+&lt;h4&gt;行间公式&lt;/h4&gt;
+&lt;p&gt;要产生行间公式就得用下面的代码：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="s"&gt;$&lt;/span&gt;&lt;span class="nb"&gt;E&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;mc^&lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="s"&gt;$&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;现在举一个行间公式的例子：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;爱因斯坦提出了质能方程：&lt;span class="s"&gt;$&lt;/span&gt;&lt;span class="nb"&gt;E&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;mc^&lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="s"&gt;$&lt;/span&gt;。他是一个伟大的物理学家。
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;爱因斯坦提出了质能方程：&lt;span class="math"&gt;\(E=mc^2\)&lt;/span&gt;。他是一个伟大的&amp;nbsp;物理学家。&lt;/p&gt;
+&lt;h4&gt;方程组&lt;/h4&gt;
+&lt;p&gt;我们可以用下面的一段代码来产生一个独立的方程组，由于一般&lt;code&gt;Markdown&lt;/code&gt;中&lt;code&gt;\\&lt;/code&gt;需要转义
+，所以换行我们可以使用&lt;code&gt;\cr&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;以下是几个三角恒等式：
+&lt;span class="sb"&gt;$$&lt;/span&gt;&lt;span class="nb"&gt;&lt;/span&gt;
+&lt;span class="nv"&gt;\begin&lt;/span&gt;&lt;span class="nb"&gt;{align}&lt;/span&gt;
+&lt;span class="nv"&gt;\sin&lt;/span&gt;&lt;span class="nb"&gt; &lt;/span&gt;&lt;span class="nv"&gt;\left&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;x&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nb"&gt;y&lt;/span&gt;&lt;span class="nv"&gt;\right&lt;/span&gt;&lt;span class="o"&gt;)=&lt;/span&gt;&lt;span class="nv"&gt;\sin&lt;/span&gt;&lt;span class="nb"&gt; x &lt;/span&gt;&lt;span class="nv"&gt;\cos&lt;/span&gt;&lt;span class="nb"&gt; y &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nb"&gt; &lt;/span&gt;&lt;span class="nv"&gt;\cos&lt;/span&gt;&lt;span class="nb"&gt; x &lt;/span&gt;&lt;span class="nv"&gt;\sin&lt;/span&gt;&lt;span class="nb"&gt; y&lt;/span&gt;&lt;span class="nv"&gt;\cr&lt;/span&gt;&lt;span class="nb"&gt;&lt;/span&gt;
+&lt;span class="nv"&gt;\cos&lt;/span&gt;&lt;span class="nb"&gt; &lt;/span&gt;&lt;span class="nv"&gt;\left&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;x&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nb"&gt;y&lt;/span&gt;&lt;span class="nv"&gt;\right&lt;/span&gt;&lt;span class="o"&gt;)=&lt;/span&gt;&lt;span class="nv"&gt;\cos&lt;/span&gt;&lt;span class="nb"&gt; x &lt;/span&gt;&lt;span class="nv"&gt;\cos&lt;/span&gt;&lt;span class="nb"&gt; y &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nb"&gt; &lt;/span&gt;&lt;span class="nv"&gt;\sin&lt;/span&gt;&lt;span class="nb"&gt; x &lt;/span&gt;&lt;span class="nv"&gt;\sin&lt;/span&gt;&lt;span class="nb"&gt; y&lt;/span&gt;
+&lt;span class="nv"&gt;\end&lt;/span&gt;&lt;span class="nb"&gt;{align}&lt;/span&gt;
+&lt;span class="s"&gt;$$&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;以下是几个三角恒等式：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{align}
+\sin \left(x+y\right)=\sin x \cos y + \cos x \sin y\cr
+\cos \left(x+y\right)=\cos x \cos y - \sin x \sin y
+\end{align}
+$$&lt;/div&gt;
+&lt;h3&gt;vim插入模板&lt;/h3&gt;
+&lt;p&gt;上述方法插入公式的时候总是要时间去敲很多没有意义的&lt;code&gt;html&lt;/code&gt;标签，我们可以利用&lt;code&gt;vim&lt;/code&gt;
+的&lt;a href="https://github.com/garbas/vim-snipmate" title="snipmate"&gt;vim-snipmate&lt;/a&gt;插件来做几个
+模板加速我们的程序编写。
+我写了两个&lt;code&gt;snippets&lt;/code&gt;来插入公式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;snippet $
+    $${1:Inline}$${0}
+
+snippet $$
+    $$  &lt;span class="cp"&gt;${&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;Displayed&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;
+    $$  
+    &lt;span class="cp"&gt;${&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;把这个&lt;code&gt;mkd.snippets&lt;/code&gt;文件放到&lt;code&gt;~/.vim/snippets/&lt;/code&gt;目录下面就可以生效，然后我们在编
+辑&lt;code&gt;MarkDown&lt;/code&gt;文件的时候就可以通过&lt;code&gt;$&amp;lt;Tab&amp;gt;&lt;/code&gt;来触发一个行间公式模板，通过&lt;code&gt;$$&amp;lt;Tab&amp;gt;&lt;/code&gt;来&amp;nbsp;生成方程组模板。&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="latex"></category><category term="vim"></category><category term="hexo"></category></entry><entry><title>BCM57780没有网络连接</title><link href="https://wugh.github.io/posts/2013/11/bcm57780-network-problem/" rel="alternate"></link><updated>2013-11-10T00:16:36+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-10:posts/2013/11/bcm57780-network-problem/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;问题描述&lt;/h3&gt;
+&lt;p&gt;安装完Gentoo之后发现系统一直没有办法上网，通过&lt;code&gt;lspci&lt;/code&gt;找到自己的网卡之后，搜索问&amp;nbsp;题，发现通过下面几条命令之后才能够激活网卡：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# rmmod broadcom &lt;/span&gt;
+&lt;span class="c"&gt;# rmmod tg3 &lt;/span&gt;
+&lt;span class="c"&gt;# modprobe broadcom &lt;/span&gt;
+&lt;span class="c"&gt;# modprobe tg3 &lt;/span&gt;
+&lt;span class="c"&gt;# dhcpcd eth0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;问题解决&lt;/h3&gt;
+&lt;p&gt;但是并不能永久解决问题，由上面看来问题应该出在内核那边，需要安装下面的方法重新&amp;nbsp;编译一下模块：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;Device Drivers ---&amp;gt; 
+     Network Device Support ---&amp;gt; 
+          Ethernet driver support ---&amp;gt; 
+               Broadcom devices 
+                 &amp;lt;M&amp;gt; Broadcom Tigon3 support 
+          PHY Device support and infrastrcutre ---&amp;gt; 
+             &amp;lt;M&amp;gt; Drivers &lt;span class="k"&gt;for&lt;/span&gt; Broadcom PHYs
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;参考文章&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://forums.gentoo.org/viewtopic-t-925416-start-0.html"&gt;No Connection with &lt;span class="caps"&gt;BCM57780&lt;/span&gt; After&amp;nbsp;Installing&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="内核编译"></category><category term="Gentoo"></category></entry><entry><title>Gentoo Portage使用技巧</title><link href="https://wugh.github.io/posts/2013/11/gentoo-portage-tips/" rel="alternate"></link><updated>2013-11-09T10:06:01+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-09:posts/2013/11/gentoo-portage-tips/</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;本文章记录一些使用Gentoo&amp;nbsp;Portage的技巧。&lt;/p&gt;
+&lt;h3&gt;指定Slot安装软件&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;Slot&lt;/code&gt;是在&lt;code&gt;Gentoo&lt;/code&gt;的包管理的一个重要功能，当一个软件有多个分支的时候Portage能够&amp;nbsp;保证不同的版本并存。例如，Python一般有多个版本&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;eix dev-lang/python
+&lt;span class="o"&gt;[&lt;/span&gt;I&lt;span class="o"&gt;]&lt;/span&gt; dev-lang/python
+     Available versions:  
+        &lt;span class="o"&gt;(&lt;/span&gt;2.5&lt;span class="o"&gt;)&lt;/span&gt;   2.5.4-r4 ~2.5.4-r5
+        &lt;span class="o"&gt;(&lt;/span&gt;2.6&lt;span class="o"&gt;)&lt;/span&gt;   2.6.8 ~2.6.8-r1
+        &lt;span class="o"&gt;(&lt;/span&gt;2.7&lt;span class="o"&gt;)&lt;/span&gt;   2.7.3-r2 ~2.7.3-r3
+        &lt;span class="o"&gt;(&lt;/span&gt;3.1&lt;span class="o"&gt;)&lt;/span&gt;   3.1.5 ~3.1.5-r1
+        &lt;span class="o"&gt;(&lt;/span&gt;3.2&lt;span class="o"&gt;)&lt;/span&gt;   3.2.3 ~3.2.3-r1 ~3.2.3-r2
+        &lt;span class="o"&gt;(&lt;/span&gt;3.3&lt;span class="o"&gt;)&lt;/span&gt;   **3.3.0 **3.3.0-r1
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上面的搜索出来的记过中括号中的就是slot号码，那么如何根据slot安装不同的软件呢，&amp;nbsp;下面将会解释这一点。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;emerge -pv dev-lang/python:3.3
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;通过上面的方式就可以安装Python3.3。&lt;/p&gt;
+&lt;h3&gt;emerge特定版本的软件&lt;/h3&gt;
+&lt;p&gt;使用&lt;code&gt;emerge&lt;/code&gt;搜索&lt;code&gt;gitolite&lt;/code&gt;，出现的结果很多，如果我们不想安装默认的版本那么就得&amp;nbsp;用特定的命令。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;tom@nextzone ~ &lt;span class="nv"&gt;$ &lt;/span&gt;eix dev-vcs/gitolite
+* dev-vcs/gitolite
+     Available versions:  2.3.1 ~3.1 ~3.2 ~3.3 ~3.4 ~3.5 ~3.5.1 ~3.5.2 &lt;span class="o"&gt;{&lt;/span&gt;contrib tools vim-syntax&lt;span class="o"&gt;}&lt;/span&gt;
+     Homepage:            http://github.com/sitaramc/gitolite
+     Description:         Highly flexible server &lt;span class="k"&gt;for&lt;/span&gt; git directory version tracker
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;安装&lt;code&gt;3.5.2&lt;/code&gt;的方法如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge --ask &lt;span class="o"&gt;=&lt;/span&gt;dev-vcs/gitolite-3.5.2
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;emerge的正则搜索&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;emerge --search "package name"&lt;/code&gt;是一个正常使用方法，如果待搜索的名字是以&lt;code&gt;%&lt;/code&gt;开头
+那么代表这个是一个正则表达式。例如，&lt;code&gt;emerge --search "%^kde"&lt;/code&gt;会搜索出全部以
+&lt;code&gt;kde&lt;/code&gt;开头的包，但是要注意的是，这样子搜索的时候不匹配软件包所在的类别，如果要匹
+配类别，那么就需要加上&lt;code&gt;@&lt;/code&gt;：就可以搜索&lt;code&gt;dev-java&lt;/code&gt;这个类别下含有&lt;code&gt;jdk&lt;/code&gt;关键词的软件&amp;nbsp;包。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;guohuawu@cist-tux ~ &lt;span class="nv"&gt;$ &lt;/span&gt;emerge --search &lt;span class="s2"&gt;&amp;quot;%@^dev-java.*jdk&amp;quot;&lt;/span&gt;
+Searching...    
+&lt;span class="o"&gt;[&lt;/span&gt; Results &lt;span class="k"&gt;for&lt;/span&gt; search key : ^dev-java.*jdk &lt;span class="o"&gt;]&lt;/span&gt;
+&lt;span class="o"&gt;[&lt;/span&gt; Applications found : &lt;span class="m"&gt;11&lt;/span&gt; &lt;span class="o"&gt;]&lt;/span&gt;
+
+*  dev-java/apple-jdk-bin &lt;span class="o"&gt;[&lt;/span&gt; Masked &lt;span class="o"&gt;]&lt;/span&gt;
+      Latest version available: 1.6.0
+      Latest version installed: &lt;span class="o"&gt;[&lt;/span&gt; Not Installed &lt;span class="o"&gt;]&lt;/span&gt;
+      Size of files: &lt;span class="m"&gt;0&lt;/span&gt; kB
+      Homepage:      http://java.sun.com/j2se/1.6.0/
+      Description:   Links to Apple&lt;span class="s1"&gt;&amp;#39;s version of Sun&amp;#39;&lt;/span&gt;s J2SE Development Kit
+      License:       public-domain
+
+*  dev-java/db4o-jdk11
+      Latest version available: 7.4
+      Latest version installed: &lt;span class="o"&gt;[&lt;/span&gt; Not Installed &lt;span class="o"&gt;]&lt;/span&gt;
+      Size of files: &lt;span class="m"&gt;312&lt;/span&gt; kB
+      Homepage:      http://www.db4o.com
+      Description:   Core files &lt;span class="k"&gt;for&lt;/span&gt; the object database &lt;span class="k"&gt;for&lt;/span&gt; java
+      License:       GPL-2
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;eix&lt;/h3&gt;
+&lt;p&gt;上面提到用&lt;code&gt;emerge&lt;/code&gt;来搜索软件包，但是这个方法遇到的一个最大问题就是搜索非常慢，
+用&lt;code&gt;eix&lt;/code&gt;可以解决这个问题。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;root &lt;span class="c"&gt;# emerge --ask eix&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这样以来同步Portage就变得非常简单：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;root &lt;span class="c"&gt;# eix-sync&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;通用&lt;code&gt;eix&lt;/code&gt;也支持正则搜索，而且搜索速度非常快&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;guohuawu@cist-dell ~ &lt;span class="nv"&gt;$ &lt;/span&gt;eix ^ack&lt;span class="err"&gt;$&lt;/span&gt;
+&lt;span class="o"&gt;[&lt;/span&gt;I&lt;span class="o"&gt;]&lt;/span&gt; sys-apps/ack
+     Available versions:  1.96 2.12 &lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="nb"&gt;test&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+     Installed versions:  2.12&lt;span class="o"&gt;(&lt;/span&gt;06:48:04 PM 05/24/2014&lt;span class="o"&gt;)(&lt;/span&gt;-test&lt;span class="o"&gt;)&lt;/span&gt;
+     Homepage:            http://betterthangrep.com/ http://search.cpan.org/dist/ack/
+     Description:         ack is a tool like grep, aimed at programmers with large trees of heterogeneous &lt;span class="nb"&gt;source &lt;/span&gt;code
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;下面举出一些常用的例子&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;eix kernel&lt;/code&gt;：搜索含有kernel关键词的包&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;eix -I kernel&lt;/code&gt;：从已经安装的包里面搜索&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;eix -S -c corba&lt;/code&gt;：搜索包的描述，并且用紧凑模式输出&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;eix -C -c app-officeext&lt;/code&gt;：搜索一个类别的包，，并且用紧凑模式输出&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;更多的请参考&lt;a href="http://wiki.gentoo.org/wiki/Eix"&gt;Gentoo Wiki&lt;/a&gt;。&lt;/p&gt;</summary><category term="Portage"></category><category term="Gentoo"></category></entry><entry><title>Linux字体配置</title><link href="https://wugh.github.io/posts/2013/11/linux-fontconfig/" rel="alternate"></link><updated>2013-11-09T09:54:23+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-09:posts/2013/11/linux-fontconfig/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;fontconfig简介&lt;/h3&gt;
+&lt;p&gt;Linux字体配置采用
+&lt;a href="http://www.freedesktop.org/wiki/Software/fontconfig/"&gt;fontconfig&lt;/a&gt;来做字体渲染
+，中文的&lt;a href="http://codex.wordpress.org.cn/Fontconfig%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C"&gt;fontconfig手册
+&lt;/a&gt;&amp;nbsp;参考这里，根据这个手册对Linux的字体进行简单的配置。&lt;/p&gt;
+&lt;h3&gt;配置文件&lt;/h3&gt;
+&lt;p&gt;根据自己的日常使用习惯，下面对我的fontconfig配置文件做一个描述。&lt;/p&gt;
+&lt;h4&gt;dpi设定&lt;/h4&gt;
+&lt;p&gt;dpi的详细设定参考这两篇文章，&lt;a href="http://xxb.is-programmer.com/posts/4260.html"&gt;dpi设置及sub-pixel次像素微调
+&lt;/a&gt;和&lt;a href="http://www.linuxsir.org/bbs/thread266659.html"&gt;Linux 字体微调 - windows 效果
+版&lt;/a&gt;两篇文章，Windows 7的默认dpi&amp;nbsp;是96，我的字体设定的dpi也采用96。参考前面两篇文章可以知道dpi的计算公式如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;屏幕 width = 287 mm = 28.7 cm，height = 215 mm = 21.5 cm
+水平 dpi = 水平 resolution * 2.54 / width = 1024 * 2.54 / 28.7 = 90.6 
+垂直 dpi = 垂直 resolution * 2.54 / height = 768 * 2.54 / 21.5 = 90.7
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;计算得到dpi就可以在fontconfig里面设定：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;pattern&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;dpi&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;double&amp;gt;&lt;/span&gt;96&lt;span class="nt"&gt;&amp;lt;/double&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;抗锯齿&lt;/h4&gt;
+&lt;p&gt;抗锯齿设定可以增加字体边缘的分辨率，配置如下&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;font&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;antialias&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;bool&amp;gt;&lt;/span&gt;true&lt;span class="nt"&gt;&amp;lt;/bool&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;字体微调&lt;/h4&gt;
+&lt;p&gt;使用普通微调，TrueType微调指令会被freetype的字节码解释器所解释，对于那些有好的
+微调指令的字体是一个好选择，然后选择的微调效果是&lt;code&gt;hintslight&lt;/code&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;font&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;hinting&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;bool&amp;gt;&lt;/span&gt;true&lt;span class="nt"&gt;&amp;lt;/bool&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;font&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;hintstyle&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;const&amp;gt;&lt;/span&gt;hintslight&lt;span class="nt"&gt;&amp;lt;/const&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;次像素渲染&lt;/h4&gt;
+&lt;p&gt;次像素渲染能通过使用次像素有效地提高字体的水平（垂直）分辨率。注意在没有使用
+&lt;a href="http://www.infinality.net/blog/"&gt;Infinality&lt;/a&gt;补丁的情况下autohint和subpixel
+rendering不能一起使用。通常情况下现在的显示器使用宏红、绿、蓝（&lt;span class="caps"&gt;RGB&lt;/span&gt;）标准生产，
+所以大多数情况下把次像素渲染类型设定为&lt;code&gt;RGB&lt;/code&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;font&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;rgba&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;const&amp;gt;&lt;/span&gt;rgb&lt;span class="nt"&gt;&amp;lt;/const&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;当使用次像素渲染的时候需要开启&lt;a href="http://www.freetype.org/freetype2/docs/reference/ft2-lcd_filtering.html"&gt;&lt;span class="caps"&gt;LCD&lt;/span&gt;
+filter&lt;/a&gt;
+（液晶过滤），这个选项的取值一般来说选&lt;code&gt;lcddefault&lt;/code&gt;就可以，完整取值请参考&amp;nbsp;fontconfig手册。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;font&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;lcdfilter&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;const&amp;gt;&lt;/span&gt;lcddefault&lt;span class="nt"&gt;&amp;lt;/const&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;字体替换&lt;/h3&gt;
+&lt;p&gt;这里简要说明以下字体替换，替换的简洁写法是采用&lt;code&gt;alias&lt;/code&gt;标签。在&lt;code&gt;family&lt;/code&gt;标签里面写
+好要替换的字体族名字，然后最后那个&lt;code&gt;prefer&lt;/code&gt;标签的意思是，在匹配的字体列表前面插
+入一些列的字体名字。需要注意的是这个列表里面的字体应该有一些是你的系统里面有的&amp;nbsp;。&lt;/p&gt;
+&lt;p&gt;Gentoo安装一些要用到的字体：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge media-fonts/corefonts &lt;span class="c"&gt;#ms core font&lt;/span&gt;
+emerge media-fonts/dejavu &lt;span class="c"&gt;#DejaVu fonts&lt;/span&gt;
+emerge media-fonts/ttf-bitstream-vera &lt;span class="c"&gt;#Bitstream Vera font family&lt;/span&gt;
+emerge media-fonts/arphicfonts &lt;span class="c"&gt;#ukai uming等字体&lt;/span&gt;
+emerge wqy-bitmapfont wqy-microhei wqy-zenhei &lt;span class="c"&gt;#文泉驿字体&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;还需要一些雅黑、宋体一类的字体，就可以自己从windows下复制，最后字体替换顺序如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;alias&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;serif&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;prefer&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;DejaVu Serif&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Bitstream Vera Serif&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Times New Roman&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;SimSun&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;AR PL New Sung&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;AR PL ShanHeiSun Uni&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/prefer&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/alias&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;alias&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;sans-serif&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;prefer&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Arial&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Open Sans&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Microsoft YaHei&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;WenQuanYi Micro Hei&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/prefer&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/alias&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;alias&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;monospace&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;prefer&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;PowerlineSymbols&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Inconsolata&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;WenQuanYi Zen Hei Mono&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;WenQuanYi Micro Hei Mono&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Arial Unicode MS&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/prefer&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/alias&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;部署配置文件&lt;/h3&gt;
+&lt;p&gt;通过以上步骤就能获得一个fontconfig配置文件，文件比较长，就不再复制过来，可以从
+我的&lt;a href="https://gist.github.com/wugh/7386376"&gt;gist&lt;/a&gt;下载，下载完之后把文件放到&lt;span class="caps"&gt;HOME&lt;/span&gt;
+目录下，重新命名为&lt;code&gt;.fonts.conf&lt;/code&gt;，不过这种方法快要被fontconfig抛弃了，现在建议的
+做法是把文件放到&lt;code&gt;~/.config/fontconfig/conf.d/&lt;/code&gt;下命名的时候在前面加个数字，表示&amp;nbsp;一个优先级，操作如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;mkdir -p ~/.config/fontconfig/conf.d/
+mv fonts.conf ~/.config/fontconfig/conf.d/40-myfonts.conf
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;重启X&amp;nbsp;Server之后就能看到生效的字体效果。&lt;/p&gt;
+&lt;h3&gt;参考文章&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://wiki.archlinux.org/index.php/Font_Configuration"&gt;Archlinux Font&amp;nbsp;Configuration&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.freedesktop.org/software/fontconfig/fontconfig-user.html"&gt;fonts-conf&amp;nbsp;document&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://codex.wordpress.org.cn/Fontconfig用户手册"&gt;fontconfig中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="fontconfig"></category></entry><entry><title>解决Linux下mp3标签乱码</title><link href="https://wugh.github.io/posts/2013/11/linux-mp3-tag-problem/" rel="alternate"></link><updated>2013-11-09T09:29:46+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-09:posts/2013/11/linux-mp3-tag-problem/</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;在Linux下mp3标签出现乱码的原因主要是下载到的mp3都使用&lt;a href="http://zh.wikipedia.org/wiki/GB_2312"&gt;&lt;span class="caps"&gt;GB2312&lt;/span&gt;&lt;/a&gt;编码，然而Linux下使用的编码是&lt;a href="http://zh.wikipedia.org/wiki/UTF-8"&gt;&lt;span class="caps"&gt;UTF&lt;/span&gt;-8&lt;/a&gt;编码，所以只要对标签编码做一个转换就可以解决问题。&lt;/p&gt;
+&lt;h3&gt;安装软件&lt;/h3&gt;
+&lt;p&gt;下面以Gentoo为例子安装&lt;a href="https://code.google.com/p/mutagen/"&gt;Mutagen&lt;/a&gt;，其他的发行&amp;nbsp;版自行Google。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge --ask media-libs/mutagen
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;转换当前目录下的所有mp3文件标签&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;find . -iname &lt;span class="s2"&gt;&amp;quot;*.mp3&amp;quot;&lt;/span&gt; -exec mid3iconv -e gbk &lt;span class="o"&gt;{}&lt;/span&gt; &lt;span class="se"&gt;\;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;转换当前目录下的所有ape文件标签&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;find . -iname &lt;span class="s2"&gt;&amp;quot;*.ape&amp;quot;&lt;/span&gt; -exec mid3iconv -e gbk &lt;span class="o"&gt;{}&lt;/span&gt; &lt;span class="se"&gt;\;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="mp3"></category><category term="乱码"></category></entry><entry><title>Linux 音频格式转换</title><link href="https://wugh.github.io/posts/2013/11/linux-audio-format-convert/" rel="alternate"></link><updated>2013-11-09T09:15:30+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-09:posts/2013/11/linux-audio-format-convert/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;需要的软件&lt;/h3&gt;
+&lt;p&gt;在开始转换之前我们需要两个程序&lt;a href="http://lame.sourceforge.net/download.php"&gt;&lt;span class="caps"&gt;LAME&lt;/span&gt;&lt;/a&gt;
+和&lt;a href="http://www.audiocoding.com/downloads.html"&gt;&lt;span class="caps"&gt;FAAD2&lt;/span&gt;&lt;/a&gt;，这两个包应该通过linux自带&amp;nbsp;的软件包管理器就可以安装。Gentoo下面安装方法如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge --ask media-sound/lame
+emerge --ask media-libs/faad2
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;批量转换&lt;/h3&gt;
+&lt;h4&gt;m4a转换成mp3&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
+
+&lt;span class="k"&gt;for&lt;/span&gt; i in *.m4a&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Converting: &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="p"&gt;%.m4a&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.mp3&amp;quot;&lt;/span&gt;
+    faad -o - &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$i&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; lame - &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="p"&gt;%.m4a&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.mp3&amp;quot;&lt;/span&gt;
+&lt;span class="k"&gt;done&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;flac转mp3&lt;/h4&gt;
+&lt;p&gt;另外可以使用flac转mp3，需要以下三个命令flac lame&amp;nbsp;id3，然后使用以下脚本&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#! /bin/sh&lt;/span&gt;
+
+&lt;span class="k"&gt;for&lt;/span&gt; a in *.flac&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="nv"&gt;OUTF&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;a&lt;/span&gt;&lt;span class="p"&gt;%.flac&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.mp3
+
+    &lt;span class="nv"&gt;ARTIST&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;ARTIST &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="nv"&gt;TITLE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;TITLE &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="nv"&gt;ALBUM&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;ALBUM &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="nv"&gt;GENRE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;GENRE &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="nv"&gt;TRACKNUMBER&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;TRACKNUMBER &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="nv"&gt;DATE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;DATE &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+
+    flac -c -d &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; lame -m j -q &lt;span class="m"&gt;0&lt;/span&gt; --vbr-new -V &lt;span class="m"&gt;0&lt;/span&gt; -s 44.1 - &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$OUTF&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+    id3 -t &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$TITLE&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -T &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;TRACKNUMBER&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="nv"&gt;0&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -a &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$ARTIST&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -A &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$ALBUM&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -y &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$DATE&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -g &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GENRE&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="nv"&gt;12&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$OUTF&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="k"&gt;done&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="格式转换"></category></entry><entry><title>gentoo wifi 共享</title><link href="https://wugh.github.io/posts/2013/11/gentoo-wifi-share/" rel="alternate"></link><updated>2013-11-09T00:57:27+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-09:posts/2013/11/gentoo-wifi-share/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;简介&lt;/h3&gt;
+&lt;p&gt;本文主要描述如何在&lt;code&gt;Gentoo&lt;/code&gt;下利用无线网卡做一个&lt;code&gt;wifi&lt;/code&gt;热点来给手机提供无线网络访
+问。目前在&lt;code&gt;Windows&lt;/code&gt;下有&lt;a href="http://www.connectify.me/"&gt;connectify&lt;/a&gt;来共享网络，同样的在&lt;code&gt;Linux&lt;/code&gt;下也有&lt;a href="http://linuxwireless.org/en/users/Documentation/hostapd"&gt;hostapd&lt;/a&gt;。
+由于在Windows下基本就是一键配置热点，但是Linux配置起来比较麻烦，所以本文在这里&amp;nbsp;记录一下配置过程。&lt;/p&gt;
+&lt;h3&gt;软件安装&lt;/h3&gt;
+&lt;p&gt;需要安装一些软件&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge -a hostapd
+emerge -a dnsmasq
+emerge -a iptables
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;配置&lt;/h3&gt;
+&lt;p&gt;以下描述各个软件的配置说明。&lt;/p&gt;
+&lt;h4&gt;网卡参数&lt;/h4&gt;
+&lt;p&gt;修改文件&lt;code&gt;/etc/conf.d/net&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;modules_wlan0&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;!iwconfig !wpa_supplicant&amp;quot;&lt;/span&gt;
+&lt;span class="nv"&gt;config_wlan0&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;192.168.0.1/24&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;网卡配置好之后，要加入默认启动。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; /etc/init.d
+ln -s net.lo net.wlan0
+/etc/init.d/net.wlan0 start
+rc-update add net.wlan0 default
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;hostapd配置&lt;/h4&gt;
+&lt;p&gt;修改&lt;code&gt;hostapd&lt;/code&gt;配置文件&lt;code&gt;/etc/hostapd/hostapd.conf&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;interface&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;wlan0
+&lt;span class="c"&gt;#bridge=br0                         (optional, if you want bridging remove the #)&lt;/span&gt;
+&lt;span class="nv"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;nl80211
+&lt;span class="nv"&gt;ssid&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;MyNetwork     &lt;span class="c"&gt;#热点名称&lt;/span&gt;
+&lt;span class="nv"&gt;channel&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1
+&lt;span class="nv"&gt;hw_mode&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;g
+&lt;span class="nv"&gt;wpa&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;3
+&lt;span class="nv"&gt;wpa_passphrase&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;Your passphrase  &lt;span class="c"&gt;#热点密码&lt;/span&gt;
+&lt;span class="nv"&gt;wpa_key_mgmt&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;WPA-PSK
+&lt;span class="nv"&gt;wpa_pairwise&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;TKIP
+&lt;span class="nv"&gt;rsn_pairwise&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;CCMP
+&lt;span class="nv"&gt;macaddr_acl&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0
+&lt;span class="nv"&gt;auth_algs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1
+&lt;span class="nv"&gt;ignore_broadcast_ssid&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0
+&lt;span class="nv"&gt;logger_syslog&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;-1
+&lt;span class="nv"&gt;logger_syslog_level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;2
+&lt;span class="nv"&gt;logger_stdout&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;-1
+&lt;span class="nv"&gt;logger_stdout_level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1
+&lt;span class="nv"&gt;debug&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0
+&lt;span class="nv"&gt;dump_file&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/tmp/hostapd.dump
+&lt;span class="nv"&gt;ctrl_interface&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/run/hostapd
+&lt;span class="nv"&gt;ctrl_interface_group&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0
+&lt;span class="nv"&gt;accept_mac_file&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/etc/hostapd/hostapd.accept
+&lt;span class="nv"&gt;deny_mac_file&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/etc/hostapd/hostapd.deny
+&lt;span class="nv"&gt;auth_algs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;把hostapd加入默认启动。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/etc/init.d/hostapd start
+rc-update add hostapd default
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;dnsmasq配置&lt;/h4&gt;
+&lt;p&gt;修改&lt;code&gt;dnsmasq&lt;/code&gt;配置文件&lt;code&gt;/etc/dnsmasq.conf&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;interface&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;wlan0
+&lt;span class="nb"&gt;bind&lt;/span&gt;-interfaces
+dhcp-range&lt;span class="o"&gt;=&lt;/span&gt;192.168.0.50,192.168.0.150,12h
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;dnsmasq用来分配&lt;span class="caps"&gt;IP&lt;/span&gt;，所以要启动这个服务。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/etc/init.d/dnsmasq start
+rc-update add dnsmasq default
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;iptables配置&lt;/h4&gt;
+&lt;p&gt;iptables用来设置包的转发规则，以&lt;span class="caps"&gt;NAT&lt;/span&gt;方式配置&lt;span class="caps"&gt;AP&lt;/span&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;iptables -F
+iptables -t nat -F
+iptables -A FORWARD -i wlan0 -s 192.168.0.0/255.255.0.0 -j ACCEPT
+iptables -A FORWARD -i eth0 -d 192.168.0.0/255.255.0.0 -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+&lt;span class="nb"&gt;echo &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt; &amp;gt; /proc/sys/net/ipv4/ip_forward
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;保存规则，并把iptable默认启动&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/etc/init.d/iptables save
+rc-update add iptables default
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;总结&lt;/h3&gt;
+&lt;p&gt;以上这些东西配置后之后，我们的手机应该就可以连上的点的wifi热点。&lt;/p&gt;
+&lt;h3&gt;参考&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://en.gentoo-wiki.com/wiki/Atheros_Ath5k/Ath9k_Wireless_Access_Point#Without_Ethernet_Bridging"&gt;Atheros Ath5k/Ath9k Wireless Access&amp;nbsp;Point&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://en.gentoo-wiki.com/wiki/Wireless/Access_point"&gt;Wireless/Access&amp;nbsp;point&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="hostapd"></category><category term="ap"></category><category term="Gentoo"></category></entry></feed>

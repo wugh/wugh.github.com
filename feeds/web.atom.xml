@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/web.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2013-11-12T12:20:30+08:00</updated><entry><title>hexo数学公式</title><link href="https://wugh.github.io/posts/2013/11/hexo-math-equation/" rel="alternate"></link><updated>2013-11-12T12:20:30+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-12:posts/2013/11/hexo-math-equation/</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;在使用&lt;a href="https://github.com/tommy351/hexo" title="Hexo"&gt;Hexo&lt;/a&gt;写博客的时候无法插入数学公
+式，通过调研发现&lt;a href="http://www.mathjax.org/" title="MathJax"&gt;MathJax&lt;/a&gt;可以很好的在网页里&amp;nbsp;面显示数学公式，并且能够支持很多浏览器，下面分步骤描述生成公式的方法。&lt;/p&gt;
+&lt;h3&gt;修改主题&lt;/h3&gt;
+&lt;p&gt;MathJax的&lt;a href="http://docs.mathjax.org/en/latest/platforms/index.html"&gt;官方文档&lt;/a&gt;说只
+要在每个页面的&lt;code&gt;head&lt;/code&gt;标签里面插入下面的&lt;code&gt;javascript&lt;/code&gt;代码：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;script &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;
+   &lt;span class="na"&gt;src=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;接下来的步骤就是要把这个代码加入所有的文章页面里面，这里参考
+&lt;a href="https://github.com/nuklly/hexo-theme-greyshade" title="hexo theme
+greyshade"&gt;greyshade&lt;/a&gt;中对这段代码的处理方式，在主题目录&lt;code&gt;themes/light/layout/_partial/&lt;/code&gt;下
+新建一个文件&lt;code&gt;mathjax.ejs&lt;/code&gt;，内容如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;&amp;lt;!-- mathjax config similar to math.stackexchange --&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;script &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/x-mathjax-config&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class="nx"&gt;MathJax&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Hub&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Config&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
+    &lt;span class="nx"&gt;tex2jax&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;inlineMath&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;\\(&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;\\)&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+      &lt;span class="nx"&gt;processEscapes&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;script &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/x-mathjax-config&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nx"&gt;MathJax&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Hub&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Config&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
+      &lt;span class="nx"&gt;tex2jax&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;skipTags&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;script&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;noscript&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;style&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;textarea&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;pre&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;code&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+      &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;script &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/x-mathjax-config&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nx"&gt;MathJax&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Hub&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Queue&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;all&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;MathJax&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Hub&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getAllJax&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="nx"&gt;all&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;length&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nx"&gt;all&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nx"&gt;SourceElement&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="nx"&gt;parentNode&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;className&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39; has-jax&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;script &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;src=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;然后在&lt;code&gt;themes/light/layout/_partial/&lt;/code&gt;目录下的&lt;code&gt;head.ejs&lt;/code&gt;里面添加以下几行：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;theme&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mathjax&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="x"&gt;    &lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%-&lt;/span&gt; &lt;span class="n"&gt;partial&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;mathjax&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这几行的意思是如果在主题的&lt;code&gt;_config.xml&lt;/code&gt;里面把&lt;code&gt;mathjax&lt;/code&gt;变量设置成&lt;code&gt;true&lt;/code&gt;那么就把
+&lt;code&gt;mathjax.ejs&lt;/code&gt;包含进来，所以还需要在&lt;code&gt;themes/_config.xml&lt;/code&gt;里面添加：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;mathjax&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;配置完之后生成的网页里面都包含有&lt;code&gt;mathjax&lt;/code&gt;需要的一段&lt;code&gt;script&lt;/code&gt;。&lt;/p&gt;
+&lt;h3&gt;生成公式&lt;/h3&gt;
+&lt;p&gt;有些&lt;code&gt;MarkDown&lt;/code&gt;渲染器本来支持，例如
+&lt;a href="https://github.com/gettalong/kramdown" title="kramdown"&gt;kramdown&lt;/a&gt;。但是这个是&lt;code&gt;Ruby&lt;/code&gt;
+写的，&lt;code&gt;Hexo&lt;/code&gt;无法支持，&lt;code&gt;Hexo&lt;/code&gt;官方的&lt;code&gt;MarkDown&lt;/code&gt;渲染器也无法对公式进行处理，现在
+还可以采用&lt;a href="https://github.com/wzpan/hexo-renderer-pandoc"&gt;hexo pandoc render&lt;/a&gt;&amp;nbsp;来进行渲染&lt;/p&gt;
+&lt;h4&gt;行间公式&lt;/h4&gt;
+&lt;p&gt;要产生行间公式就得用下面的代码：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="s"&gt;$&lt;/span&gt;&lt;span class="nb"&gt;E&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;mc^&lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="s"&gt;$&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;现在举一个行间公式的例子：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;爱因斯坦提出了质能方程：&lt;span class="s"&gt;$&lt;/span&gt;&lt;span class="nb"&gt;E&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;mc^&lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="s"&gt;$&lt;/span&gt;。他是一个伟大的物理学家。
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;爱因斯坦提出了质能方程：&lt;span class="math"&gt;\(E=mc^2\)&lt;/span&gt;。他是一个伟大的&amp;nbsp;物理学家。&lt;/p&gt;
+&lt;h4&gt;方程组&lt;/h4&gt;
+&lt;p&gt;我们可以用下面的一段代码来产生一个独立的方程组，由于一般&lt;code&gt;Markdown&lt;/code&gt;中&lt;code&gt;\\&lt;/code&gt;需要转义
+，所以换行我们可以使用&lt;code&gt;\cr&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;以下是几个三角恒等式：
+&lt;span class="sb"&gt;$$&lt;/span&gt;&lt;span class="nb"&gt;&lt;/span&gt;
+&lt;span class="nv"&gt;\begin&lt;/span&gt;&lt;span class="nb"&gt;{align}&lt;/span&gt;
+&lt;span class="nv"&gt;\sin&lt;/span&gt;&lt;span class="nb"&gt; &lt;/span&gt;&lt;span class="nv"&gt;\left&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;x&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nb"&gt;y&lt;/span&gt;&lt;span class="nv"&gt;\right&lt;/span&gt;&lt;span class="o"&gt;)=&lt;/span&gt;&lt;span class="nv"&gt;\sin&lt;/span&gt;&lt;span class="nb"&gt; x &lt;/span&gt;&lt;span class="nv"&gt;\cos&lt;/span&gt;&lt;span class="nb"&gt; y &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nb"&gt; &lt;/span&gt;&lt;span class="nv"&gt;\cos&lt;/span&gt;&lt;span class="nb"&gt; x &lt;/span&gt;&lt;span class="nv"&gt;\sin&lt;/span&gt;&lt;span class="nb"&gt; y&lt;/span&gt;&lt;span class="nv"&gt;\cr&lt;/span&gt;&lt;span class="nb"&gt;&lt;/span&gt;
+&lt;span class="nv"&gt;\cos&lt;/span&gt;&lt;span class="nb"&gt; &lt;/span&gt;&lt;span class="nv"&gt;\left&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;x&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nb"&gt;y&lt;/span&gt;&lt;span class="nv"&gt;\right&lt;/span&gt;&lt;span class="o"&gt;)=&lt;/span&gt;&lt;span class="nv"&gt;\cos&lt;/span&gt;&lt;span class="nb"&gt; x &lt;/span&gt;&lt;span class="nv"&gt;\cos&lt;/span&gt;&lt;span class="nb"&gt; y &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nb"&gt; &lt;/span&gt;&lt;span class="nv"&gt;\sin&lt;/span&gt;&lt;span class="nb"&gt; x &lt;/span&gt;&lt;span class="nv"&gt;\sin&lt;/span&gt;&lt;span class="nb"&gt; y&lt;/span&gt;
+&lt;span class="nv"&gt;\end&lt;/span&gt;&lt;span class="nb"&gt;{align}&lt;/span&gt;
+&lt;span class="s"&gt;$$&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;以下是几个三角恒等式：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{align}
+\sin \left(x+y\right)=\sin x \cos y + \cos x \sin y\cr
+\cos \left(x+y\right)=\cos x \cos y - \sin x \sin y
+\end{align}
+$$&lt;/div&gt;
+&lt;h3&gt;vim插入模板&lt;/h3&gt;
+&lt;p&gt;上述方法插入公式的时候总是要时间去敲很多没有意义的&lt;code&gt;html&lt;/code&gt;标签，我们可以利用&lt;code&gt;vim&lt;/code&gt;
+的&lt;a href="https://github.com/garbas/vim-snipmate" title="snipmate"&gt;vim-snipmate&lt;/a&gt;插件来做几个
+模板加速我们的程序编写。
+我写了两个&lt;code&gt;snippets&lt;/code&gt;来插入公式：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;snippet $
+    $${1:Inline}$${0}
+
+snippet $$
+    $$  &lt;span class="cp"&gt;${&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;Displayed&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;
+    $$  
+    &lt;span class="cp"&gt;${&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;把这个&lt;code&gt;mkd.snippets&lt;/code&gt;文件放到&lt;code&gt;~/.vim/snippets/&lt;/code&gt;目录下面就可以生效，然后我们在编
+辑&lt;code&gt;MarkDown&lt;/code&gt;文件的时候就可以通过&lt;code&gt;$&amp;lt;Tab&amp;gt;&lt;/code&gt;来触发一个行间公式模板，通过&lt;code&gt;$$&amp;lt;Tab&amp;gt;&lt;/code&gt;来&amp;nbsp;生成方程组模板。&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="latex"></category><category term="vim"></category><category term="hexo"></category></entry></feed>

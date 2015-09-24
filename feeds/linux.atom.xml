@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/linux.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2015-01-08T21:08:00+08:00</updated><entry><title>Linux通过Pulse混合麦克风和音频输出</title><link href="https://wugh.github.io/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/" rel="alternate"></link><updated>2015-01-08T21:08:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2015-01-08:posts/2015/01/linux-pulse-mix-mic-and-computer-audio/</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;由于想在语音识别时候给麦克风加噪声，所以就在思考有没有办法通过混合麦克风输入和
+电脑的音频输出混合起来实现加噪声的效果呢？经过Google找到以下的&lt;a href="https://www.youtube.com/watch?v=8hkCE7ETJRM"&gt;解决办法
+&lt;/a&gt;，这种方法依赖
+&lt;a href="http://zh.wikipedia.org/wiki/PulseAudio" title="PulseAudio"&gt;PulseAudio&lt;/a&gt;。&lt;/p&gt;
+&lt;h3&gt;安装工具&lt;/h3&gt;
+&lt;p&gt;首先需要安装
+&lt;a href="http://freedesktop.org/software/pulseaudio/pavucontrol/"&gt;pavucontrol&lt;/a&gt;用来管理&amp;nbsp;Pulse。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge -a media-sound/pavucontrol
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;修改配置文件&lt;/h3&gt;
+&lt;p&gt;修改配置文件&lt;code&gt;/etc/pulse/default.pa&lt;/code&gt;，添加以下模块&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;load-module module-null-sink 
+load-module module-loopback
+load-module module-loopback
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;然后重启电脑或者重启Pulse服务器。&lt;/p&gt;
+&lt;p&gt;上面的步骤也可以不重启Pulse服务器，直接通过&lt;code&gt;pacmd&lt;/code&gt;这个命令行工具配置Pulse服务&amp;nbsp;器，可以在这个命令行的交互工具中，执行以上三个命令。&lt;/p&gt;
+&lt;h3&gt;通过pavucontrol配置音频混合&lt;/h3&gt;
+&lt;p&gt;我们添加了两个loopback，这时候就可以在pavucontrol的Playback标签页下面看到
+两个新的Loopback，需要把&lt;code&gt;Show&lt;/code&gt;这个过滤器选择为&lt;code&gt;All Streams&lt;/code&gt;，结果如下图所示：
+&lt;img alt="Playback" src="https://lh6.googleusercontent.com/-aDr4tBprMqM/VK6GWnCs-VI/AAAAAAAAAQc/jsJ4DAqzRKM/w893-h572-no/Playback.png" title="Playback" /&gt;
+这两个Loopback一个是麦克风（Loopback from Bulit-in Audio Analog Stero）另一个
+是电脑的音频输出（Loopback of Monitor of Bult-in Audio Analog Stero），需要把
+这两个的输出设定成&lt;code&gt;Null Output&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;接着需要设定一下我们录音的时候使用哪个声音源，设置如下图
+&lt;img alt="Record" src="https://lh4.googleusercontent.com/-JXDur6hvBYA/VK6GWzMAxDI/AAAAAAAAAQg/J4BoCtqtUVk/w890-h578-no/record.png" title="Record" /&gt;
+可以看到&lt;code&gt;ALSA Capture from&lt;/code&gt;被我们设置成&lt;code&gt;Monitor of Null Output&lt;/code&gt;，相当于把Null
+这个设备的输出当作声音源进行捕获，而Null这个设备输出是麦克风和电脑声音的混合，&amp;nbsp;所以可以正常工作。&lt;/p&gt;</summary><category term="pulse"></category><category term="录音"></category></entry><entry><title>BCM57780没有网络连接</title><link href="https://wugh.github.io/posts/2013/11/bcm57780-network-problem/" rel="alternate"></link><updated>2013-11-10T00:16:36+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-10:posts/2013/11/bcm57780-network-problem/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;问题描述&lt;/h3&gt;
+&lt;p&gt;安装完Gentoo之后发现系统一直没有办法上网，通过&lt;code&gt;lspci&lt;/code&gt;找到自己的网卡之后，搜索问&amp;nbsp;题，发现通过下面几条命令之后才能够激活网卡：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# rmmod broadcom &lt;/span&gt;
+&lt;span class="c"&gt;# rmmod tg3 &lt;/span&gt;
+&lt;span class="c"&gt;# modprobe broadcom &lt;/span&gt;
+&lt;span class="c"&gt;# modprobe tg3 &lt;/span&gt;
+&lt;span class="c"&gt;# dhcpcd eth0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;问题解决&lt;/h3&gt;
+&lt;p&gt;但是并不能永久解决问题，由上面看来问题应该出在内核那边，需要安装下面的方法重新&amp;nbsp;编译一下模块：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;Device Drivers ---&amp;gt; 
+     Network Device Support ---&amp;gt; 
+          Ethernet driver support ---&amp;gt; 
+               Broadcom devices 
+                 &amp;lt;M&amp;gt; Broadcom Tigon3 support 
+          PHY Device support and infrastrcutre ---&amp;gt; 
+             &amp;lt;M&amp;gt; Drivers &lt;span class="k"&gt;for&lt;/span&gt; Broadcom PHYs
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;参考文章&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://forums.gentoo.org/viewtopic-t-925416-start-0.html"&gt;No Connection with &lt;span class="caps"&gt;BCM57780&lt;/span&gt; After&amp;nbsp;Installing&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="内核编译"></category><category term="Gentoo"></category></entry><entry><title>Gentoo Portage使用技巧</title><link href="https://wugh.github.io/posts/2013/11/gentoo-portage-tips/" rel="alternate"></link><updated>2013-11-09T10:06:01+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-09:posts/2013/11/gentoo-portage-tips/</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;本文章记录一些使用Gentoo&amp;nbsp;Portage的技巧。&lt;/p&gt;
+&lt;h3&gt;指定Slot安装软件&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;Slot&lt;/code&gt;是在&lt;code&gt;Gentoo&lt;/code&gt;的包管理的一个重要功能，当一个软件有多个分支的时候Portage能够&amp;nbsp;保证不同的版本并存。例如，Python一般有多个版本&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;eix dev-lang/python
+&lt;span class="o"&gt;[&lt;/span&gt;I&lt;span class="o"&gt;]&lt;/span&gt; dev-lang/python
+     Available versions:  
+        &lt;span class="o"&gt;(&lt;/span&gt;2.5&lt;span class="o"&gt;)&lt;/span&gt;   2.5.4-r4 ~2.5.4-r5
+        &lt;span class="o"&gt;(&lt;/span&gt;2.6&lt;span class="o"&gt;)&lt;/span&gt;   2.6.8 ~2.6.8-r1
+        &lt;span class="o"&gt;(&lt;/span&gt;2.7&lt;span class="o"&gt;)&lt;/span&gt;   2.7.3-r2 ~2.7.3-r3
+        &lt;span class="o"&gt;(&lt;/span&gt;3.1&lt;span class="o"&gt;)&lt;/span&gt;   3.1.5 ~3.1.5-r1
+        &lt;span class="o"&gt;(&lt;/span&gt;3.2&lt;span class="o"&gt;)&lt;/span&gt;   3.2.3 ~3.2.3-r1 ~3.2.3-r2
+        &lt;span class="o"&gt;(&lt;/span&gt;3.3&lt;span class="o"&gt;)&lt;/span&gt;   **3.3.0 **3.3.0-r1
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上面的搜索出来的记过中括号中的就是slot号码，那么如何根据slot安装不同的软件呢，&amp;nbsp;下面将会解释这一点。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;emerge -pv dev-lang/python:3.3
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;通过上面的方式就可以安装Python3.3。&lt;/p&gt;
+&lt;h3&gt;emerge特定版本的软件&lt;/h3&gt;
+&lt;p&gt;使用&lt;code&gt;emerge&lt;/code&gt;搜索&lt;code&gt;gitolite&lt;/code&gt;，出现的结果很多，如果我们不想安装默认的版本那么就得&amp;nbsp;用特定的命令。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;tom@nextzone ~ &lt;span class="nv"&gt;$ &lt;/span&gt;eix dev-vcs/gitolite
+* dev-vcs/gitolite
+     Available versions:  2.3.1 ~3.1 ~3.2 ~3.3 ~3.4 ~3.5 ~3.5.1 ~3.5.2 &lt;span class="o"&gt;{&lt;/span&gt;contrib tools vim-syntax&lt;span class="o"&gt;}&lt;/span&gt;
+     Homepage:            http://github.com/sitaramc/gitolite
+     Description:         Highly flexible server &lt;span class="k"&gt;for&lt;/span&gt; git directory version tracker
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;安装&lt;code&gt;3.5.2&lt;/code&gt;的方法如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge --ask &lt;span class="o"&gt;=&lt;/span&gt;dev-vcs/gitolite-3.5.2
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;emerge的正则搜索&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;emerge --search "package name"&lt;/code&gt;是一个正常使用方法，如果待搜索的名字是以&lt;code&gt;%&lt;/code&gt;开头
+那么代表这个是一个正则表达式。例如，&lt;code&gt;emerge --search "%^kde"&lt;/code&gt;会搜索出全部以
+&lt;code&gt;kde&lt;/code&gt;开头的包，但是要注意的是，这样子搜索的时候不匹配软件包所在的类别，如果要匹
+配类别，那么就需要加上&lt;code&gt;@&lt;/code&gt;：就可以搜索&lt;code&gt;dev-java&lt;/code&gt;这个类别下含有&lt;code&gt;jdk&lt;/code&gt;关键词的软件&amp;nbsp;包。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;guohuawu@cist-tux ~ &lt;span class="nv"&gt;$ &lt;/span&gt;emerge --search &lt;span class="s2"&gt;&amp;quot;%@^dev-java.*jdk&amp;quot;&lt;/span&gt;
+Searching...    
+&lt;span class="o"&gt;[&lt;/span&gt; Results &lt;span class="k"&gt;for&lt;/span&gt; search key : ^dev-java.*jdk &lt;span class="o"&gt;]&lt;/span&gt;
+&lt;span class="o"&gt;[&lt;/span&gt; Applications found : &lt;span class="m"&gt;11&lt;/span&gt; &lt;span class="o"&gt;]&lt;/span&gt;
+
+*  dev-java/apple-jdk-bin &lt;span class="o"&gt;[&lt;/span&gt; Masked &lt;span class="o"&gt;]&lt;/span&gt;
+      Latest version available: 1.6.0
+      Latest version installed: &lt;span class="o"&gt;[&lt;/span&gt; Not Installed &lt;span class="o"&gt;]&lt;/span&gt;
+      Size of files: &lt;span class="m"&gt;0&lt;/span&gt; kB
+      Homepage:      http://java.sun.com/j2se/1.6.0/
+      Description:   Links to Apple&lt;span class="s1"&gt;&amp;#39;s version of Sun&amp;#39;&lt;/span&gt;s J2SE Development Kit
+      License:       public-domain
+
+*  dev-java/db4o-jdk11
+      Latest version available: 7.4
+      Latest version installed: &lt;span class="o"&gt;[&lt;/span&gt; Not Installed &lt;span class="o"&gt;]&lt;/span&gt;
+      Size of files: &lt;span class="m"&gt;312&lt;/span&gt; kB
+      Homepage:      http://www.db4o.com
+      Description:   Core files &lt;span class="k"&gt;for&lt;/span&gt; the object database &lt;span class="k"&gt;for&lt;/span&gt; java
+      License:       GPL-2
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;eix&lt;/h3&gt;
+&lt;p&gt;上面提到用&lt;code&gt;emerge&lt;/code&gt;来搜索软件包，但是这个方法遇到的一个最大问题就是搜索非常慢，
+用&lt;code&gt;eix&lt;/code&gt;可以解决这个问题。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;root &lt;span class="c"&gt;# emerge --ask eix&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这样以来同步Portage就变得非常简单：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;root &lt;span class="c"&gt;# eix-sync&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;通用&lt;code&gt;eix&lt;/code&gt;也支持正则搜索，而且搜索速度非常快&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;guohuawu@cist-dell ~ &lt;span class="nv"&gt;$ &lt;/span&gt;eix ^ack&lt;span class="err"&gt;$&lt;/span&gt;
+&lt;span class="o"&gt;[&lt;/span&gt;I&lt;span class="o"&gt;]&lt;/span&gt; sys-apps/ack
+     Available versions:  1.96 2.12 &lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="nb"&gt;test&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+     Installed versions:  2.12&lt;span class="o"&gt;(&lt;/span&gt;06:48:04 PM 05/24/2014&lt;span class="o"&gt;)(&lt;/span&gt;-test&lt;span class="o"&gt;)&lt;/span&gt;
+     Homepage:            http://betterthangrep.com/ http://search.cpan.org/dist/ack/
+     Description:         ack is a tool like grep, aimed at programmers with large trees of heterogeneous &lt;span class="nb"&gt;source &lt;/span&gt;code
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;下面举出一些常用的例子&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;eix kernel&lt;/code&gt;：搜索含有kernel关键词的包&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;eix -I kernel&lt;/code&gt;：从已经安装的包里面搜索&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;eix -S -c corba&lt;/code&gt;：搜索包的描述，并且用紧凑模式输出&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;eix -C -c app-officeext&lt;/code&gt;：搜索一个类别的包，，并且用紧凑模式输出&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;更多的请参考&lt;a href="http://wiki.gentoo.org/wiki/Eix"&gt;Gentoo Wiki&lt;/a&gt;。&lt;/p&gt;</summary><category term="Portage"></category><category term="Gentoo"></category></entry><entry><title>Linux字体配置</title><link href="https://wugh.github.io/posts/2013/11/linux-fontconfig/" rel="alternate"></link><updated>2013-11-09T09:54:23+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-09:posts/2013/11/linux-fontconfig/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;fontconfig简介&lt;/h3&gt;
+&lt;p&gt;Linux字体配置采用
+&lt;a href="http://www.freedesktop.org/wiki/Software/fontconfig/"&gt;fontconfig&lt;/a&gt;来做字体渲染
+，中文的&lt;a href="http://codex.wordpress.org.cn/Fontconfig%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C"&gt;fontconfig手册
+&lt;/a&gt;&amp;nbsp;参考这里，根据这个手册对Linux的字体进行简单的配置。&lt;/p&gt;
+&lt;h3&gt;配置文件&lt;/h3&gt;
+&lt;p&gt;根据自己的日常使用习惯，下面对我的fontconfig配置文件做一个描述。&lt;/p&gt;
+&lt;h4&gt;dpi设定&lt;/h4&gt;
+&lt;p&gt;dpi的详细设定参考这两篇文章，&lt;a href="http://xxb.is-programmer.com/posts/4260.html"&gt;dpi设置及sub-pixel次像素微调
+&lt;/a&gt;和&lt;a href="http://www.linuxsir.org/bbs/thread266659.html"&gt;Linux 字体微调 - windows 效果
+版&lt;/a&gt;两篇文章，Windows 7的默认dpi&amp;nbsp;是96，我的字体设定的dpi也采用96。参考前面两篇文章可以知道dpi的计算公式如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;屏幕 width = 287 mm = 28.7 cm，height = 215 mm = 21.5 cm
+水平 dpi = 水平 resolution * 2.54 / width = 1024 * 2.54 / 28.7 = 90.6 
+垂直 dpi = 垂直 resolution * 2.54 / height = 768 * 2.54 / 21.5 = 90.7
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;计算得到dpi就可以在fontconfig里面设定：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;pattern&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;dpi&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;double&amp;gt;&lt;/span&gt;96&lt;span class="nt"&gt;&amp;lt;/double&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;抗锯齿&lt;/h4&gt;
+&lt;p&gt;抗锯齿设定可以增加字体边缘的分辨率，配置如下&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;font&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;antialias&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;bool&amp;gt;&lt;/span&gt;true&lt;span class="nt"&gt;&amp;lt;/bool&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;字体微调&lt;/h4&gt;
+&lt;p&gt;使用普通微调，TrueType微调指令会被freetype的字节码解释器所解释，对于那些有好的
+微调指令的字体是一个好选择，然后选择的微调效果是&lt;code&gt;hintslight&lt;/code&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;font&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;hinting&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;bool&amp;gt;&lt;/span&gt;true&lt;span class="nt"&gt;&amp;lt;/bool&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;font&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;hintstyle&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;const&amp;gt;&lt;/span&gt;hintslight&lt;span class="nt"&gt;&amp;lt;/const&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;次像素渲染&lt;/h4&gt;
+&lt;p&gt;次像素渲染能通过使用次像素有效地提高字体的水平（垂直）分辨率。注意在没有使用
+&lt;a href="http://www.infinality.net/blog/"&gt;Infinality&lt;/a&gt;补丁的情况下autohint和subpixel
+rendering不能一起使用。通常情况下现在的显示器使用宏红、绿、蓝（&lt;span class="caps"&gt;RGB&lt;/span&gt;）标准生产，
+所以大多数情况下把次像素渲染类型设定为&lt;code&gt;RGB&lt;/code&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;font&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;rgba&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;const&amp;gt;&lt;/span&gt;rgb&lt;span class="nt"&gt;&amp;lt;/const&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;当使用次像素渲染的时候需要开启&lt;a href="http://www.freetype.org/freetype2/docs/reference/ft2-lcd_filtering.html"&gt;&lt;span class="caps"&gt;LCD&lt;/span&gt;
+filter&lt;/a&gt;
+（液晶过滤），这个选项的取值一般来说选&lt;code&gt;lcddefault&lt;/code&gt;就可以，完整取值请参考&amp;nbsp;fontconfig手册。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;match&lt;/span&gt; &lt;span class="na"&gt;target=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;font&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;edit&lt;/span&gt; &lt;span class="na"&gt;mode=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;assign&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;lcdfilter&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;const&amp;gt;&lt;/span&gt;lcddefault&lt;span class="nt"&gt;&amp;lt;/const&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;字体替换&lt;/h3&gt;
+&lt;p&gt;这里简要说明以下字体替换，替换的简洁写法是采用&lt;code&gt;alias&lt;/code&gt;标签。在&lt;code&gt;family&lt;/code&gt;标签里面写
+好要替换的字体族名字，然后最后那个&lt;code&gt;prefer&lt;/code&gt;标签的意思是，在匹配的字体列表前面插
+入一些列的字体名字。需要注意的是这个列表里面的字体应该有一些是你的系统里面有的&amp;nbsp;。&lt;/p&gt;
+&lt;p&gt;Gentoo安装一些要用到的字体：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge media-fonts/corefonts &lt;span class="c"&gt;#ms core font&lt;/span&gt;
+emerge media-fonts/dejavu &lt;span class="c"&gt;#DejaVu fonts&lt;/span&gt;
+emerge media-fonts/ttf-bitstream-vera &lt;span class="c"&gt;#Bitstream Vera font family&lt;/span&gt;
+emerge media-fonts/arphicfonts &lt;span class="c"&gt;#ukai uming等字体&lt;/span&gt;
+emerge wqy-bitmapfont wqy-microhei wqy-zenhei &lt;span class="c"&gt;#文泉驿字体&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;还需要一些雅黑、宋体一类的字体，就可以自己从windows下复制，最后字体替换顺序如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;alias&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;serif&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;prefer&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;DejaVu Serif&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Bitstream Vera Serif&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Times New Roman&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;SimSun&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;AR PL New Sung&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;AR PL ShanHeiSun Uni&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/prefer&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/alias&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;alias&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;sans-serif&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;prefer&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Arial&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Open Sans&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Microsoft YaHei&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;WenQuanYi Micro Hei&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/prefer&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/alias&amp;gt;&lt;/span&gt;
+
+&lt;span class="nt"&gt;&amp;lt;alias&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;monospace&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;prefer&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;PowerlineSymbols&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Inconsolata&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;WenQuanYi Zen Hei Mono&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;WenQuanYi Micro Hei Mono&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;family&amp;gt;&lt;/span&gt;Arial Unicode MS&lt;span class="nt"&gt;&amp;lt;/family&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/prefer&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/alias&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;部署配置文件&lt;/h3&gt;
+&lt;p&gt;通过以上步骤就能获得一个fontconfig配置文件，文件比较长，就不再复制过来，可以从
+我的&lt;a href="https://gist.github.com/wugh/7386376"&gt;gist&lt;/a&gt;下载，下载完之后把文件放到&lt;span class="caps"&gt;HOME&lt;/span&gt;
+目录下，重新命名为&lt;code&gt;.fonts.conf&lt;/code&gt;，不过这种方法快要被fontconfig抛弃了，现在建议的
+做法是把文件放到&lt;code&gt;~/.config/fontconfig/conf.d/&lt;/code&gt;下命名的时候在前面加个数字，表示&amp;nbsp;一个优先级，操作如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;mkdir -p ~/.config/fontconfig/conf.d/
+mv fonts.conf ~/.config/fontconfig/conf.d/40-myfonts.conf
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;重启X&amp;nbsp;Server之后就能看到生效的字体效果。&lt;/p&gt;
+&lt;h3&gt;参考文章&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://wiki.archlinux.org/index.php/Font_Configuration"&gt;Archlinux Font&amp;nbsp;Configuration&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.freedesktop.org/software/fontconfig/fontconfig-user.html"&gt;fonts-conf&amp;nbsp;document&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://codex.wordpress.org.cn/Fontconfig用户手册"&gt;fontconfig中文文档&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="fontconfig"></category></entry><entry><title>解决Linux下mp3标签乱码</title><link href="https://wugh.github.io/posts/2013/11/linux-mp3-tag-problem/" rel="alternate"></link><updated>2013-11-09T09:29:46+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-09:posts/2013/11/linux-mp3-tag-problem/</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;在Linux下mp3标签出现乱码的原因主要是下载到的mp3都使用&lt;a href="http://zh.wikipedia.org/wiki/GB_2312"&gt;&lt;span class="caps"&gt;GB2312&lt;/span&gt;&lt;/a&gt;编码，然而Linux下使用的编码是&lt;a href="http://zh.wikipedia.org/wiki/UTF-8"&gt;&lt;span class="caps"&gt;UTF&lt;/span&gt;-8&lt;/a&gt;编码，所以只要对标签编码做一个转换就可以解决问题。&lt;/p&gt;
+&lt;h3&gt;安装软件&lt;/h3&gt;
+&lt;p&gt;下面以Gentoo为例子安装&lt;a href="https://code.google.com/p/mutagen/"&gt;Mutagen&lt;/a&gt;，其他的发行&amp;nbsp;版自行Google。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge --ask media-libs/mutagen
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;转换当前目录下的所有mp3文件标签&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;find . -iname &lt;span class="s2"&gt;&amp;quot;*.mp3&amp;quot;&lt;/span&gt; -exec mid3iconv -e gbk &lt;span class="o"&gt;{}&lt;/span&gt; &lt;span class="se"&gt;\;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;转换当前目录下的所有ape文件标签&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;find . -iname &lt;span class="s2"&gt;&amp;quot;*.ape&amp;quot;&lt;/span&gt; -exec mid3iconv -e gbk &lt;span class="o"&gt;{}&lt;/span&gt; &lt;span class="se"&gt;\;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="mp3"></category><category term="乱码"></category></entry><entry><title>Linux 音频格式转换</title><link href="https://wugh.github.io/posts/2013/11/linux-audio-format-convert/" rel="alternate"></link><updated>2013-11-09T09:15:30+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-09:posts/2013/11/linux-audio-format-convert/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;需要的软件&lt;/h3&gt;
+&lt;p&gt;在开始转换之前我们需要两个程序&lt;a href="http://lame.sourceforge.net/download.php"&gt;&lt;span class="caps"&gt;LAME&lt;/span&gt;&lt;/a&gt;
+和&lt;a href="http://www.audiocoding.com/downloads.html"&gt;&lt;span class="caps"&gt;FAAD2&lt;/span&gt;&lt;/a&gt;，这两个包应该通过linux自带&amp;nbsp;的软件包管理器就可以安装。Gentoo下面安装方法如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge --ask media-sound/lame
+emerge --ask media-libs/faad2
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;批量转换&lt;/h3&gt;
+&lt;h4&gt;m4a转换成mp3&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
+
+&lt;span class="k"&gt;for&lt;/span&gt; i in *.m4a&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Converting: &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="p"&gt;%.m4a&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.mp3&amp;quot;&lt;/span&gt;
+    faad -o - &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$i&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; lame - &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;i&lt;/span&gt;&lt;span class="p"&gt;%.m4a&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;.mp3&amp;quot;&lt;/span&gt;
+&lt;span class="k"&gt;done&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;flac转mp3&lt;/h4&gt;
+&lt;p&gt;另外可以使用flac转mp3，需要以下三个命令flac lame&amp;nbsp;id3，然后使用以下脚本&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#! /bin/sh&lt;/span&gt;
+
+&lt;span class="k"&gt;for&lt;/span&gt; a in *.flac&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="nv"&gt;OUTF&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;a&lt;/span&gt;&lt;span class="p"&gt;%.flac&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.mp3
+
+    &lt;span class="nv"&gt;ARTIST&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;ARTIST &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="nv"&gt;TITLE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;TITLE &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="nv"&gt;ALBUM&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;ALBUM &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="nv"&gt;GENRE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;GENRE &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="nv"&gt;TRACKNUMBER&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;TRACKNUMBER &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="nv"&gt;DATE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;metaflac &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; --show-tag&lt;span class="o"&gt;=&lt;/span&gt;DATE &lt;span class="p"&gt;|&lt;/span&gt; sed s/.*&lt;span class="o"&gt;=&lt;/span&gt;//g&lt;span class="k"&gt;)&lt;/span&gt;
+
+    flac -c -d &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; lame -m j -q &lt;span class="m"&gt;0&lt;/span&gt; --vbr-new -V &lt;span class="m"&gt;0&lt;/span&gt; -s 44.1 - &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$OUTF&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+    id3 -t &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$TITLE&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -T &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;TRACKNUMBER&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="nv"&gt;0&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -a &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$ARTIST&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -A &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$ALBUM&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -y &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$DATE&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; -g &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GENRE&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="nv"&gt;12&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$OUTF&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="k"&gt;done&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="格式转换"></category></entry><entry><title>gentoo wifi 共享</title><link href="https://wugh.github.io/posts/2013/11/gentoo-wifi-share/" rel="alternate"></link><updated>2013-11-09T00:57:27+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-09:posts/2013/11/gentoo-wifi-share/</id><summary type="html">&lt;hr /&gt;
+&lt;h3&gt;简介&lt;/h3&gt;
+&lt;p&gt;本文主要描述如何在&lt;code&gt;Gentoo&lt;/code&gt;下利用无线网卡做一个&lt;code&gt;wifi&lt;/code&gt;热点来给手机提供无线网络访
+问。目前在&lt;code&gt;Windows&lt;/code&gt;下有&lt;a href="http://www.connectify.me/"&gt;connectify&lt;/a&gt;来共享网络，同样的在&lt;code&gt;Linux&lt;/code&gt;下也有&lt;a href="http://linuxwireless.org/en/users/Documentation/hostapd"&gt;hostapd&lt;/a&gt;。
+由于在Windows下基本就是一键配置热点，但是Linux配置起来比较麻烦，所以本文在这里&amp;nbsp;记录一下配置过程。&lt;/p&gt;
+&lt;h3&gt;软件安装&lt;/h3&gt;
+&lt;p&gt;需要安装一些软件&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;emerge -a hostapd
+emerge -a dnsmasq
+emerge -a iptables
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;配置&lt;/h3&gt;
+&lt;p&gt;以下描述各个软件的配置说明。&lt;/p&gt;
+&lt;h4&gt;网卡参数&lt;/h4&gt;
+&lt;p&gt;修改文件&lt;code&gt;/etc/conf.d/net&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;modules_wlan0&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;!iwconfig !wpa_supplicant&amp;quot;&lt;/span&gt;
+&lt;span class="nv"&gt;config_wlan0&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;192.168.0.1/24&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;网卡配置好之后，要加入默认启动。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; /etc/init.d
+ln -s net.lo net.wlan0
+/etc/init.d/net.wlan0 start
+rc-update add net.wlan0 default
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;hostapd配置&lt;/h4&gt;
+&lt;p&gt;修改&lt;code&gt;hostapd&lt;/code&gt;配置文件&lt;code&gt;/etc/hostapd/hostapd.conf&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;interface&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;wlan0
+&lt;span class="c"&gt;#bridge=br0                         (optional, if you want bridging remove the #)&lt;/span&gt;
+&lt;span class="nv"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;nl80211
+&lt;span class="nv"&gt;ssid&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;MyNetwork     &lt;span class="c"&gt;#热点名称&lt;/span&gt;
+&lt;span class="nv"&gt;channel&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1
+&lt;span class="nv"&gt;hw_mode&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;g
+&lt;span class="nv"&gt;wpa&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;3
+&lt;span class="nv"&gt;wpa_passphrase&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;Your passphrase  &lt;span class="c"&gt;#热点密码&lt;/span&gt;
+&lt;span class="nv"&gt;wpa_key_mgmt&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;WPA-PSK
+&lt;span class="nv"&gt;wpa_pairwise&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;TKIP
+&lt;span class="nv"&gt;rsn_pairwise&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;CCMP
+&lt;span class="nv"&gt;macaddr_acl&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0
+&lt;span class="nv"&gt;auth_algs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1
+&lt;span class="nv"&gt;ignore_broadcast_ssid&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0
+&lt;span class="nv"&gt;logger_syslog&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;-1
+&lt;span class="nv"&gt;logger_syslog_level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;2
+&lt;span class="nv"&gt;logger_stdout&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;-1
+&lt;span class="nv"&gt;logger_stdout_level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1
+&lt;span class="nv"&gt;debug&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0
+&lt;span class="nv"&gt;dump_file&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/tmp/hostapd.dump
+&lt;span class="nv"&gt;ctrl_interface&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/run/hostapd
+&lt;span class="nv"&gt;ctrl_interface_group&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;0
+&lt;span class="nv"&gt;accept_mac_file&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/etc/hostapd/hostapd.accept
+&lt;span class="nv"&gt;deny_mac_file&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/etc/hostapd/hostapd.deny
+&lt;span class="nv"&gt;auth_algs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;1
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;把hostapd加入默认启动。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/etc/init.d/hostapd start
+rc-update add hostapd default
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;dnsmasq配置&lt;/h4&gt;
+&lt;p&gt;修改&lt;code&gt;dnsmasq&lt;/code&gt;配置文件&lt;code&gt;/etc/dnsmasq.conf&lt;/code&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;interface&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;wlan0
+&lt;span class="nb"&gt;bind&lt;/span&gt;-interfaces
+dhcp-range&lt;span class="o"&gt;=&lt;/span&gt;192.168.0.50,192.168.0.150,12h
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;dnsmasq用来分配&lt;span class="caps"&gt;IP&lt;/span&gt;，所以要启动这个服务。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/etc/init.d/dnsmasq start
+rc-update add dnsmasq default
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4&gt;iptables配置&lt;/h4&gt;
+&lt;p&gt;iptables用来设置包的转发规则，以&lt;span class="caps"&gt;NAT&lt;/span&gt;方式配置&lt;span class="caps"&gt;AP&lt;/span&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;iptables -F
+iptables -t nat -F
+iptables -A FORWARD -i wlan0 -s 192.168.0.0/255.255.0.0 -j ACCEPT
+iptables -A FORWARD -i eth0 -d 192.168.0.0/255.255.0.0 -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+&lt;span class="nb"&gt;echo &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt; &amp;gt; /proc/sys/net/ipv4/ip_forward
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;保存规则，并把iptable默认启动&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/etc/init.d/iptables save
+rc-update add iptables default
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;总结&lt;/h3&gt;
+&lt;p&gt;以上这些东西配置后之后，我们的手机应该就可以连上的点的wifi热点。&lt;/p&gt;
+&lt;h3&gt;参考&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://en.gentoo-wiki.com/wiki/Atheros_Ath5k/Ath9k_Wireless_Access_Point#Without_Ethernet_Bridging"&gt;Atheros Ath5k/Ath9k Wireless Access&amp;nbsp;Point&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://en.gentoo-wiki.com/wiki/Wireless/Access_point"&gt;Wireless/Access&amp;nbsp;point&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="hostapd"></category><category term="ap"></category><category term="Gentoo"></category></entry></feed>
