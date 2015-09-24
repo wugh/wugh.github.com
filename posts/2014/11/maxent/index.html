@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-cn" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article# profile: http://ogp.me/ns/profile#">
+    <head>
+	<meta charset="utf-8">
+
+<meta name="description" content="最大熵原理 最大熵原理指的是当我们在估计概率分布的时候，这个概率分布符合已知信息的约束并且 该分布是最均匀的。从熵的角度考虑就是要让这个分布符合约束并且熵最大。 The principle of maximum entropy states that, subject to precisely stated prior data (such as a proposition that expresses testable information), the probability distribution which best represents the current state of knowledge is the one with largest entropy. 现在考虑一个文本分类的例子，假设我们有4个类别的文本分别是：economics、 sports、politics和art。因为文本只能被分成4个类别，假设现在没有额外的信息 ...">
+<meta name="keywords" content="MaxEnt">
+<meta name="author" content="Guohua Wu">
+<meta name="robots" content="index,follow">
+
+
+<!-- OpenGraph -->
+<meta property="og:property" content="zh-cn">
+<meta property="og:title" content="最大熵">
+<meta property="og:type" content="article">
+<meta property="og:description" content="最大熵原理 最大熵原理指的是当我们在估计概率分布的时候，这个概率分布符合已知信息的约束并且 该分布是最均匀的。从熵的角度考虑就是要让这个分布符合约束并且熵最大。 The principle of maximum entropy states that, subject to precisely stated prior data (such as a proposition that expresses testable information), the probability distribution which best represents the current state of knowledge is the one with largest entropy. 现在考虑一个文本分类的例子，假设我们有4个类别的文本分别是：economics、 sports、politics和art。因为文本只能被分成4个类别，假设现在没有额外的信息 ...">
+<meta property="article:published_time" content="2014-11-14">
+<meta property="article:tag" content="MaxEnt">
+<meta property="article:section" content="Machine Learning">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>最大熵</title>
+	<script type="text/javascript" src="/theme/js/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="/theme/js/bootstrap.js"></script>
+
+	<!-- Bootstrap CSS  -->
+	<link rel="stylesheet" href="/theme/css/bootstrap.css"/>
+	<link rel="stylesheet" href="/theme/css/responsive.css"/>
+	
+	<!-- Generated favicons markup -->
+	<link rel="apple-touch-icon" sizes="57x57" href="/assets/images/favicons/apple-touch-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicons/apple-touch-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicons/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicons/apple-touch-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicons/apple-touch-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicons/apple-touch-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicons/apple-touch-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicons/apple-touch-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicons/apple-touch-icon-180x180.png">
+	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="/assets/images/favicons/android-chrome-192x192.png" sizes="192x192">
+	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-16x16.png" sizes="16x16">
+	<link rel="manifest" href="/assets/images/favicons/manifest.json">
+	<link rel="shortcut icon" href="/assets/images/favicons/favicon.ico">
+	<meta name="msapplication-TileColor" content="#2b5797">
+	<meta name="msapplication-TileImage" content="/assets/images/favicons/mstile-144x144.png">
+	<meta name="msapplication-config" content="/assets/images/favicons/browserconfig.xml">
+	<meta name="theme-color" content="#ffffff">
+	<!-- LESS generated css for Nuja theme -->
+	<link rel="stylesheet" href="/theme/css/NujaStructure.css"/>
+	<!-- Highlight -->
+	<link rel="stylesheet" href="/theme/css/pygment.css"/>
+
+	<link href="http://fonts.useso.com/css?family=Droid+Serif" rel="stylesheet" type="text/css">
+	<link href='http://fonts.useso.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.useso.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.useso.com/css?family=Noto+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.useso.com/css?family=Vollkorn' rel='stylesheet' type='text/css'>
+	<!--[if IE]>
+	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+
+
+
+	<!-- setup feeds and third-party services -->
+	<!-- to clean up later for the new theme -->
+	<script>
+	    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-968141-17', 'auto');
+ga('send', 'pageview');
+
+	</script>
+	<meta name="google-site-verification" content="4TETrzpAoVPu2-VrTpOxQJFmmynS9VzPq_boE45VKa8" />
+	<meta name="msvalidate.01" content="E2790C576E7623BE2F59AC965B48361D" />
+    </head>
+    <body>
+
+	<div class="container">
+	    <div class="header-container">
+		<header>
+		    <a href="/">
+			<h4>Life in a Nutshell 		    </a>
+
+		    <nav>
+			<ul>
+			    <li><a href="/">Home</a></li>
+			    <li><a href="/pages/about-me.html">About&nbsp;Me</a></li>
+
+			    <li><a href="/archives.html">Archives</a></li>
+
+			</ul>
+		    </nav>
+		</header>
+
+
+	    </div>
+	    <div class="clearfix"></div>
+	    <div class="row">
+		<div class="span9">
+
+		    <div class="span10">
+
+
+<div class="row">
+    <div class="span9 alpha">
+	<div class="entry-container ">
+
+	    <article  class="entry hentry" >
+		<header>
+		    <a href="/posts/2014/11/maxent/" rel="bookmark" title="permalink for 最大熵" ><h2 class="entry-title">最大熵</h2></a>
+		    <div class="author-details vcard">
+
+			by <a  class="url fn" href="/author/guohua-wu.html">Guohua Wu</a>  file under <a href="/category/machine-learning.html">Machine Learning</a> with tags 			<a href="/tag/maxent.html" title="Browse tag: MaxEnt" rel="tag">MaxEnt</a>		    </div>
+		</header>
+		<div class="entry-content">
+		<hr />
+<h3>最大熵原理</h3>
+<p>最大熵原理指的是当我们在估计概率分布的时候，这个概率分布符合已知信息的约束并且&nbsp;该分布是最均匀的。从熵的角度考虑就是要让这个分布符合约束并且熵最大。</p>
+<blockquote>
+<p>The principle of maximum entropy states that, subject to precisely stated
+prior data (such as a proposition that expresses testable information), the
+probability distribution which best represents the current state of knowledge
+is the one with largest&nbsp;entropy.</p>
+</blockquote>
+<p>现在考虑一个文本分类的例子，假设我们有4个类别的文本分别是：economics、
+sports、politics和art。因为文本只能被分成4个类别，假设现在没有额外的信息，&nbsp;那么约束只有以下的1个
+</p>
+<div class="math">$$p(economics)+p(sports)+p(politics)+p(art)=1$$</div>
+<p>
+那么我们希望得到得概率分布尽量均匀，就会得到下面结果
+</p>
+<div class="math">$$p(economics)=p(sports)=p(politics)=p(art)=0.25$$</div>
+<p>
+现在假设我们有一个先验信息是60%的文档是economics或者sports类别的，那么我们的&nbsp;概率分布就会有以下两个约束
+</p>
+<div class="math">$$p(economics)+p(sports)=0.6$$</div>
+<div class="math">$$p(economics)+p(sports)+p(politics)+p(art)=1$$</div>
+<p>
+考虑以上两个约束又希望使得我们的分布均匀，将会得到下面的结果
+</p>
+<div class="math">$$
+\begin{align}
+\notag
+p(economics)&amp;=0.30\cr
+\notag
+p(sports)&amp;=0.30\cr
+\notag
+p(politics)&amp;=0.20\cr
+\notag
+p(art)&amp;=0.20 
+\end{align}
+$$</div>
+<p>
+但是随着对数据的观察，可能又会对引入其他约束。这时候需要解决两个问题，首先是如
+何来定量描述分布的均匀；其次是如何在考虑约束的条件下使得分布均匀。最大熵的基本
+思路就是选择一个与给定事实一致的模型（满足约束），并且要使得模型对未知事实不做&nbsp;假设（使得分布尽量均匀）。</p>
+<h3>最大熵建模</h3>
+<p>我们继续考虑上面提到的文本分类的例子，假设用最简单的<a href="http://en.wikipedia.org/wiki/Bag-of-words_model" title="Bag-of-words model">词袋模型</a>来表示文档，&nbsp;每个文档都可以表示成一个词频向量，例如下面的简单的例子</p>
+<div class="highlight"><pre><span class="n">Doc1</span><span class="o">:</span> <span class="n">John</span> <span class="n">likes</span> <span class="n">to</span> <span class="n">watch</span> <span class="n">movies</span><span class="o">.</span> <span class="n">Mary</span> <span class="n">likes</span> <span class="n">movies</span> <span class="n">too</span><span class="o">.</span>
+<span class="n">Doc2</span><span class="o">:</span> <span class="n">John</span> <span class="n">also</span> <span class="n">likes</span> <span class="n">to</span> <span class="n">watch</span> <span class="n">football</span> <span class="n">games</span><span class="o">.</span>
+</pre></div>
+
+
+<p>得到词表如下:</p>
+<div class="highlight"><pre>{
+    &quot;John&quot;: 1,
+    &quot;likes&quot;: 2,
+    &quot;to&quot;: 3,
+    &quot;watch&quot;: 4,
+    &quot;movies&quot;: 5,
+    &quot;also&quot;: 6,
+    &quot;football&quot;: 7,
+    &quot;games&quot;: 8,
+    &quot;Mary&quot;: 9,
+    &quot;too&quot;: 10
+}
+</pre></div>
+
+
+<p>所以可以把Doc1和Doc2表示成两个10维的向量，如下:</p>
+<div class="highlight"><pre>Doc1: [1, 2, 1, 1, 2, 0, 0, 0, 1, 1]
+Doc2: [1, 1, 1, 1, 0, 1, 1, 1, 0, 0]
+</pre></div>
+
+
+<p>我们把当个文档用<span class="math">\(x\)</span>表示，文档类别用<span class="math">\(y\)</span>表示，根据上面的描述<span class="math">\(y\)</span>会有4个类别，跟
+<a href="http://en.wikipedia.org/wiki/Logistic_regression" title="Logistic regression">Logistic Regression</a>类似，我们要建模一个判别模型<span class="math">\(p(y|x)\)</span>，即给定
+一个文档<span class="math">\(x\)</span>，我们的模型可以得出这篇文档属于特定类别<span class="math">\(y\)</span>的概率。如果用<span class="math">\(\mathcal{P}\)</span>
+表示所有的条件概率分布，那么<span class="math">\(p(y|x)\)</span>就是<span class="math">\(\mathcal{P}\)</span>中的一个元素。</p>
+<h4>训练数据</h4>
+<p>我们可以把的<span class="math">\(N\)</span>个训练数据表示成<span class="math">\(\\{(x_1,y_1),\cdots,(x_N,y_N)\\}\)</span>，且</p>
+<ul>
+<li><span class="math">\(x_i\in X\)</span>，其中<span class="math">\(X\)</span>表示所有的文档类别</li>
+<li><span class="math">\(y_i\in Y\)</span>，其中<span class="math">\(Y\)</span>表示训练文档集合，每个文档用词频向量表示</li>
+</ul>
+<p>从训练数据样本中我们可以估计出一个经验的联合概率分布
+</p>
+<div class="math">$$\tilde{p}(x,y)=\frac{1}{N}\times \text{the number of times (x,y) appears}$$</div>
+<h4>特征和约束</h4>
+<p>最大熵建模的过程中特征函数（简称特征）主要是为了描述训练样本的统计量，例如&nbsp;建模的时候我们可能会考虑当ball这个词出现的时候，文档属于sports的概率是9/10。</p>
+<p>为了描述ball出现时文档属于sports类别的事实我们引入特征函数（指示函数或者特征）
+</p>
+<div class="math">$$
+f_{ball,sports} (x,y)=\begin{cases}
+1 &amp; \text{if y=sports and ball appears in d} \cr
+0 &amp; \text{otherwise}
+\end{cases}
+$$</div>
+<p>
+考虑经验分布<span class="math">\(\tilde{p}(x,y)\)</span>下<span class="math">\(f\)</span>的期望值，这个期望值就是我们关注的统计量（如
+果对上面那个特征函数按照经验分布求期望，得到的东西就是当ball这个词出现的时候文&nbsp;档属于sports的概率），记为
+</p>
+<div class="math">$$
+\begin{equation}
+\tilde{p}(f)\equiv \sum_{x,y}{\tilde{p}(x,y)f(x,y)}
+\end{equation}
+\label{eq:empricalException}
+$$</div>
+<p>
+其实样本的任何统计量都可以通过特征函数的期望值来表示。</p>
+<p>如果我们发现了一些有用的统计量，我们就可以要求我们的模型也要遵循这个信息。我们
+通过约束模型在特征函数<span class="math">\(f\)</span>上的期望值来遵循这个统计量，对于模型<span class="math">\(p(y|x)\)</span>特征函数
+<span class="math">\(f\)</span>的期望值为
+</p>
+<div class="math">$$
+\begin{equation}
+p(f)\equiv \sum_{x,y}{\tilde{p}(x)p(y|x)f(x,y)}
+\label{eq:modelException}
+\end{equation}
+$$</div>
+<p>
+其中<span class="math">\(\tilde{p}(x)\)</span>是训练样本中<span class="math">\(x\)</span>的经验分布。我们通过约束模型下特征函数的期望&nbsp;值等于样本中特征函数的期望值，如下所示
+</p>
+<div class="math">$$
+\begin{equation}
+p(f) = \tilde{p}(f)
+\label{eq:constriant}
+\end{equation}
+$$</div>
+<p>把前面的<span class="math">\(\ref{eq:empricalException}\)</span>，<span class="math">\(\ref{eq:modelException}\)</span>和
+<span class="math">\(\ref{eq:constriant}\)</span>综合起来得意得到下面的约束</p>
+<div class="math">$$
+\sum_{x,y}{\tilde{p}(x)p(y|x)f(x,y)} = \sum_{x,y}{\tilde{p}(x,y)f(x,y)}
+$$</div>
+<p>这样我们只需要考虑那些满足<span class="math">\(\ref{eq:constriant}\)</span>的模型<span class="math">\(p(y|x)\)</span>。总的来说
+我们用<span class="math">\(\tilde{p}(f)\)</span>表示样本数据中的统计特征，同时也要求我们的模型要表示出
+这种特征（<span class="math">\(p(f)=\tilde{p}(f)\)</span>）。</p>
+<p>假设我们现在有<span class="math">\(n\)</span>个我们认为很重要的特征函数<span class="math">\(f_i\)</span>，我们希望我们的模型遵循这些
+特征在训练数据中所表现出的统计信息，那么<span class="math">\(p\)</span>就应该是<span class="math">\(\mathcal{P}\)</span>的一个子集
+<span class="math">\(\mathcal{C}\)</span>，定义如下
+</p>
+<div class="math">$$
+\begin{equation}
+\mathcal{C} = \big\{p \in P \text{ | } p(f_i)=\tilde{p}(f_i) \text{ for i } \in \{1,2,\cdots,n\}\big\}
+\label{eq:distsubset}
+\end{equation}
+$$</div>
+<p>
+下图解释为概率分布添加约束的过程，图中<span class="math">\(\mathcal{P}\)</span>表示一个在3个变量上的概率分
+布，如果我们没有设置任何约束那么所有的概率分布都是可以的如图(a)所示；如果我们
+添加一个线性约束<span class="math">\(\mathcal{C}_1\)</span>那么我们的概率分布只能落在图(b)中<span class="math">\(mathcal{C}_1\)</span>
+这个线上面；此时如果再添加一个约束我们就能确定概率分布<span class="math">\(p\)</span>，如果第二个线性约束
+<span class="math">\(\mathcal{C}_2\)</span>和<span class="math">\(\mathcal{C}_1\)</span>不冲突（有交点），那么这个交点就是我们要求的概
+率分布<span class="math">\(p\)</span>，如图(c)所示；如果两个约束冲突，例如第一个约束要求第1点的概率是<span class="math">\(1/3\)</span>
+而第二个约束是要求第3点的概率是<span class="math">\(3/4\)</span>，那么会得到图(d)的结果。由于我们的约束都
+是从训练样本中抽取的，所以约束之间不可能冲突，而且我们的约束无法像图(c)一样唯
+一确定<span class="math">\(p\)</span>，换句话说<span class="math">\(\mathcal{C}=\mathcal{C}_1\cap\mathcal{C}_2\cdots\cap\mathcal{C}_n\)</span>
+所确定的模型有无数个。
+<img alt="simplex" src="https://lh4.googleusercontent.com/LPIaifIMioNyOki7VgsM9zLlbDukQDnoCJb-GrXHy6w=w757-h712-no" title="simplex" /></p>
+<p>在所有的模型<span class="math">\(p\in\mathcal{C}\)</span>中我们需要根据最大熵原理选择一个最均匀的，我们用
+<a href="http://en.wikipedia.org/wiki/Conditional_entropy" title="条件熵">条件熵</a>量化度量条件分布<span class="math">\(p(y|x)\)</span>的均匀程度
+</p>
+<div class="math">$$
+\begin{equation}
+H(p)\equiv -\sum_{x,y}{\tilde{p}(x)p(y|x)\log{p(y|x)}}
+\label{eq:conditionalentropy}
+\end{equation}
+$$</div>
+<p>
+条件熵的取值其下界是0（没有不确定性），上界是<span class="math">\(\log{|Y|}\)</span>（在所有<span class="math">\(y\)</span>的取值上均
+匀分布）。我们的目的就是要从<span class="math">\(\mathcal{C}\)</span>里面找到一个模型<span class="math">\(p^*\in\mathcal{C}\)</span>使
+得<span class="math">\(H(p)\)</span>最大，即
+</p>
+<div class="math">$$
+\begin{equation}
+p^*= \mathop{\arg\,\max}\limits_{p\in\mathcal{C}}H(p)
+\end{equation}
+$$</div>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script> </div>
+	    </article>
+
+	    <!--
+	    in case any image breaks the theme
+	    i was going to use :after but it didn't quite work for me, maybe next time-->
+	    <div class="clearfix"></div>
+
+
+
+	</div>
+    </div>
+</div>
+
+
+	    
+<div class="row">
+    <div class="alpha span9">
+			<!-- 多说评论框 start -->
+			<!--data-thread-key="的ID"-->
+			<div class="ds-thread" data-title="最大熵" data-url="posts/2014/11/maxent/"></div>
+			<!-- 多说评论框 end -->
+			<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+			<script type="text/javascript">
+			var duoshuoQuery = {short_name:"wughblog"};
+				(function() {
+					var ds = document.createElement('script');
+					ds.type = 'text/javascript';ds.async = true;
+					ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+					ds.charset = 'UTF-8';
+					(document.getElementsByTagName('head')[0] 
+					 || document.getElementsByTagName('body')[0]).appendChild(ds);
+				})();
+				</script>
+			<!-- 多说公共JS代码 end -->
+</div></div>
+		    </div>
+		</div>
+<!-- Sidebar -->
+<aside class="span3  hidden-phone hidden-tablet">
+
+    <div class="widget-external-links widget">
+	<h3 class="widget-header">External Links</h3>
+	<div class="widget-content">
+	    <ul class="widget-list">
+		<li class="widget-list-item"><a href="http://getpelican.com/">Pelican</a></li>		<li class="widget-list-item"><a href="http://python.org/">Python.org</a></li>		<li class="widget-list-item"><a href="http://jinja.pocoo.org/">Jinja2</a></li>		<li class="widget-list-item"><a href="#">You can modify those links in your config file</a></li> 	    </ul>
+	</div>
+    </div>
+    <div class="widget-external-links widget">
+        <h3 class="widget-header">Recent Articles</h3>
+	<div class="widget-content">
+	    <ul class="widget-list">
+		<li class="widget-list-item"><a href="/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/" title="Read: Linux通过Pulse混合麦克风和音频输出">Linux通过Pulse混合麦克风和音频输出</a></li>
+		<li class="widget-list-item"><a href="/posts/2014/11/maxent/" title="Read: 最大熵">最大熵</a></li>
+		<li class="widget-list-item"><a href="/posts/2014/04/an-introduction-to-mdp/" title="Read: MDP入门"><span class="caps">MDP</span>入门</a></li>
+		<li class="widget-list-item"><a href="/posts/2013/11/text-classification/" title="Read: 文本分类">文本分类</a></li>
+		<li class="widget-list-item"><a href="/posts/2013/11/hexo-math-equation/" title="Read: hexo数学公式">hexo数学公式</a></li>
+		<li class="widget-list-item"><a href="/posts/2013/11/bcm57780-network-problem/" title="Read: BCM57780没有网络连接"><span class="caps">BCM57780</span>没有网络连接</a></li>
+		<li class="widget-list-item"><a href="/posts/2013/11/gentoo-portage-tips/" title="Read: Gentoo Portage使用技巧">Gentoo&nbsp;Portage使用技巧</a></li>
+		<li class="widget-list-item"><a href="/posts/2013/11/linux-fontconfig/" title="Read: Linux字体配置">Linux字体配置</a></li>
+		<li class="widget-list-item"><a href="/posts/2013/11/linux-mp3-tag-problem/" title="Read: 解决Linux下mp3标签乱码">解决Linux下mp3标签乱码</a></li>
+		<li class="widget-list-item"><a href="/posts/2013/11/linux-audio-format-convert/" title="Read: Linux 音频格式转换">Linux&nbsp;音频格式转换</a></li>
+	    </ul>
+	</div>
+    </div>
+    <div class="widget-archive-category widget">
+	<h3 class="widget-header">Category</h3>
+	<div class="widget-content">
+	    <ul class="widget-list">
+		<li class="widget-list-item"><a href="/category/linux.html">Linux.<span>7</span></a></li>
+
+		<li class="widget-list-item"><a href="/category/machine-learning.html">Machine Learning.<span>2</span></a></li>
+
+		<li class="widget-list-item"><a href="/category/nlp.html">NLP.<span>1</span></a></li>
+
+		<li class="widget-list-item"><a href="/category/web.html">Web.<span>1</span></a></li>
+
+	    </ul>
+	</div>
+    </div>
+    <div class="widget">
+	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+	<!-- dgzen he -->
+	<ins class="adsbygoogle"
+	    style="display:inline-block;width:300px;height:600px"
+	    data-ad-client="ca-pub-4442880234515975"
+	    data-ad-slot="1240455063"></ins>
+	<script>
+	    (adsbygoogle = window.adsbygoogle || []).push({});
+	</script>
+    </script>
+</div>
+		</aside>
+	    </div>
+	    <!--footer-->
+	    <div class="row">
+		<div class="span12">
+		    <footer>
+			<p>Powered by <a href="http://getpelican.org">Pelican</a>.</p>
+			<p><a href="">Nuja theme</a> designed by <a rel="bookmark" href="http://dgzen.pw">DGZen</a>.</p>
+		    </footer>
+		</div>
+	    </div>
+	</div>
+
+
+    </body>
+</html>
