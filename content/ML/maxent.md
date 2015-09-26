@@ -172,9 +172,139 @@ p^*= \mathop{\arg\,\max}\limits_{p\in\mathcal{C}}H(p)
 \end{equation}
 $$
 
+### 指数形式
 
+经过上节的分析其实可以知道最大熵模型的目的就是要找到一个模型
+$p^*\in\mathcal{C}$使得$H(p)$最大。这其实就是一个有约束条件下的最优化问题，可
+以用[拉格朗日乘数法][lagrange]来解，原始优化问题形式如下：
+$$
+\begin{align*}
+& max_p && H(p) \\
+& s.t. && p(y|x) \leq 0\text{ for all }x,y.\\
+&&& \sum_yp(y|x)=1\text{ for all }x. \\
+&&& \sum_{x,y}\tilde{p}(x)p(y|x)f(x,y)=\sum_{x,y}\tilde{p}(x,y)f(x,y)\text{ for }
+i\in\left\{1,2,...,n\right\}. 
+\end{align*}
+$$
+前两个约束保证模型是一个条件概率分布，第三个约束值得是模型需要满足的统计量。该
+问题等价于在相同约束下最小化$-H(p)$：
+$$\begin{equation}\begin{split}
+& min_p && -H(p) \\
+& s.t. && p(y|x) \leq 0\text{ for all }x,y.\\
+&&& \sum_yp(y|x)=1\text{ for all }x.\\
+&&& \sum_{x,y}\tilde{p}(x)p(y|x)f(x,y)=\sum_{x,y}\tilde{p}(x,y)f(x,y)\text{ for }
+i\in\left\{1,2,...,n\right\}.
+\end{split}
+\label{eq:primal}
+\end{equation}$$
+用拉格朗日乘数法将有约束问题转换成无约束问题，拉格朗日方程如下：
+$$\begin{equation}\begin{split}
+\mathcal{L}(p,\Lambda,\gamma)=&\sum_{x,y}\tilde{p}(x)p(y|x)\log p(y|x)\\
+&+\sum_i^n\lambda_i\left(sum_{x,y}\tilde{p}(x,y)f_i(x,y)-\sum_{x,y}\tilde{p}(x)p(y|x)f_i(x,y)\right)\\
+&+\gamma(\sum_yp(y|x) - 1)
+\end{split}
+\label{eq:lagrangian}
+\end{equation}$$
+对于$\ref{eq:lagrangian}$这个拉格朗日方程原问题如下：
+$$\begin{equation}
+\min_w\max_{\Lambda,\gamma}\mathcal{L}(p,\Lambda,\gamma)
+\end{equation}$$
+对偶问题为：
+$$\begin{equation}
+\max_{\Lambda,\gamma}\min_w\mathcal{L}(p,\Lambda,\gamma)
+\label{eq:dual}
+\end{equation}$$
+由于$p$是一个凸函数，并且两个约束都和$p$呈线性关系，所以原始问题的解和对偶问题
+的解是等价的，下面求如何最大化对偶问题$\ref{eq:dual}。首先固定$Lambda$和
+$\gamma$求$\mathcal{L}(p,\Lambda,\gamma)$的最小值，将$\ref{eq:lagrangian}$对
+$p$求导，另求导结果等于0，得到：
+$$
+\frac{\partial \mathcal{L}(p,\Lambda,\gamma)}{\partial
+p(y|x)}=\tilde{p}(x)\left(1+\log
+p(y|x)\right)-\sum_i\lambda_i\tilde{p}(x)f_i(x,y) + \gamma=0
+$$
+可以求得最优的$p(y|x)$具有如下形式：
+$$\begin{equation}\begin{split}
+&\log p^*(y|x)=\sum_i\lambda_if_i(x,y)-\frac{\gamma}{\tilde{p}(x)}-1\\
+\Rightarrow&p*(y|x)=\exp\left(\sum_i\lambda_if_i(x,y)\right)\exp\left(-\frac{\gamma)}{\tilde{p}(x)}-1\right)
+\end{split}
+\label{eq:optimalp}
+\end{equation}$$
+这样我们就找到了$p^*$的最优化形式，现在的目标就是要去求解$\gamma^*$和
+$\Lambda^*$。注意到$\ref{eq:optimalp}$的第二项实际上对应的就是原始束问题
+$\ref{eq:primal}$的第二个约束，可以把$\ref{eq:optimalp}$写成如下形式：
+$$\begin{equation}\begin{split}
+p*(y|x)&=\frac{p^*(y|x)}{\sum_yp^*(y|x)}\\
+&=\frac{\exp\left(\sum_i\lambda_if_i(x,y)\right)\exp\left(-\frac{\gamma)}{\tilde{p}(x)}-1\right)}{\sum_y{\exp\left(\sum_i\lambda_if_i(x,y)\right)\exp\left(-\frac{\gamma)}{\tilde{p}(x)}-1\right)}}\\
+&=\frac{\exp\left(\sum_i\lambda_if_i(x,y)\right)}{Z(x)}
+\end{split}
+\label{eq:optimalpnew}
+\end{equation}$$
+其中
+$$\begin{equation}
+Z(x)=\sum_y\exp\left(\sum_i\lambda_if_i(x,y)\right)
+\end{equation}$$
+$\ref{eq:optimalpnew}$就是最终$p^*$的参数形式，并且满足$\ref{eq:primal}$的第二
+个约束，此时相当于我们已经找到了最优的$p^*$和$\gamma^*$，$p^*$带入
+拉格朗日方程$\ref{eq:lagrangian}$中，得到对偶函数：
+$$ \begin{align}
+\Psi(\Lambda)&=\mathcal{L}(p^*,\Lambda,\gamma^*)\nonumber\\
+&=\sum_{x,y}\tilde{p}(x)p^*(y|x)\log p^*(y|x)+\sum_i^n\lambda_i\left(\sum_{x,y}\tilde{p}(x,y)f_i(x,y)-\sum_{x,y}\tilde{p}(x)p^*(y|x)f_i(x,y)\right)\nonumber\\
+&=\sum_{x,y}\tilde{p}(x,y)\sum_i\lambda_i f_i(x,y)+\sum_{x,y}\tilde{p}(x)p^*(y|x)\left(\log p^*(y|x)-\sum_i\lambda_i f_i(x,y)\right)\nonumber\\
+&=\sum_{x,y}\tilde{p}(x,y)\sum_i\lambda_i f_i(x,y)-\sum_{x,y}\tilde{p}(x)p^*(y|x)\log Z(x)\nonumber\\
+&=\sum_{x,y}\tilde{p}(x,y)\sum_i\lambda_i f_i(x,y)-\sum_{x}\tilde{p}(x)\log Z(x)
+\label{eq:optimallambda}
+\end{align} $$
+所以现在的对偶问题$\ref{eq:dual}$相当于是要优化如下目标：
+$$ \begin{align}
+\max_{\Lambda}\Psi(\Lambda)=\max_{\Lambda}\left[\sum_{x,y}\tilde{p}(x,y)\sum_i\lambda_i f_i(x,y)-\sum_{x}\tilde{p}(x)\log Z(x)\right]
+\end{align} $$
+最优的$\Lambda^*$需要满足：
+$$ \begin{align}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\Lambda^*=\argmax_{\Lambda}\Psi(\Lambda)=\argmax_{\Lambda}\left[\sum_{x,y}\tilde{p}(x,y)\sum_i\lambda_i f_i(x,y)-\sum_{x}\tilde{p}(x)\log Z(x)\right]
+\end{align} $$
+
+### 最大似然
+
+已知训练数据的经验分布$\tilde{p}(x,y)$，模型$p(y|x)$的对数似然函数表示为：
+$$\begin{align}
+L_{\tilde{p}}(p) &\equiv \log\Pi_{x,y}p(y|x)^{\tilde{p}(x,y)}=\sum_{x,y}\tilde{p}(x,y)\log p(y|x) \nonumber \\
+&=\sum_{x,y}\tilde{p}(x,y)\sum_i\lambda_i f_i(x,y)-\sum_{x,y}\tilde{p}(x,y)\log Z(x) \nonumber \\G
+&=\sum_{x,y}\tilde{p}(x,y)\sum_i\lambda_i f_i(x,y)-\sum_{x,y}\tilde{p}(x)\log Z(x)
+\label{eq:likehood}
+\end{align}$$
+可以看出对偶函数$\Psi(\Lambda)$形式$\ref{eq:optimallambda}$和模型$p$的对数似然
+结果是等价的。所以整个对偶问题的求解找到的熵最大的模型$p*$其实也最大化了模型在
+训练样本上的似然。
+
+### 参数求解
+
+对于一般的问题一般无法用数学分析的方法求解出最大化$\Psi(\Lambda)$的$\Lambda^*$
+，一般需要用数值方法来求解。因为$\Psi(\Lambda)$是一个光滑的凸函数，所以有很多
+方法都可以用来求$\Lambda^*$，例如梯度下降、共轭梯度、坐标上升等方法。这里介绍
+的是专门针对最大熵问题设计的`改进的尺度迭代算法（improved iterative scaling,
+IIS）`，该算法要求所有的特征函数$f_i(x,y)$必须非负。
+![IIS算法](https://lh3.googleusercontent.com/OWxCsVbsf99Qt6WgpEI9oHpfujnToSwD_AtlZ6yBIMmGs3XndhQWhfAHDLvb6_yO4dSBA6C4VHBiQ5tjuzM5TfYcm1ttQshMrmV1tbqFqIHorvPoyHGOjd0cfQM0hSFahs7MjdhCVd1LKCQyFDq5NYq0JSVs4mVP8vkCVY6MJYNcQDXq_XIGfvA7ips35WOJuGGGekhAcmAlXf0uYoV1_9oJORP8q2KPMEp8tVcFXse09Djl_HZJ_RVpC44SXC7JNlzNZk4blKE8dO2BdIIAZHqIrGjAWyVUeZi7Z5siS-C0W23cbJE0ze890NJLslSIr--Femdy-kUfK_x0ZbniiQkl6PL9mdNNV1Nas0gprgRNQZ6JKQMBvgatNb50F08Zptt425k23D3basTMKADcNpN7U-7xO6oT4hncSwwgYUwETgJlIkKuBMVqX0GV1q4MFLDOsJGjqH5rKKU01UxQbUBGRCDOOZuavMrS8j2k7gPVyrDl5PIc3fospwJmrsg7rPhqQ91lWvDYn_sbDUsHne-iWNvKff9iKgTcXtUmI_o=w867-h438-no)
+算法的关键在于求解第3步的$\Delta\lambda_i$，如果这时候$f^\#(x,y)$（表示某个样
+本$x,y$激活的特征函数个数）对于所有的$x,y$都一样，即$f^\#(x,y)$是一个常数$M$，
+那么$\Delta\lambda_i$可以按下面式子求解
+$$
+\Delta\lambda_i = \frac{1}{M}\log\frac{\tilde{p}(f_i)}{p_\Lambda(f_i)}
+$$
+如果$f^\#(x,y)$不是一个常数，那么$\Delta\lambda_i$需要通过数值方法计算。一个简
+单快速的方法是通过[牛顿法][newtons]来求解，相当于这时候的目标函数
+$g(\Delta\lambda_i)$就是算法第3步那个方程把右边那一项移到左边的函数，现在的目
+标就是要求$g(\Delta\lambda_i)=0$的$\Delta\lambda_i$，可以按下面的更新公式求
+$$\begin{equation}
+\Delta\lambda_i^{n+1}=\Delta\lambda_i^n-\frac{g(\Delta\lambda_i^n)}{g'(\Delta\lambda_i^n)}
+\end{equation}$$
+通过选取适当的初始$\Delta\lambda_i^0$，由于$g(\Delta\lambda_i)=0$有单根，牛顿
+法可以快速收敛。
 
 [bow]: http://en.wikipedia.org/wiki/Bag-of-words_model "Bag-of-words model"
 [logistic]: http://en.wikipedia.org/wiki/Logistic_regression "Logistic regression"
 [conditional]: http://en.wikipedia.org/wiki/Conditional_entropy "条件熵"
+[lagrange]: https://en.wikipedia.org/wiki/Lagrange_multiplier "拉格朗日数乘"
+[newtons]: https://en.wikipedia.org/wiki/Newton%27s_method "牛顿法"
 
