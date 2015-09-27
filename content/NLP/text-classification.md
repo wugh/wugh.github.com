@@ -110,7 +110,7 @@ END::
 比例，发现少部分词占有了大部分的词频。更多有意思的词频规律参考
 [Zipf's law](https://zh.wikipedia.org/wiki/%E9%BD%8A%E5%A4%AB%E5%AE%9A%E5%BE%8B)。
 
-![zipflaw](https://lh6.googleusercontent.com/-HfKjKnkAcu8/UpVqb8RwgWI/AAAAAAAABIk/k2cOKixBkOA/w1415-h1028-no/image.png)
+![zipflaw]({filename}/images/NLP/zipfs-law.png)
 
 本文最终取前3万个词频最高的词作为词汇表，这3万个词，总的出现次数已经占到总次数
 的90%。当然从词汇表里面去除一些词还有更高级的做法，例如：计算每个词对整个语料库
@@ -233,7 +233,7 @@ $$
 测试的主要流程如下图，首先也要讲过训练过程的预处理和特征提取，再将特征向量转换
 成[LIBSVM][libsvm]需要的格式，最后用编译好的`svm-predict`可执行文件进行分类，最
 后取得的准确率为`0.8592%`。
-![chartflow](https://lh6.googleusercontent.com/-mr3DkEOvdPo/UpWXaMkzhFI/AAAAAAAABIw/8q2RCP99MjU/w839-h646-no/test.png)
+![chartflow]({filename}/images/NLP/text-classify-flow.png)
 
 [fudannlp]: http://code.google.com/p/fudannlp/ "FudanNLP"
 [libsvm]: http://www.csie.ntu.edu.tw/~cjlin/libsvm/ "LIBSVM"

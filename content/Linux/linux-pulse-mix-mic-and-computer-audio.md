@@ -34,13 +34,13 @@ Pulse。
 
 我们添加了两个loopback，这时候就可以在pavucontrol的Playback标签页下面看到
 两个新的Loopback，需要把`Show`这个过滤器选择为`All Streams`，结果如下图所示：
-![Playback](https://lh6.googleusercontent.com/-aDr4tBprMqM/VK6GWnCs-VI/AAAAAAAAAQc/jsJ4DAqzRKM/w893-h572-no/Playback.png "Playback")
+![Playback]({filename}/images/Linux/playback.png "Playback")
 这两个Loopback一个是麦克风（Loopback from Bulit-in Audio Analog Stero）另一个
 是电脑的音频输出（Loopback of Monitor of Bult-in Audio Analog Stero），需要把
 这两个的输出设定成`Null Output`。
 
 接着需要设定一下我们录音的时候使用哪个声音源，设置如下图
-![Record](https://lh4.googleusercontent.com/-JXDur6hvBYA/VK6GWzMAxDI/AAAAAAAAAQg/J4BoCtqtUVk/w890-h578-no/record.png "Record")
+![Record]({filename}/images/Linux/record.png "Record")
 可以看到`ALSA Capture from`被我们设置成`Monitor of Null Output`，相当于把Null
 这个设备的输出当作声音源进行捕获，而Null这个设备输出是麦克风和电脑声音的混合，
 所以可以正常工作。

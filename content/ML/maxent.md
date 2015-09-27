@@ -153,7 +153,7 @@ $\mathcal{C}_2$和$\mathcal{C}_1$不冲突（有交点），那么这个交点�
 是从训练样本中抽取的，所以约束之间不可能冲突，而且我们的约束无法像图(c)一样唯
 一确定$p$，换句话说$\mathcal{C}=\mathcal{C}_1\cap\mathcal{C}_2\cdots\cap\mathcal{C}_n$
 所确定的模型有无数个。
-![simplex](https://lh4.googleusercontent.com/LPIaifIMioNyOki7VgsM9zLlbDukQDnoCJb-GrXHy6w=w757-h712-no "simplex")
+![simplex]({filename}/images/ML/simplex.png "simplex")
 
 在所有的模型$p\in\mathcal{C}$中我们需要根据最大熵原理选择一个最均匀的，我们用
 [条件熵][conditional]量化度量条件分布$p(y|x)$的均匀程度
@@ -285,7 +285,7 @@ L_{\tilde{p}}(p) &\equiv \log\Pi_{x,y}p(y|x)^{\tilde{p}(x,y)}=\sum_{x,y}\tilde{p
 方法都可以用来求$\Lambda^*$，例如梯度下降、共轭梯度、坐标上升等方法。这里介绍
 的是专门针对最大熵问题设计的`改进的尺度迭代算法（improved iterative scaling,
 IIS）`，该算法要求所有的特征函数$f_i(x,y)$必须非负。
-![IIS算法](https://lh3.googleusercontent.com/OWxCsVbsf99Qt6WgpEI9oHpfujnToSwD_AtlZ6yBIMmGs3XndhQWhfAHDLvb6_yO4dSBA6C4VHBiQ5tjuzM5TfYcm1ttQshMrmV1tbqFqIHorvPoyHGOjd0cfQM0hSFahs7MjdhCVd1LKCQyFDq5NYq0JSVs4mVP8vkCVY6MJYNcQDXq_XIGfvA7ips35WOJuGGGekhAcmAlXf0uYoV1_9oJORP8q2KPMEp8tVcFXse09Djl_HZJ_RVpC44SXC7JNlzNZk4blKE8dO2BdIIAZHqIrGjAWyVUeZi7Z5siS-C0W23cbJE0ze890NJLslSIr--Femdy-kUfK_x0ZbniiQkl6PL9mdNNV1Nas0gprgRNQZ6JKQMBvgatNb50F08Zptt425k23D3basTMKADcNpN7U-7xO6oT4hncSwwgYUwETgJlIkKuBMVqX0GV1q4MFLDOsJGjqH5rKKU01UxQbUBGRCDOOZuavMrS8j2k7gPVyrDl5PIc3fospwJmrsg7rPhqQ91lWvDYn_sbDUsHne-iWNvKff9iKgTcXtUmI_o=w867-h438-no)
+![IIS算法]({filename}/images/ML/iis.png)
 算法的关键在于求解第3步的$\Delta\lambda_i$，如果这时候$f^\#(x,y)$（表示某个样
 本$x,y$激活的特征函数个数）对于所有的$x,y$都一样，即$f^\#(x,y)$是一个常数$M$，
 那么$\Delta\lambda_i$可以按下面式子求解
