@@ -23,24 +23,24 @@
 	<link rel="stylesheet" href="https://wugh.github.io/theme/css/responsive.css"/>
 	
 	<!-- Generated favicons markup -->
-	<link rel="apple-touch-icon" sizes="57x57" href="/assets/images/favicons/apple-touch-icon-57x57.png">
-	<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicons/apple-touch-icon-60x60.png">
-	<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicons/apple-touch-icon-72x72.png">
-	<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicons/apple-touch-icon-76x76.png">
-	<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicons/apple-touch-icon-114x114.png">
-	<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicons/apple-touch-icon-120x120.png">
-	<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicons/apple-touch-icon-144x144.png">
-	<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicons/apple-touch-icon-152x152.png">
-	<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicons/apple-touch-icon-180x180.png">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-32x32.png" sizes="32x32">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/android-chrome-192x192.png" sizes="192x192">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-96x96.png" sizes="96x96">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-16x16.png" sizes="16x16">
-	<link rel="manifest" href="/assets/images/favicons/manifest.json">
-	<link rel="shortcut icon" href="/assets/images/favicons/favicon.ico">
+	<link rel="apple-touch-icon" sizes="57x57" href="/images/favicons/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/images/favicons/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/images/favicons/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/images/favicons/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/images/favicons/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/images/favicons/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/images/favicons/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/images/favicons/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/images/favicons/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" href="/images/favicons/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="/images/favicons/android-icon-192x192.png" sizes="192x192">
+	<link rel="icon" type="image/png" href="/images/favicons/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="/images/favicons/favicon-16x16.png" sizes="16x16">
+	<link rel="manifest" href="/images/favicons/manifest.json">
+	<link rel="shortcut icon" href="/images/favicons/favicon.ico">
 	<meta name="msapplication-TileColor" content="#2b5797">
-	<meta name="msapplication-TileImage" content="/assets/images/favicons/mstile-144x144.png">
-	<meta name="msapplication-config" content="/assets/images/favicons/browserconfig.xml">
+	<meta name="msapplication-TileImage" content="/images/favicons/mstile-144x144.png">
+	<meta name="msapplication-config" content="/images/favicons/browserconfig.xml">
 	<meta name="theme-color" content="#ffffff">
 	<!-- LESS generated css for Nuja theme -->
 	<link rel="stylesheet" href="https://wugh.github.io/theme/css/NujaStructure.css"/>
@@ -234,7 +234,7 @@ END::
 频就越高。下图是我统计的一个累计词频分布图，累积地统计个词的出现次数占总次数的
 比例，发现少部分词占有了大部分的词频。更多有意思的词频规律参考
 <a href="https://zh.wikipedia.org/wiki/%E9%BD%8A%E5%A4%AB%E5%AE%9A%E5%BE%8B">Zipf&#8217;s law</a>。</p>
-<p><img alt="zipflaw" src="https://lh6.googleusercontent.com/-HfKjKnkAcu8/UpVqb8RwgWI/AAAAAAAABIk/k2cOKixBkOA/w1415-h1028-no/image.png" /></p>
+<p><img alt="zipflaw" src="https://wugh.github.io/images/NLP/zipfs-law.png" /></p>
 <p>本文最终取前3万个词频最高的词作为词汇表，这3万个词，总的出现次数已经占到总次数
 的90%。当然从词汇表里面去除一些词还有更高级的做法，例如：计算每个词对整个语料库
 的信息增益，取信息增益最高的多少个词作为词汇表，信息增益是什么，请参考<a href="http://www.blogjava.net/zhenandaci/archive/2009/03/24/261701.html">这里
@@ -339,7 +339,7 @@ $$</div>
 <p>测试的主要流程如下图，首先也要讲过训练过程的预处理和特征提取，再将特征向量转换
 成<a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/" title="LIBSVM"><span class="caps">LIBSVM</span></a>需要的格式，最后用编译好的<code>svm-predict</code>可执行文件进行分类，最
 后取得的准确率为<code>0.8592%</code>。
-<img alt="chartflow" src="https://lh6.googleusercontent.com/-mr3DkEOvdPo/UpWXaMkzhFI/AAAAAAAABIw/8q2RCP99MjU/w839-h646-no/test.png" /></p>
+<img alt="chartflow" src="https://wugh.github.io/images/NLP/text-classify-flow.png" /></p>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",

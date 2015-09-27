@@ -24,24 +24,24 @@
 	<link rel="stylesheet" href="https://wugh.github.io/theme/css/responsive.css"/>
 	
 	<!-- Generated favicons markup -->
-	<link rel="apple-touch-icon" sizes="57x57" href="/assets/images/favicons/apple-touch-icon-57x57.png">
-	<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicons/apple-touch-icon-60x60.png">
-	<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicons/apple-touch-icon-72x72.png">
-	<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicons/apple-touch-icon-76x76.png">
-	<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicons/apple-touch-icon-114x114.png">
-	<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicons/apple-touch-icon-120x120.png">
-	<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicons/apple-touch-icon-144x144.png">
-	<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicons/apple-touch-icon-152x152.png">
-	<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicons/apple-touch-icon-180x180.png">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-32x32.png" sizes="32x32">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/android-chrome-192x192.png" sizes="192x192">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-96x96.png" sizes="96x96">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-16x16.png" sizes="16x16">
-	<link rel="manifest" href="/assets/images/favicons/manifest.json">
-	<link rel="shortcut icon" href="/assets/images/favicons/favicon.ico">
+	<link rel="apple-touch-icon" sizes="57x57" href="/images/favicons/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/images/favicons/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/images/favicons/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/images/favicons/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/images/favicons/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/images/favicons/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/images/favicons/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/images/favicons/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/images/favicons/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" href="/images/favicons/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="/images/favicons/android-icon-192x192.png" sizes="192x192">
+	<link rel="icon" type="image/png" href="/images/favicons/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="/images/favicons/favicon-16x16.png" sizes="16x16">
+	<link rel="manifest" href="/images/favicons/manifest.json">
+	<link rel="shortcut icon" href="/images/favicons/favicon.ico">
 	<meta name="msapplication-TileColor" content="#2b5797">
-	<meta name="msapplication-TileImage" content="/assets/images/favicons/mstile-144x144.png">
-	<meta name="msapplication-config" content="/assets/images/favicons/browserconfig.xml">
+	<meta name="msapplication-TileImage" content="/images/favicons/mstile-144x144.png">
+	<meta name="msapplication-config" content="/images/favicons/browserconfig.xml">
 	<meta name="theme-color" content="#ffffff">
 	<!-- LESS generated css for Nuja theme -->
 	<link rel="stylesheet" href="https://wugh.github.io/theme/css/NujaStructure.css"/>
@@ -291,7 +291,7 @@ $$</div>
 是从训练样本中抽取的，所以约束之间不可能冲突，而且我们的约束无法像图(c)一样唯
 一确定<span class="math">\(p\)</span>，换句话说<span class="math">\(\mathcal{C}=\mathcal{C}_1\cap\mathcal{C}_2\cdots\cap\mathcal{C}_n\)</span>
 所确定的模型有无数个。
-<img alt="simplex" src="https://lh4.googleusercontent.com/LPIaifIMioNyOki7VgsM9zLlbDukQDnoCJb-GrXHy6w=w757-h712-no" title="simplex" /></p>
+<img alt="simplex" src="https://wugh.github.io/images/ML/simplex.png" title="simplex" /></p>
 <p>在所有的模型<span class="math">\(p\in\mathcal{C}\)</span>中我们需要根据最大熵原理选择一个最均匀的，我们用
 <a href="http://en.wikipedia.org/wiki/Conditional_entropy" title="条件熵">条件熵</a>量化度量条件分布<span class="math">\(p(y|x)\)</span>的均匀程度
 </p>
@@ -443,7 +443,7 @@ L_{\tilde{p}}(p) &amp;\equiv \log\Pi_{x,y}p(y|x)^{\tilde{p}(x,y)}=\sum_{x,y}\til
 方法都可以用来求<span class="math">\(\Lambda^*\)</span>，例如梯度下降、共轭梯度、坐标上升等方法。这里介绍
 的是专门针对最大熵问题设计的<code>改进的尺度迭代算法（improved iterative scaling,
 IIS）</code>，该算法要求所有的特征函数<span class="math">\(f_i(x,y)\)</span>必须非负。
-<img alt="IIS算法" src="https://lh3.googleusercontent.com/OWxCsVbsf99Qt6WgpEI9oHpfujnToSwD_AtlZ6yBIMmGs3XndhQWhfAHDLvb6_yO4dSBA6C4VHBiQ5tjuzM5TfYcm1ttQshMrmV1tbqFqIHorvPoyHGOjd0cfQM0hSFahs7MjdhCVd1LKCQyFDq5NYq0JSVs4mVP8vkCVY6MJYNcQDXq_XIGfvA7ips35WOJuGGGekhAcmAlXf0uYoV1_9oJORP8q2KPMEp8tVcFXse09Djl_HZJ_RVpC44SXC7JNlzNZk4blKE8dO2BdIIAZHqIrGjAWyVUeZi7Z5siS-C0W23cbJE0ze890NJLslSIr--Femdy-kUfK_x0ZbniiQkl6PL9mdNNV1Nas0gprgRNQZ6JKQMBvgatNb50F08Zptt425k23D3basTMKADcNpN7U-7xO6oT4hncSwwgYUwETgJlIkKuBMVqX0GV1q4MFLDOsJGjqH5rKKU01UxQbUBGRCDOOZuavMrS8j2k7gPVyrDl5PIc3fospwJmrsg7rPhqQ91lWvDYn_sbDUsHne-iWNvKff9iKgTcXtUmI_o=w867-h438-no" />
+<img alt="IIS算法" src="https://wugh.github.io/images/ML/iis.png" />
 算法的关键在于求解第3步的<span class="math">\(\Delta\lambda_i\)</span>，如果这时候<span class="math">\(f^\#(x,y)\)</span>（表示某个样
 本<span class="math">\(x,y\)</span>激活的特征函数个数）对于所有的<span class="math">\(x,y\)</span>都一样，即<span class="math">\(f^\#(x,y)\)</span>是一个常数<span class="math">\(M\)</span>，
 那么<span class="math">\(\Delta\lambda_i\)</span>可以按下面式子求解

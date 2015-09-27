@@ -24,24 +24,24 @@
 	<link rel="stylesheet" href="https://wugh.github.io/theme/css/responsive.css"/>
 	
 	<!-- Generated favicons markup -->
-	<link rel="apple-touch-icon" sizes="57x57" href="/assets/images/favicons/apple-touch-icon-57x57.png">
-	<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicons/apple-touch-icon-60x60.png">
-	<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicons/apple-touch-icon-72x72.png">
-	<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicons/apple-touch-icon-76x76.png">
-	<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicons/apple-touch-icon-114x114.png">
-	<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicons/apple-touch-icon-120x120.png">
-	<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicons/apple-touch-icon-144x144.png">
-	<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicons/apple-touch-icon-152x152.png">
-	<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicons/apple-touch-icon-180x180.png">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-32x32.png" sizes="32x32">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/android-chrome-192x192.png" sizes="192x192">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-96x96.png" sizes="96x96">
-	<link rel="icon" type="image/png" href="/assets/images/favicons/favicon-16x16.png" sizes="16x16">
-	<link rel="manifest" href="/assets/images/favicons/manifest.json">
-	<link rel="shortcut icon" href="/assets/images/favicons/favicon.ico">
+	<link rel="apple-touch-icon" sizes="57x57" href="/images/favicons/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/images/favicons/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/images/favicons/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/images/favicons/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/images/favicons/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/images/favicons/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/images/favicons/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/images/favicons/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/images/favicons/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" href="/images/favicons/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="/images/favicons/android-icon-192x192.png" sizes="192x192">
+	<link rel="icon" type="image/png" href="/images/favicons/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="/images/favicons/favicon-16x16.png" sizes="16x16">
+	<link rel="manifest" href="/images/favicons/manifest.json">
+	<link rel="shortcut icon" href="/images/favicons/favicon.ico">
 	<meta name="msapplication-TileColor" content="#2b5797">
-	<meta name="msapplication-TileImage" content="/assets/images/favicons/mstile-144x144.png">
-	<meta name="msapplication-config" content="/assets/images/favicons/browserconfig.xml">
+	<meta name="msapplication-TileImage" content="/images/favicons/mstile-144x144.png">
+	<meta name="msapplication-config" content="/images/favicons/browserconfig.xml">
 	<meta name="theme-color" content="#ffffff">
 	<!-- LESS generated css for Nuja theme -->
 	<link rel="stylesheet" href="https://wugh.github.io/theme/css/NujaStructure.css"/>
@@ -153,8 +153,8 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
 <p>下面举一个例子来说明<span class="caps">MDP</span>的参数，假设一个机器人在如所描述的
 网格中走动，灰色代表障碍物，当机器人走到<span class="math">\((4,3)\)</span>位置将获得<span class="math">\(+1\)</span>的回报，走到
 <span class="math">\((4,2)\)</span>位置回报为<span class="math">\(-1\)</span>。</p>
-<p><img alt="MDP简单例子" src="https://lh4.googleusercontent.com/-xF3xfrxs4N4/U1o_5aTmagI/AAAAAAAAAKA/SQXvpDaCnAM/w335-h268-no/simple-pomdp.png" />
-<img alt="动作执行受噪声干扰" src="https://lh6.googleusercontent.com/-H2AkMXDTFqA/U1o_RmjBCyI/AAAAAAAAAJQ/LR0UgmMFaWE/w236-h181-no/noisy.png" /></p>
+<p><img alt="MDP简单例子" src="https://wugh.github.io/images/ML/simple-pomdp.png" />
+<img alt="动作执行受噪声干扰" src="https://wugh.github.io/images/ML/noisy.png" /></p>
 <p>如果用<span class="caps">MDP</span>来描述这个例子，那么<span class="math">\(S\)</span>就有<span class="math">\(11\)</span>中取值，机器人可能处在除了障碍物的其他
 位置；<span class="math">\(A\)</span>就有<span class="math">\(4\)</span>种取值，机器人可以往<span class="math">\({N,S,E,W}\)</span>四个方向走；假设现在处于<span class="math">\([3,1]\)</span>
 位置，采取动作<span class="math">\(N\)</span>（虽然命令机器人向前走，但是由于噪声的影响，可能机器人会向左
@@ -191,8 +191,8 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
 后趋向于走到<span class="math">\(-1\)</span>位置而不是<span class="math">\(+1\)</span>位置。中下面两行执行的动作
 使得机器人偏向走到<span class="math">\(-1\)</span>位置，所以他们的总回报的期望值是负数，对于最上面一行偏向
 于走到<span class="math">\(+1\)</span>位置，所以总回报都是正的。所以对于下两行的位置这个策略非常差，但是&nbsp;对于最上面那行这个策略就显得不错。</p>
-<p><img alt="其中一个pi" src="https://lh3.googleusercontent.com/-KK3A9W7jYOw/U1pCqa0KNJI/AAAAAAAAAK4/PHJxlkP6L34/w336-h264-no/one-pi.png" />
-<img alt="pi对应的V" src="https://lh5.googleusercontent.com/-CF7Lg0ZiM04/U1pCrDwhq5I/AAAAAAAAALI/d6t4EaQoQtU/w332-h271-no/v-pi.png" /></p>
+<p><img alt="其中一个pi" src="https://wugh.github.io/images/ML/one-pi.png" />
+<img alt="pi对应的V" src="https://wugh.github.io/images/ML/v-pi.png" /></p>
 <p>下面要对<span class="math">\(V^\pi\)</span>做一个推导使得<span class="math">\(V\pi\)</span>更容易计算，这里假设当前状态<span class="math">\(s\)</span>会转移到状态
 <span class="math">\(s'\)</span>。中的<span class="math">\(P_{s\pi(s)}(s')\)</span>描述的是<span class="math">\(s\)</span>状态下采取一个动作
 （这个动作由<span class="math">\(\pi(s)\)</span>来确定）转移到<span class="math">\(s'\)</span>状态的概率分布，因此式子中的求和描述的就
@@ -220,49 +220,50 @@ V^*(s) = \max_x V^\pi(s)
 \end{equation}</div>
 <p>集合和可以得到<span class="math">\(V^*\)</span>的贝尔曼方程：</p>
 <div class="math">\begin{equation}
-V^\*(s) = R(s) + \max\_a \gamma \sum\_{s'}{P_{sa}(s')V^*(s')} 
+V^*(s) = R(s) + \max_a \gamma \sum_{s'}{P_{sa}(s')V^*(s')} 
   \label{eq:vstarbellman}
 \end{equation}</div>
 <p>根据最优值函数的贝尔曼方程，把中的常数项<span class="math">\(R(s)\)</span>和
 常数系数<span class="math">\(\gamma\)</span>去掉（处于状态<span class="math">\(s\)</span>时，对于所有的<span class="math">\(a\)</span>这两个系数都相等），
 就可以得到最优策略<span class="math">\(\pi^*(s)\)</span>的求解公式：</p>
 <div class="math">\begin{equation}
-\pi^\*(s) = arg\,max\_a \sum_{s'}{P_{sa}(s')V^*(s')} 
+\DeclareMathOperator*{\argmax}{arg\,max}
+\pi^*(s) = \argmax_a \sum_{s'}{P_{sa}(s')V^*(s')} 
   \label{eq:bestpi}
 \end{equation}</div>
-<p>由可以看出<span class="math">\(\pi^\*(s) $其实依赖于\)</span>V^*(s) <span class="math">\(，所以现在
-的主要目标是要想办法求解\)</span>V^*(s) <span class="math">\(。根据的定义，最直接的
-方法就是穷举所有的\)</span> \pi <span class="math">\(，但是穷举的情况会非常多，例如有\)</span>11<span class="math">\(个状态，\)</span>4<span class="math">\(个动作
-那么就有\)</span>4^11<span class="math">\(种组合，搜索空间呈指数增长，不大合理，下面将介绍值迭代
-（Value Iteration）和策略迭代（Policy Iteration）方法来求解\)</span>V^*(s)$。</p>
+<p>由可以看出<span class="math">\(\pi^*(s)\)</span>其实依赖于<span class="math">\(V^*(s)\)</span>，所以现在的主要目标是要想办法求解
+<span class="math">\(V^*(s)\)</span>。根据的定义，最直接的方法就是穷举所有的<span class="math">\(\pi\)</span>，但是穷举的情况会非常多
+，例如有<span class="math">\(11\)</span>个状态，<span class="math">\(4\)</span>个动作那么就有<span class="math">\(4^{11}\)</span>种组合，搜索空间呈指数增长，不大
+合理，下面将介绍值迭代（Value Iteration）和策略迭代（Policy Iteration）方法来
+求解<span class="math">\(V^*(s)\)</span>。</p>
 <p>算法所描述的是值迭代的过程，初始化时对于所有的<span class="math">\(s\)</span>对应的
 <span class="math">\(V(s)\)</span>为<span class="math">\(0\)</span>，接着对于每个<span class="math">\(V(s)\)</span>，这里的<span class="math">\(V(s)\)</span>有两种更新方式。</p>
-<p><img alt="值迭代" src="https://lh6.googleusercontent.com/-UQBih3c_8qs/U1pCqW8ff0I/AAAAAAAAAK0/roPWXS7vjt4/w592-h211-no/mdp-vi.png" /></p>
+<p><img alt="值迭代" src="https://wugh.github.io/images/ML/mdp-vi.png" /></p>
 <p>第一种是对于所有的状态计算出式子右边的部分，然后同时更新所有的<span class="math">\(V(s)\)</span>,这种称作
 同步更新（Synchronous Update）；另一种叫做异步更新（Asynchronous
 Update），假设我们按照固定的状态顺序更新<span class="math">\(V(s)\)</span>，那么首先会更新第1个状态
 的<span class="math">\(V(s)\)</span>，接着是第2个状态的<span class="math">\(V(s)\)</span>、第3个状态的<span class="math">\(V(s)\)</span>、第4个状态的<span class="math">\(V(s)\)</span>
 ，如果在更新第5个状态的<span class="math">\(V(s)\)</span>用到的<span class="math">\(V(s')\)</span>恰好是第1、2、3、4状态的，
 那么我们使用的<span class="math">\(V(s')\)</span>是前面几次迭代更新的版本。两种方法中异步更新会
-收敛地稍微快一点，值迭代会使得<span class="math">\(V(s)\)</span>不断地向<span class="math">\(V^\*(s)\)</span>接近，如
-是最后求解出来的<span class="math">\(V^\*(s)\)</span>。</p>
-<p><img alt="左图是\(V^*\)且\gamma=.99，右图是对应的\(\pi^*\)" src="https://lh5.googleusercontent.com/-fjw0qaYgma8/U1pEI0vjrsI/AAAAAAAAAL0/IWGM0WljS0o/w790-h274-no/bestv-and-pi.png" /></p>
-<p>求解出<span class="math">\(V^\*(s)\)</span>之后，根据就可以计算<span class="math">\(\pi^\*(s)\)</span>，
+收敛地稍微快一点，值迭代会使得<span class="math">\(V(s)\)</span>不断地向<span class="math">\(V^*(s)\)</span>接近，如
+是最后求解出来的<span class="math">\(V^*(s)\)</span>。</p>
+<p><img alt="左图是\(V^*\)且\gamma=.99，右图是对应的\(\pi^*\)" src="https://wugh.github.io/images/ML/bestv-and-pi.png" /></p>
+<p>求解出<span class="math">\(V^*(s)\)</span>之后，根据就可以计算<span class="math">\(\pi^*(s)\)</span>，
 下面举一个例子计算<span class="math">\(\pi([3,1])\)</span>的最优策略，结合，可以
 计算出采取各个动作的未来总回报的期望，假设机器人碰到墙壁之后会回到
 原来的位置，所以机器人向<span class="math">\(E\)</span>走的时候有<span class="math">\(0.1\)</span>的可能性会碰到墙壁然后又
 返回到<span class="math">\([3,1]\)</span>位置。 </p>
 <div class="math">\begin{aligned}
-    E: &amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.75 + 0.1\*0.69 + 0.1\*0.71 = 0.74\cr
-    N: &amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.69 + 0.1\*0.75 + 0.1\*0.49 = 0.676\cr
-    W: &amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.49 + 0.1\*0.69 + 0.1\*0.71 = 0.532\cr
-    S: &amp; \sum_{s'}{P_{sa}(s')V^\*(s')} = 0.8\*0.71 + 0.1\*0.75 + 0.1\*0.49 = 0.692
+    E: &amp; \sum_{s'}{P_{sa}(s')V^*(s')} = 0.8*0.75 + 0.1*0.69 + 0.1*0.71 = 0.74\cr
+    N: &amp; \sum_{s'}{P_{sa}(s')V^*(s')} = 0.8*0.69 + 0.1*0.75 + 0.1*0.49 = 0.676\cr
+    W: &amp; \sum_{s'}{P_{sa}(s')V^*(s')} = 0.8*0.49 + 0.1*0.69 + 0.1*0.71 = 0.532\cr
+    S: &amp; \sum_{s'}{P_{sa}(s')V^*(s')} = 0.8*0.71 + 0.1*0.75 + 0.1*0.49 = 0.692
 \end{aligned}</div>
 <p>对比<span class="math">\(4\)</span>个方向的未来总回报的期望值之后，发现采取<span class="math">\(E\)</span>动作之后得到的值最大，
 所以在<span class="math">\([3,1]\)</span>位置会采取动作<span class="math">\(E\)</span>。对每个状态都计算最优动作之后就可以得到如&nbsp;所示的结果。</p>
 <p>描述完值迭代之后，下面简单描述一下策略迭代求解<span class="math">\(V^*(s)\)</span>，策略迭代会使得最后
-<span class="math">\(V(s)\)</span>趋近于<span class="math">\(V^\*(s)\)</span>并且<span class="math">\(\pi(s)\)</span>趋近于<span class="math">\(\pi^\*(s)\)</span>。</p>
-<p><img alt="策略迭代" src="https://lh6.googleusercontent.com/-PUy_N8kv0-Y/U1pCqTatGDI/AAAAAAAAALE/CQMTpfOJC4Q/w612-h258-no/mdp-pi.png" /></p>
+<span class="math">\(V(s)\)</span>趋近于<span class="math">\(V^*(s)\)</span>并且<span class="math">\(\pi(s)\)</span>趋近于<span class="math">\(\pi^*(s)\)</span>。</p>
+<p><img alt="策略迭代" src="https://wugh.github.io/images/ML/mdp-pi.png" /></p>
 <p>当状态数量少的时候可以采用策略迭代，因为这时候求解贝尔曼方程比较快速，但是当
 状态数非常多，例如有100万个状态，那么求解贝尔曼方程的代价可能会太大，就应该&nbsp;考虑使用值迭代。</p>
 <p>这里还需要讨论一下如何求解<span class="math">\(P_{sa}\)</span>，一般来说可以用最大似然估计来估计。</p>
@@ -275,12 +276,12 @@ Update），假设我们按照固定的状态顺序更新<span class="math">\(V(
   \label{eq:psa}
 \end{equation}</div>
 <h4>求解过程总结</h4>
-<p>把上文提到的求解<span class="math">\(V^\*(s)\)</span>、<span class="math">\(\pi^\*(s)\)</span>和<span class="math">\(P_{sa}\)</span>的方法结合起来就可以构成一个完整
+<p>把上文提到的求解<span class="math">\(V^*(s)\)</span>、<span class="math">\(\pi^*(s)\)</span>和<span class="math">\(P_{sa}\)</span>的方法结合起来就可以构成一个完整
 的求解<span class="caps">MDP</span>的方法。首先采取策略<span class="math">\(\pi\)</span>之后可以观测到一些状态转移的数据，用这些
 数据来重新估计<span class="math">\(P_{sa}\)</span>，接着用值迭代的方式来求解当前<span class="math">\(\pi\)</span>和<span class="math">\(P_{sa}\)</span>前提
-下的<span class="math">\(V^\*(s)\)</span>（值迭代的初始<span class="math">\(V(s)\)</span>可以使用上一轮迭代的<span class="math">\(V^\*(s)\)</span>），
+下的<span class="math">\(V^*(s)\)</span>（值迭代的初始<span class="math">\(V(s)\)</span>可以使用上一轮迭代的<span class="math">\(V^*(s)\)</span>），
 最后再利用这个<span class="math">\(V^*(s)\)</span>来更新<span class="math">\(\pi\)</span>。
-<img alt="整个过程" src="https://lh4.googleusercontent.com/-nQTOBVmMB7k/U1pDwlnexpI/AAAAAAAAALg/xCTEPw5oAWY/w810-h290-no/put-together.png" /></p>
+<img alt="整个过程" src="https://wugh.github.io/images/ML/put-together.png" /></p>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",

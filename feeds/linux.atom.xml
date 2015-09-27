@@ -24,12 +24,12 @@ load-module module-loopback
 &lt;h3&gt;通过pavucontrol配置音频混合&lt;/h3&gt;
 &lt;p&gt;我们添加了两个loopback，这时候就可以在pavucontrol的Playback标签页下面看到
 两个新的Loopback，需要把&lt;code&gt;Show&lt;/code&gt;这个过滤器选择为&lt;code&gt;All Streams&lt;/code&gt;，结果如下图所示：
-&lt;img alt="Playback" src="https://lh6.googleusercontent.com/-aDr4tBprMqM/VK6GWnCs-VI/AAAAAAAAAQc/jsJ4DAqzRKM/w893-h572-no/Playback.png" title="Playback" /&gt;
+&lt;img alt="Playback" src="https://wugh.github.io/images/Linux/playback.png" title="Playback" /&gt;
 这两个Loopback一个是麦克风（Loopback from Bulit-in Audio Analog Stero）另一个
 是电脑的音频输出（Loopback of Monitor of Bult-in Audio Analog Stero），需要把
 这两个的输出设定成&lt;code&gt;Null Output&lt;/code&gt;。&lt;/p&gt;
 &lt;p&gt;接着需要设定一下我们录音的时候使用哪个声音源，设置如下图
-&lt;img alt="Record" src="https://lh4.googleusercontent.com/-JXDur6hvBYA/VK6GWzMAxDI/AAAAAAAAAQg/J4BoCtqtUVk/w890-h578-no/record.png" title="Record" /&gt;
+&lt;img alt="Record" src="https://wugh.github.io/images/Linux/record.png" title="Record" /&gt;
 可以看到&lt;code&gt;ALSA Capture from&lt;/code&gt;被我们设置成&lt;code&gt;Monitor of Null Output&lt;/code&gt;，相当于把Null
 这个设备的输出当作声音源进行捕获，而Null这个设备输出是麦克风和电脑声音的混合，&amp;nbsp;所以可以正常工作。&lt;/p&gt;</summary><category term="pulse"></category><category term="录音"></category></entry><entry><title>BCM57780没有网络连接</title><link href="https://wugh.github.io/posts/2013/11/bcm57780-network-problem/" rel="alternate"></link><updated>2013-11-10T00:16:36+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-10:posts/2013/11/bcm57780-network-problem/</id><summary type="html">&lt;hr /&gt;
 &lt;h3&gt;问题描述&lt;/h3&gt;
