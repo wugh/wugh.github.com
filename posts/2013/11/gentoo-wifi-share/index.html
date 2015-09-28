@@ -3,7 +3,7 @@
     <head>
 	<meta charset="utf-8">
 
-<meta name="description" content="简介 本文主要描述如何在Gentoo下利用无线网卡做一个wifi热点来给手机提供无线网络访 问。目前在Windows下有connectify来共享网络，同样的在Linux下也有hostapd。 由于在Windows下基本就是一键配置热点，但是Linux配置起来比较麻烦，所以本文在这里 记录一下配置过程。 软件安装 需要安装一些软件 emerge -a hostapd emerge -a dnsmasq emerge -a iptables 配置 以下描述各个软件的配置说明。 网卡参数 修改文件/etc/conf.d/net： modules_wlan0="!iwconfig !wpa_supplicant" config_wlan0="192.168.0.1/24" 网卡配置好之后，要加入默认启动 ...">
+<meta name="description" content="简介 本文主要描述如何在Gentoo下利用无线网卡做一个wifi热点来给手机提供无线网络访 问。目前在Windows下有connectify来共享网络，同样的在Linux下也有hostapd。 由于在Windows下基本就是一键配置热点，但是Linux配置起来比较麻烦，所以本文在这里 记录一下配置过程。 软件安装 需要安装一些软件 emerge -a hostapd emerge -a dnsmasq emerge -a iptables 配置 以下描述各个软件的配置说明。 网卡参数 修改文件/etc/conf.d/net： modules_wlan0=&#34;!iwconfig !wpa_supplicant&#34; config_wlan0=&#34;192.168.0.1/24&#34; 网卡配置好之后，要加入默认启动 ...">
 <meta name="keywords" content="hostapd,ap,Gentoo">
 <meta name="author" content="Guohua Wu">
 <meta name="robots" content="index,follow">
@@ -13,7 +13,7 @@
 <meta property="og:property" content="zh-cn">
 <meta property="og:title" content="gentoo wifi 共享">
 <meta property="og:type" content="article">
-<meta property="og:description" content="简介 本文主要描述如何在Gentoo下利用无线网卡做一个wifi热点来给手机提供无线网络访 问。目前在Windows下有connectify来共享网络，同样的在Linux下也有hostapd。 由于在Windows下基本就是一键配置热点，但是Linux配置起来比较麻烦，所以本文在这里 记录一下配置过程。 软件安装 需要安装一些软件 emerge -a hostapd emerge -a dnsmasq emerge -a iptables 配置 以下描述各个软件的配置说明。 网卡参数 修改文件/etc/conf.d/net： modules_wlan0="!iwconfig !wpa_supplicant" config_wlan0="192.168.0.1/24" 网卡配置好之后，要加入默认启动 ...">
+<meta property="og:description" content="简介 本文主要描述如何在Gentoo下利用无线网卡做一个wifi热点来给手机提供无线网络访 问。目前在Windows下有connectify来共享网络，同样的在Linux下也有hostapd。 由于在Windows下基本就是一键配置热点，但是Linux配置起来比较麻烦，所以本文在这里 记录一下配置过程。 软件安装 需要安装一些软件 emerge -a hostapd emerge -a dnsmasq emerge -a iptables 配置 以下描述各个软件的配置说明。 网卡参数 修改文件/etc/conf.d/net： modules_wlan0=&#34;!iwconfig !wpa_supplicant&#34; config_wlan0=&#34;192.168.0.1/24&#34; 网卡配置好之后，要加入默认启动 ...">
 <meta property="article:published_time" content="2013-11-09">
 <meta property="article:tag" content="hostapd">
 <meta property="article:tag" content="ap">
@@ -245,7 +245,7 @@ rc-update add iptables default
     <div class="alpha span9">
 			<!-- 多说评论框 start -->
 			<!--data-thread-key="的ID"-->
-			<div class="ds-thread" data-title="gentoo wifi&nbsp;共享" data-url="posts/2013/11/gentoo-wifi-share/"></div>
+			<div class="ds-thread" data-thread-key="598c27ecc7a66ad1179fdcd1a5c3af4c" data-title="gentoo wifi 共享" data-url="posts/2013/11/gentoo-wifi-share/"></div>
 			<!-- 多说评论框 end -->
 			<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 			<script type="text/javascript">
