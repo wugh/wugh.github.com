@@ -11,10 +11,11 @@
 	<!-- OpenGraph -->
 	<meta property="og:property" content="zh-cn">
 	<meta property="og:image" content="/assets/images/favicons/apple-touch-icon-180x180.png">
-	<meta property="og:title" content="Life in a Nutshell articles in Web category">
+
+	<meta property="og:title" content="Life in a Nutshell: You are now browsing: Filter tag">
 	<meta property="og:type" content="website">
 	<meta property="og:description" content="">	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Life in a Nutshell articles in Web category</title>
+	<title>Life in a Nutshell: You are now browsing through `Filter` tag</title>
 	<script type="text/javascript" src="https://wugh.github.io/theme/js/jquery-1.9.1.js"></script>
 	<script type="text/javascript" src="https://wugh.github.io/theme/js/bootstrap.js"></script>
 
@@ -100,7 +101,7 @@ ga('send', 'pageview');
 	    <div class="clearfix"></div>
 <div class="row">
     <div class="span12 alpha">
-	<h3>You are now browsing through `Web` articles</h3>
+	<h3>You are now browsing through `Filter` tagged articles</h3>
     </div>
 </div>
 <div class="clearfix"></div>
@@ -268,220 +269,6 @@ ga('send', 'pageview');
 	</div>
     </div>
 </div>
-<div class="row">
-    <div class="span1 metadata alpha">
-	<aside>
-	    <div class="entry-date">
-		<div class="month-day">
-		    <time pubdate datetime="2013-11-12T12:20:30+08:00" title="Nov 12, 13">
-			Nov.<span class="day">12</span>
-			<div class="year">13</div>
-		    </time>
-		</div>
-
-	    </div>
-
-	</aside> 
-
-    </div>
-    <div class="span7">
-	<div class="entry-container ">
-
-	    <article  class="entry hentry" >
-		<header>
-		    <a href="/posts/2013/11/hexo-math-equation/" rel="bookmark" title="permalink for hexo数学公式" ><h2 class="entry-title">hexo数学公式</h2></a>
-		    <div class="author-details vcard">
-
-			by <a  class="url fn" href="/author/guohua-wu.html">Guohua Wu</a>  file under <a href="/category/web.html">Web</a> with tags 			<a href="https://wugh.github.io/tag/latex.html" title="Browse tag: latex" rel="tag">latex</a>, 			<a href="https://wugh.github.io/tag/vim.html" title="Browse tag: vim" rel="tag">vim</a>, 			<a href="https://wugh.github.io/tag/hexo.html" title="Browse tag: hexo" rel="tag">hexo</a>		    </div>
-		</header>
-		<div class="entry-content">
-		<hr />
-<p>在使用<a href="https://github.com/tommy351/hexo" title="Hexo">Hexo</a>写博客的时候无法插入数学公
-式，通过调研发现<a href="http://www.mathjax.org/" title="MathJax">MathJax</a>可以很好的在网页里&nbsp;面显示数学公式，并且能够支持很多浏览器，下面分步骤描述生成公式的方法。</p>
-<h3>修改主题</h3>
-<p>MathJax的<a href="http://docs.mathjax.org/en/latest/platforms/index.html">官方文档</a>说只
-要在每个页面的<code>head</code>标签里面插入下面的<code>javascript</code>代码：</p>
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span>
-   <span class="na">src=</span><span class="s">&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</pre></div>
-
-
-<p>接下来的步骤就是要把这个代码加入所有的文章页面里面，这里参考
-<a href="https://github.com/nuklly/hexo-theme-greyshade" title="hexo theme
-greyshade">greyshade</a>中对这段代码的处理方式，在主题目录<code>themes/light/layout/_partial/</code>下
-新建一个文件<code>mathjax.ejs</code>，内容如下：</p>
-<div class="highlight"><pre><span class="c">&lt;!-- mathjax config similar to math.stackexchange --&gt;</span>
-
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-mathjax-config&quot;</span><span class="nt">&gt;</span>
-  <span class="nx">MathJax</span><span class="p">.</span><span class="nx">Hub</span><span class="p">.</span><span class="nx">Config</span><span class="p">({</span>
-    <span class="nx">tex2jax</span><span class="o">:</span> <span class="p">{</span>
-      <span class="nx">inlineMath</span><span class="o">:</span> <span class="p">[</span> <span class="p">[</span><span class="s1">&#39;$&#39;</span><span class="p">,</span><span class="s1">&#39;$&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;\\(&quot;</span><span class="p">,</span><span class="s2">&quot;\\)&quot;</span><span class="p">]</span> <span class="p">],</span>
-      <span class="nx">processEscapes</span><span class="o">:</span> <span class="kc">true</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-<span class="nt">&lt;/script&gt;</span>
-
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-mathjax-config&quot;</span><span class="nt">&gt;</span>
-    <span class="nx">MathJax</span><span class="p">.</span><span class="nx">Hub</span><span class="p">.</span><span class="nx">Config</span><span class="p">({</span>
-      <span class="nx">tex2jax</span><span class="o">:</span> <span class="p">{</span>
-        <span class="nx">skipTags</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;script&#39;</span><span class="p">,</span> <span class="s1">&#39;noscript&#39;</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">,</span> <span class="s1">&#39;textarea&#39;</span><span class="p">,</span> <span class="s1">&#39;pre&#39;</span><span class="p">,</span> <span class="s1">&#39;code&#39;</span><span class="p">]</span>
-      <span class="p">}</span>
-    <span class="p">});</span>
-<span class="nt">&lt;/script&gt;</span>
-
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/x-mathjax-config&quot;</span><span class="nt">&gt;</span>
-    <span class="nx">MathJax</span><span class="p">.</span><span class="nx">Hub</span><span class="p">.</span><span class="nx">Queue</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">all</span> <span class="o">=</span> <span class="nx">MathJax</span><span class="p">.</span><span class="nx">Hub</span><span class="p">.</span><span class="nx">getAllJax</span><span class="p">(),</span> <span class="nx">i</span><span class="p">;</span>
-        <span class="k">for</span><span class="p">(</span><span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">all</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">all</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">SourceElement</span><span class="p">().</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">className</span> <span class="o">+=</span> <span class="s1">&#39; has-jax&#39;</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">});</span>
-<span class="nt">&lt;/script&gt;</span>
-
-<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;</span><span class="nt">&gt;</span>
-<span class="nt">&lt;/script&gt;</span>
-</pre></div>
-
-
-<p>然后在<code>themes/light/layout/_partial/</code>目录下的<code>head.ejs</code>里面添加以下几行：</p>
-<div class="highlight"><pre><span class="cp">&lt;%</span> <span class="k">if</span><span class="p">(</span><span class="n">theme</span><span class="o">.</span><span class="n">mathjax</span><span class="p">)</span> <span class="p">{</span><span class="cp">%&gt;</span><span class="x"></span>
-<span class="x">    </span><span class="cp">&lt;%-</span> <span class="n">partial</span><span class="p">(</span><span class="s1">&#39;mathjax&#39;</span><span class="p">)</span><span class="cp">%&gt;</span><span class="x"></span>
-<span class="cp">&lt;%</span> <span class="p">}</span> <span class="cp">%&gt;</span><span class="x"></span>
-</pre></div>
-
-
-<p>这几行的意思是如果在主题的<code>_config.xml</code>里面把<code>mathjax</code>变量设置成<code>true</code>那么就把
-<code>mathjax.ejs</code>包含进来，所以还需要在<code>themes/_config.xml</code>里面添加：</p>
-<div class="highlight"><pre><span class="n">mathjax</span><span class="o">:</span> <span class="kc">true</span>
-</pre></div>
-
-
-<p>配置完之后生成的网页里面都包含有<code>mathjax</code>需要的一段<code>script</code>。</p>
-<h3>生成公式</h3>
-<p>有些<code>MarkDown</code>渲染器本来支持，例如
-<a href="https://github.com/gettalong/kramdown" title="kramdown">kramdown</a>。但是这个是<code>Ruby</code>
-写的，<code>Hexo</code>无法支持，<code>Hexo</code>官方的<code>MarkDown</code>渲染器也无法对公式进行处理，现在
-还可以采用<a href="https://github.com/wzpan/hexo-renderer-pandoc">hexo pandoc render</a>&nbsp;来进行渲染</p>
-<h4>行间公式</h4>
-<p>要产生行间公式就得用下面的代码：</p>
-<div class="highlight"><pre><span class="s">$</span><span class="nb">E</span><span class="o">=</span><span class="nb">mc^</span><span class="m">2</span><span class="s">$</span>
-</pre></div>
-
-
-<p>现在举一个行间公式的例子：</p>
-<div class="highlight"><pre>爱因斯坦提出了质能方程：<span class="s">$</span><span class="nb">E</span><span class="o">=</span><span class="nb">mc^</span><span class="m">2</span><span class="s">$</span>。他是一个伟大的物理学家。
-</pre></div>
-
-
-<p>爱因斯坦提出了质能方程：<span class="math">\(E=mc^2\)</span>。他是一个伟大的&nbsp;物理学家。</p>
-<h4>方程组</h4>
-<p>我们可以用下面的一段代码来产生一个独立的方程组，由于一般<code>Markdown</code>中<code>\\</code>需要转义
-，所以换行我们可以使用<code>\cr</code></p>
-<div class="highlight"><pre>以下是几个三角恒等式：
-<span class="sb">$$</span><span class="nb"></span>
-<span class="nv">\begin</span><span class="nb">{align}</span>
-<span class="nv">\sin</span><span class="nb"> </span><span class="nv">\left</span><span class="o">(</span><span class="nb">x</span><span class="o">+</span><span class="nb">y</span><span class="nv">\right</span><span class="o">)=</span><span class="nv">\sin</span><span class="nb"> x </span><span class="nv">\cos</span><span class="nb"> y </span><span class="o">+</span><span class="nb"> </span><span class="nv">\cos</span><span class="nb"> x </span><span class="nv">\sin</span><span class="nb"> y</span><span class="nv">\cr</span><span class="nb"></span>
-<span class="nv">\cos</span><span class="nb"> </span><span class="nv">\left</span><span class="o">(</span><span class="nb">x</span><span class="o">+</span><span class="nb">y</span><span class="nv">\right</span><span class="o">)=</span><span class="nv">\cos</span><span class="nb"> x </span><span class="nv">\cos</span><span class="nb"> y </span><span class="o">-</span><span class="nb"> </span><span class="nv">\sin</span><span class="nb"> x </span><span class="nv">\sin</span><span class="nb"> y</span>
-<span class="nv">\end</span><span class="nb">{align}</span>
-<span class="s">$$</span>
-</pre></div>
-
-
-<p>以下是几个三角恒等式：
-</p>
-<div class="math">$$
-\begin{align}
-\sin \left(x+y\right)=\sin x \cos y + \cos x \sin y\cr
-\cos \left(x+y\right)=\cos x \cos y - \sin x \sin y
-\end{align}
-$$</div>
-<h3>vim插入模板</h3>
-<p>上述方法插入公式的时候总是要时间去敲很多没有意义的<code>html</code>标签，我们可以利用<code>vim</code>
-的<a href="https://github.com/garbas/vim-snipmate" title="snipmate">vim-snipmate</a>插件来做几个
-模板加速我们的程序编写。
-我写了两个<code>snippets</code>来插入公式：</p>
-<div class="highlight"><pre>snippet $
-    $${1:Inline}$${0}
-
-snippet $$
-    $$  <span class="cp">${</span><span class="mi">1</span><span class="p">:</span><span class="n">Displayed</span><span class="cp">}</span>
-    $$  
-    <span class="cp">${</span><span class="mi">0</span><span class="cp">}</span>
-</pre></div>
-
-
-<p>把这个<code>mkd.snippets</code>文件放到<code>~/.vim/snippets/</code>目录下面就可以生效，然后我们在编
-辑<code>MarkDown</code>文件的时候就可以通过<code>$&lt;Tab&gt;</code>来触发一个行间公式模板，通过<code>$$&lt;Tab&gt;</code>来&nbsp;生成方程组模板。</p>
-<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width < 768) ? "left" : align;
-        indent = (screen.width < 768) ? "0em" : indent;
-        linebreak = (screen.width < 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    var location_protocol = (false) ? 'https' : document.location.protocol;
-    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
-    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-    mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
-        "MathJax.Hub.Config({" +
-        "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
-        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-        "    displayAlign: '"+ align +"'," +
-        "    displayIndent: '"+ indent +"'," +
-        "    showMathMenu: true," +
-        "    messageStyle: 'normal'," +
-        "    tex2jax: { " +
-        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
-        "        displayMath: [ ['$$','$$'] ]," +
-        "        processEscapes: true," +
-        "        preview: 'TeX'," +
-        "    }, " +
-        "    'HTML-CSS': { " +
-        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
-        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
-        "    }, " +
-        "}); " +
-        "if ('default' !== 'default') {" +
-            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-        "}";
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-}
-</script> </div>
-	    </article>
-
-	    <!--
-	    in case any image breaks the theme
-	    i was going to use :after but it didn't quite work for me, maybe next time-->
-	    <div class="clearfix"></div>
-
-
-
-	</div>
-    </div>
-</div>
-
 
 
 		    </div>
@@ -501,7 +288,6 @@ snippet $$
 	<div class="widget-content">
 	    <ul class="widget-list">
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/" title="Read: Pelican自定义Jinja过滤器">Pelican自定义Jinja过滤器</a></li>
-		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2013/11/hexo-math-equation/" title="Read: hexo数学公式">hexo数学公式</a></li>
 	    </ul>
 	</div>
     </div>

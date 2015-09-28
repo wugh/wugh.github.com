@@ -117,6 +117,164 @@ ga('send', 'pageview');
 	<aside>
 	    <div class="entry-date">
 		<div class="month-day">
+		    <time pubdate datetime="2015-09-28T10:18:00+08:00" title="Sep 28, 15">
+			Sep.<span class="day">28</span>
+			<div class="year">15</div>
+		    </time>
+		</div>
+
+	    </div>
+
+	</aside> 
+
+    </div>
+    <div class="span7">
+	<div class="entry-container ">
+
+	    <article  class="entry hentry" >
+		<header>
+		    <a href="/posts/2015/09/pelican-custom-jinja-filter/" rel="bookmark" title="permalink for Pelican自定义Jinja过滤器" ><h2 class="entry-title">Pelican自定义Jinja过滤器</h2></a>
+		    <div class="author-details vcard">
+
+			by <a  class="url fn" href="/author/guohua-wu.html">Guohua Wu</a>  file under <a href="/category/web.html">Web</a> with tags 			<a href="https://wugh.github.io/tag/pelican.html" title="Browse tag: Pelican" rel="tag">Pelican</a>, 			<a href="https://wugh.github.io/tag/jinja.html" title="Browse tag: Jinja" rel="tag">Jinja</a>, 			<a href="https://wugh.github.io/tag/filter.html" title="Browse tag: Filter" rel="tag">Filter</a>		    </div>
+		</header>
+		<div class="entry-content">
+		<p>使用<code>Pelican</code>的时候发现需要在模板中使用<code>Hash</code>函数，但是<code>Jinja</code>并没有提供<code>Hash</code>
+过滤器，需要自己实现一个<code>Hash</code>过滤器，这里以<code>Hash</code>过滤器为例子讲讲如何在
+<code>Pelican</code>中使用自定义过滤器。</p>
+<h3>Hash函数功能实现</h3>
+<p>通过<code>Python</code>的标准库函数实现一个<code>md5</code>的哈希函数，函数的功能的是传入一个字符串
+返回该字符串的<code>md5</code>串，实现如下：</p>
+<div class="highlight"><pre><span class="c"># (c) 2012-2014, Michael DeHaan &lt;michael.dehaan@gmail.com&gt;</span>
+<span class="c">#</span>
+<span class="c"># This file is part of Ansible</span>
+<span class="c">#</span>
+<span class="c"># Ansible is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># Ansible is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with Ansible.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c"># Make coding more python3-ish</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">)</span>
+<span class="n">__metaclass__</span> <span class="o">=</span> <span class="nb">type</span>
+
+
+<span class="c"># Note, sha1 is the only hash algorithm compatible with python2.4 and with</span>
+<span class="c"># FIPS-140 mode (as of 11-2014)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">sha1</span> <span class="k">as</span> <span class="n">sha1</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">sha</span> <span class="kn">import</span> <span class="n">sha</span> <span class="k">as</span> <span class="n">sha1</span>
+
+<span class="c"># Backwards compat only</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">md5</span> <span class="k">as</span> <span class="n">_md5</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">md5</span> <span class="kn">import</span> <span class="n">md5</span> <span class="k">as</span> <span class="n">_md5</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="c"># Assume we&#39;re running in FIPS mode here</span>
+        <span class="n">_md5</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="k">def</span> <span class="nf">secure_hash_s</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">hash_func</span><span class="o">=</span><span class="n">sha1</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return a secure hash hex digest of data. &#39;&#39;&#39;</span>
+
+    <span class="n">digest</span> <span class="o">=</span> <span class="n">hash_func</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">data</span>
+        <span class="n">digest</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">UnicodeEncodeError</span><span class="p">:</span>
+        <span class="n">digest</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">digest</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+
+<span class="c"># The checksum algorithm must match with the algorithm in ShellModule.checksum() method</span>
+<span class="n">checksum_s</span> <span class="o">=</span> <span class="n">secure_hash_s</span>
+
+<span class="c"># Backwards compat functions.  Some modules include md5s in their return values</span>
+<span class="c"># Continue to support that for now.  As of ansible-1.8, all of those modules</span>
+<span class="c"># should also return &quot;checksum&quot; (sha1 for now)</span>
+<span class="c"># Do not use md5 unless it is needed for:</span>
+<span class="c"># 1) Optional backwards compatibility</span>
+<span class="c"># 2) Compliance with a third party protocol</span>
+<span class="c">#</span>
+<span class="c"># MD5 will not work on systems which are FIPS-140-2 compliant.</span>
+
+
+<span class="k">def</span> <span class="nf">md5s</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_md5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;MD5 not available.  Possibly running in FIPS mode&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">secure_hash_s</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_md5</span><span class="p">)</span>
+</pre></div>
+
+
+<p>这里的<code>md5s</code>实现了我们需要的功能。</p>
+<h3>向Pelican注册Jinja过滤器</h3>
+<p>通过配置<code>Pelican</code>的配置文件<code>pelicanconf.py</code>注册过滤器的名字和对应的函数，如下：</p>
+<div class="highlight"><pre><span class="c"># add customer filter</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">curdir</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">hashing</span> <span class="kn">import</span> <span class="n">md5s</span> <span class="k">as</span> <span class="n">md5hash</span>
+<span class="n">JINJA_FILTERS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&quot;md5hash&quot;</span><span class="p">:</span> <span class="n">md5hash</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>代码中注册了一个名字为<code>md5hash</code>的过滤器，并且对应的函数名字也叫<code>md5hash</code>。</p>
+<h3>在Jinja模板中使用自定义过滤器</h3>
+<p>下面的模板中通过文章的<code>url</code>产生一个唯一的<code>key</code>给多说插件使用
+<code>data-thread-key="{{ article.url|md5hash }}"</code></p>
+<div class="highlight"><pre>{%if DUOSHUO %}
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;alpha span9&quot;</span><span class="nt">&gt;</span>
+            <span class="c">&lt;!-- 多说评论框 start --&gt;</span>
+            <span class="c">&lt;!--data-thread-key=&quot;的ID&quot;--&gt;</span>
+            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;ds-thread&quot;</span> <span class="na">data-thread-key=</span><span class="s">&quot;{{ article.url|md5hash }}&quot;</span> <span class="na">data-title=</span><span class="s">&quot;{{ article.title|striptags }}&quot;</span> <span class="na">data-url=</span><span class="s">&quot;{{article.url}}&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
+            <span class="c">&lt;!-- 多说评论框 end --&gt;</span>
+            <span class="c">&lt;!-- 多说公共JS代码 start (一个网页只需插入一次) --&gt;</span>
+            <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+            <span class="kd">var</span> <span class="nx">duoshuoQuery</span> <span class="o">=</span> <span class="p">{</span><span class="nx">short_name</span><span class="o">:</span><span class="s2">&quot;{{DUOSHUO}}&quot;</span><span class="p">};</span>
+                <span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">ds</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">&#39;script&#39;</span><span class="p">);</span>
+                    <span class="nx">ds</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="s1">&#39;text/javascript&#39;</span><span class="p">;</span><span class="nx">ds</span><span class="p">.</span><span class="nx">async</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                    <span class="nx">ds</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">protocol</span> <span class="o">==</span> <span class="s1">&#39;https:&#39;</span> <span class="o">?</span> <span class="s1">&#39;https:&#39;</span> <span class="o">:</span> <span class="s1">&#39;http:&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;//static.duoshuo.com/embed.js&#39;</span><span class="p">;</span>
+                    <span class="nx">ds</span><span class="p">.</span><span class="nx">charset</span> <span class="o">=</span> <span class="s1">&#39;UTF-8&#39;</span><span class="p">;</span>
+                    <span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;head&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> 
+                     <span class="o">||</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]).</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">ds</span><span class="p">);</span>
+                <span class="p">})();</span>
+                <span class="nt">&lt;/script&gt;</span>
+            <span class="c">&lt;!-- 多说公共JS代码 end --&gt;</span>
+<span class="nt">&lt;/div&gt;&lt;/div&gt;</span>
+{%endif%}
+</pre></div> </div>
+	    </article>
+
+	    <!--
+	    in case any image breaks the theme
+	    i was going to use :after but it didn't quite work for me, maybe next time-->
+	    <div class="clearfix"></div>
+
+
+
+	</div>
+    </div>
+</div>
+<div class="row">
+    <div class="span1 metadata alpha">
+	<aside>
+	    <div class="entry-date">
+		<div class="month-day">
 		    <time pubdate datetime="2015-01-08T21:08:00+08:00" title="Jan 08, 15">
 			Jan.<span class="day">08</span>
 			<div class="year">15</div>
@@ -1793,83 +1951,6 @@ mv fonts.conf ~/.config/fontconfig/conf.d/40-myfonts.conf
 	</div>
     </div>
 </div>
-<div class="row">
-    <div class="span1 metadata alpha">
-	<aside>
-	    <div class="entry-date">
-		<div class="month-day">
-		    <time pubdate datetime="2013-11-09T09:15:30+08:00" title="Nov 09, 13">
-			Nov.<span class="day">09</span>
-			<div class="year">13</div>
-		    </time>
-		</div>
-
-	    </div>
-
-	</aside> 
-
-    </div>
-    <div class="span7">
-	<div class="entry-container ">
-
-	    <article  class="entry hentry" >
-		<header>
-		    <a href="/posts/2013/11/linux-audio-format-convert/" rel="bookmark" title="permalink for Linux 音频格式转换" ><h2 class="entry-title">Linux&nbsp;音频格式转换</h2></a>
-		    <div class="author-details vcard">
-
-			by <a  class="url fn" href="/author/guohua-wu.html">Guohua Wu</a>  file under <a href="/category/linux.html">Linux</a> with tags 			<a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html" title="Browse tag: 格式转换" rel="tag">格式转换</a>		    </div>
-		</header>
-		<div class="entry-content">
-		<hr />
-<h3>需要的软件</h3>
-<p>在开始转换之前我们需要两个程序<a href="http://lame.sourceforge.net/download.php"><span class="caps">LAME</span></a>
-和<a href="http://www.audiocoding.com/downloads.html"><span class="caps">FAAD2</span></a>，这两个包应该通过linux自带&nbsp;的软件包管理器就可以安装。Gentoo下面安装方法如下：</p>
-<div class="highlight"><pre>emerge --ask media-sound/lame
-emerge --ask media-libs/faad2
-</pre></div>
-
-
-<h3>批量转换</h3>
-<h4>m4a转换成mp3</h4>
-<div class="highlight"><pre><span class="c">#!/bin/bash</span>
-
-<span class="k">for</span> i in *.m4a<span class="p">;</span> <span class="k">do</span>
-    <span class="nb">echo</span> <span class="s2">&quot;Converting: </span><span class="si">${</span><span class="nv">i</span><span class="p">%.m4a</span><span class="si">}</span><span class="s2">.mp3&quot;</span>
-    faad -o - <span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span> <span class="p">|</span> lame - <span class="s2">&quot;</span><span class="si">${</span><span class="nv">i</span><span class="p">%.m4a</span><span class="si">}</span><span class="s2">.mp3&quot;</span>
-<span class="k">done</span>
-</pre></div>
-
-
-<h4>flac转mp3</h4>
-<p>另外可以使用flac转mp3，需要以下三个命令flac lame&nbsp;id3，然后使用以下脚本</p>
-<div class="highlight"><pre><span class="c">#! /bin/sh</span>
-
-<span class="k">for</span> a in *.flac<span class="p">;</span> <span class="k">do</span>
-    <span class="nv">OUTF</span><span class="o">=</span><span class="si">${</span><span class="nv">a</span><span class="p">%.flac</span><span class="si">}</span>.mp3
-
-    <span class="nv">ARTIST</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>ARTIST <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
-    <span class="nv">TITLE</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>TITLE <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
-    <span class="nv">ALBUM</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>ALBUM <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
-    <span class="nv">GENRE</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>GENRE <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
-    <span class="nv">TRACKNUMBER</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>TRACKNUMBER <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
-    <span class="nv">DATE</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>DATE <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
-
-    flac -c -d <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> <span class="p">|</span> lame -m j -q <span class="m">0</span> --vbr-new -V <span class="m">0</span> -s 44.1 - <span class="s2">&quot;</span><span class="nv">$OUTF</span><span class="s2">&quot;</span>
-    id3 -t <span class="s2">&quot;</span><span class="nv">$TITLE</span><span class="s2">&quot;</span> -T <span class="s2">&quot;</span><span class="si">${</span><span class="nv">TRACKNUMBER</span><span class="k">:-</span><span class="nv">0</span><span class="si">}</span><span class="s2">&quot;</span> -a <span class="s2">&quot;</span><span class="nv">$ARTIST</span><span class="s2">&quot;</span> -A <span class="s2">&quot;</span><span class="nv">$ALBUM</span><span class="s2">&quot;</span> -y <span class="s2">&quot;</span><span class="nv">$DATE</span><span class="s2">&quot;</span> -g <span class="s2">&quot;</span><span class="si">${</span><span class="nv">GENRE</span><span class="k">:-</span><span class="nv">12</span><span class="si">}</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="nv">$OUTF</span><span class="s2">&quot;</span>
-<span class="k">done</span>
-</pre></div> </div>
-	    </article>
-
-	    <!--
-	    in case any image breaks the theme
-	    i was going to use :after but it didn't quite work for me, maybe next time-->
-	    <div class="clearfix"></div>
-
-
-
-	</div>
-    </div>
-</div>
 
 <div class="row">
     <div class="span1 alpha"></div>
@@ -1904,6 +1985,7 @@ emerge --ask media-libs/faad2
         <h3 class="widget-header">Recent Articles</h3>
 	<div class="widget-content">
 	    <ul class="widget-list">
+		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/" title="Read: Pelican自定义Jinja过滤器">Pelican自定义Jinja过滤器</a></li>
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/" title="Read: Linux通过Pulse混合麦克风和音频输出">Linux通过Pulse混合麦克风和音频输出</a></li>
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2014/11/maxent/" title="Read: 最大熵">最大熵</a></li>
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/" title="Read: MDP入门"><span class="caps">MDP</span>入门</a></li>
@@ -1913,7 +1995,6 @@ emerge --ask media-libs/faad2
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2013/11/gentoo-portage-tips/" title="Read: Gentoo Portage使用技巧">Gentoo&nbsp;Portage使用技巧</a></li>
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2013/11/linux-fontconfig/" title="Read: Linux字体配置">Linux字体配置</a></li>
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2013/11/linux-mp3-tag-problem/" title="Read: 解决Linux下mp3标签乱码">解决Linux下mp3标签乱码</a></li>
-		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2013/11/linux-audio-format-convert/" title="Read: Linux 音频格式转换">Linux&nbsp;音频格式转换</a></li>
 	    </ul>
 	</div>
     </div>
@@ -1927,7 +2008,7 @@ emerge --ask media-libs/faad2
 
 		<li class="widget-list-item"><a href="https://wugh.github.io/category/nlp.html">NLP.<span>1</span></a></li>
 
-		<li class="widget-list-item"><a href="https://wugh.github.io/category/web.html">Web.<span>1</span></a></li>
+		<li class="widget-list-item"><a href="https://wugh.github.io/category/web.html">Web.<span>2</span></a></li>
 
 	    </ul>
 	</div>

@@ -117,6 +117,83 @@ ga('send', 'pageview');
 	<aside>
 	    <div class="entry-date">
 		<div class="month-day">
+		    <time pubdate datetime="2013-11-09T09:15:30+08:00" title="Nov 09, 13">
+			Nov.<span class="day">09</span>
+			<div class="year">13</div>
+		    </time>
+		</div>
+
+	    </div>
+
+	</aside> 
+
+    </div>
+    <div class="span7">
+	<div class="entry-container ">
+
+	    <article  class="entry hentry" >
+		<header>
+		    <a href="/posts/2013/11/linux-audio-format-convert/" rel="bookmark" title="permalink for Linux 音频格式转换" ><h2 class="entry-title">Linux&nbsp;音频格式转换</h2></a>
+		    <div class="author-details vcard">
+
+			by <a  class="url fn" href="/author/guohua-wu.html">Guohua Wu</a>  file under <a href="/category/linux.html">Linux</a> with tags 			<a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html" title="Browse tag: 格式转换" rel="tag">格式转换</a>		    </div>
+		</header>
+		<div class="entry-content">
+		<hr />
+<h3>需要的软件</h3>
+<p>在开始转换之前我们需要两个程序<a href="http://lame.sourceforge.net/download.php"><span class="caps">LAME</span></a>
+和<a href="http://www.audiocoding.com/downloads.html"><span class="caps">FAAD2</span></a>，这两个包应该通过linux自带&nbsp;的软件包管理器就可以安装。Gentoo下面安装方法如下：</p>
+<div class="highlight"><pre>emerge --ask media-sound/lame
+emerge --ask media-libs/faad2
+</pre></div>
+
+
+<h3>批量转换</h3>
+<h4>m4a转换成mp3</h4>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+
+<span class="k">for</span> i in *.m4a<span class="p">;</span> <span class="k">do</span>
+    <span class="nb">echo</span> <span class="s2">&quot;Converting: </span><span class="si">${</span><span class="nv">i</span><span class="p">%.m4a</span><span class="si">}</span><span class="s2">.mp3&quot;</span>
+    faad -o - <span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span> <span class="p">|</span> lame - <span class="s2">&quot;</span><span class="si">${</span><span class="nv">i</span><span class="p">%.m4a</span><span class="si">}</span><span class="s2">.mp3&quot;</span>
+<span class="k">done</span>
+</pre></div>
+
+
+<h4>flac转mp3</h4>
+<p>另外可以使用flac转mp3，需要以下三个命令flac lame&nbsp;id3，然后使用以下脚本</p>
+<div class="highlight"><pre><span class="c">#! /bin/sh</span>
+
+<span class="k">for</span> a in *.flac<span class="p">;</span> <span class="k">do</span>
+    <span class="nv">OUTF</span><span class="o">=</span><span class="si">${</span><span class="nv">a</span><span class="p">%.flac</span><span class="si">}</span>.mp3
+
+    <span class="nv">ARTIST</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>ARTIST <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
+    <span class="nv">TITLE</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>TITLE <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
+    <span class="nv">ALBUM</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>ALBUM <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
+    <span class="nv">GENRE</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>GENRE <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
+    <span class="nv">TRACKNUMBER</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>TRACKNUMBER <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
+    <span class="nv">DATE</span><span class="o">=</span><span class="k">$(</span>metaflac <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> --show-tag<span class="o">=</span>DATE <span class="p">|</span> sed s/.*<span class="o">=</span>//g<span class="k">)</span>
+
+    flac -c -d <span class="s2">&quot;</span><span class="nv">$a</span><span class="s2">&quot;</span> <span class="p">|</span> lame -m j -q <span class="m">0</span> --vbr-new -V <span class="m">0</span> -s 44.1 - <span class="s2">&quot;</span><span class="nv">$OUTF</span><span class="s2">&quot;</span>
+    id3 -t <span class="s2">&quot;</span><span class="nv">$TITLE</span><span class="s2">&quot;</span> -T <span class="s2">&quot;</span><span class="si">${</span><span class="nv">TRACKNUMBER</span><span class="k">:-</span><span class="nv">0</span><span class="si">}</span><span class="s2">&quot;</span> -a <span class="s2">&quot;</span><span class="nv">$ARTIST</span><span class="s2">&quot;</span> -A <span class="s2">&quot;</span><span class="nv">$ALBUM</span><span class="s2">&quot;</span> -y <span class="s2">&quot;</span><span class="nv">$DATE</span><span class="s2">&quot;</span> -g <span class="s2">&quot;</span><span class="si">${</span><span class="nv">GENRE</span><span class="k">:-</span><span class="nv">12</span><span class="si">}</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="nv">$OUTF</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</pre></div> </div>
+	    </article>
+
+	    <!--
+	    in case any image breaks the theme
+	    i was going to use :after but it didn't quite work for me, maybe next time-->
+	    <div class="clearfix"></div>
+
+
+
+	</div>
+    </div>
+</div>
+<div class="row">
+    <div class="span1 metadata alpha">
+	<aside>
+	    <div class="entry-date">
+		<div class="month-day">
 		    <time pubdate datetime="2013-11-09T00:57:27+08:00" title="Nov 09, 13">
 			Nov.<span class="day">09</span>
 			<div class="year">13</div>
@@ -288,6 +365,7 @@ rc-update add iptables default
         <h3 class="widget-header">Recent Articles</h3>
 	<div class="widget-content">
 	    <ul class="widget-list">
+		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/" title="Read: Pelican自定义Jinja过滤器">Pelican自定义Jinja过滤器</a></li>
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/" title="Read: Linux通过Pulse混合麦克风和音频输出">Linux通过Pulse混合麦克风和音频输出</a></li>
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2014/11/maxent/" title="Read: 最大熵">最大熵</a></li>
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/" title="Read: MDP入门"><span class="caps">MDP</span>入门</a></li>
@@ -297,7 +375,6 @@ rc-update add iptables default
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2013/11/gentoo-portage-tips/" title="Read: Gentoo Portage使用技巧">Gentoo&nbsp;Portage使用技巧</a></li>
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2013/11/linux-fontconfig/" title="Read: Linux字体配置">Linux字体配置</a></li>
 		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2013/11/linux-mp3-tag-problem/" title="Read: 解决Linux下mp3标签乱码">解决Linux下mp3标签乱码</a></li>
-		<li class="widget-list-item"><a href="https://wugh.github.io/posts/2013/11/linux-audio-format-convert/" title="Read: Linux 音频格式转换">Linux&nbsp;音频格式转换</a></li>
 	    </ul>
 	</div>
     </div>
@@ -311,7 +388,7 @@ rc-update add iptables default
 
 		<li class="widget-list-item"><a href="https://wugh.github.io/category/nlp.html">NLP.<span>1</span></a></li>
 
-		<li class="widget-list-item"><a href="https://wugh.github.io/category/web.html">Web.<span>1</span></a></li>
+		<li class="widget-list-item"><a href="https://wugh.github.io/category/web.html">Web.<span>2</span></a></li>
 
 	    </ul>
 	</div>
