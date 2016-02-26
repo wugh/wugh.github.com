@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 AUTHOR = u'Guohua Wu'
 SITENAME = u'Life in a Nutshell'
-SITEURL = ''
+SITEURL = 'https://wugh.github.io'
 
 PATH = 'content'
 
@@ -13,6 +13,7 @@ TIMEZONE = 'Asia/Shanghai'
 DEFAULT_LANG = u'zh-CN'
 
 # Feed generation is usually not desired when developing
+FEED_ATOM = 'feeds/main.atom.xml'
 FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
@@ -20,13 +21,12 @@ AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
 # Blogroll
-LINKS = (('Pelican', 'http://getpelican.com/'),
-         ('Python.org', 'http://python.org/'),
-         ('Jinja2', 'http://jinja.pocoo.org/'),)
+# LINKS = (('Pelican', 'http://getpelican.com/'),
+#          ('Python.org', 'http://python.org/'),
+#          ('Jinja2', 'http://jinja.pocoo.org/'),)
 
 # Social widget
-SOCIAL = (('You can add links in your config file', '#'),
-          ('Another social link', '#'),)
+SOCIAL = (('GitHub', 'https://github.com/wugh'),)
 
 DEFAULT_PAGINATION = 10
 
@@ -35,9 +35,12 @@ PLUGIN_PATHS = ['pelican-plugins']
 PLUGINS = ['render_math']
 
 # 主题
-THEME = './Nuja'
+THEME = './pelican-themes/octopress'
 MENUITEMS = [('Archives', '/archives.html')]
-DUOSHUO = 'wughblog'
+DISQUS_SITENAME = 'guohuasblog'
+
+# 导航
+DISPLAY_CATEGORIES_ON_MENU = False
 
 # HTML优化
 TYPOGRIFY = True
