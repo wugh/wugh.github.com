@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CS224D笔记1——word2vec &mdash; Life in a Nutshell</title>
+  <meta name="author" content="Guohua Wu">
+
+  <link href="https://wugh.github.io/feeds/main.atom.xml" type="application/atom+xml" rel="alternate"
+        title="Life in a Nutshell Atom Feed" />
+
+
+
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link href="https://wugh.github.io/favicon.png" rel="icon">
+
+  <link href="https://wugh.github.io/theme/css/main.css" media="screen, projection"
+        rel="stylesheet" type="text/css">
+
+  <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="https://wugh.github.io/">Life in a Nutshell</a></h1>
+</hgroup></header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="https://wugh.github.io/feeds/main.atom.xml" rel="subscribe-atom">Atom</a></li>
+</ul>
+
+
+<ul class="main-navigation">
+    <li><a href="/archives.html">Archives</a></li>
+      <li><a href="https://wugh.github.io/pages/about-me.html">About&nbsp;Me</a></li>
+</ul></nav>
+  <div id="main">
+    <div id="content">
+<div>
+  <article class="hentry" role="article">
+<header>
+      <h1 class="entry-title">CS224D笔记1——word2vec</h1>
+    <p class="meta">
+<time datetime="2016-02-26T10:03:00+08:00" pubdate>2016-02-26(Fri)</time>    </p>
+</header>
+
+  <div class="entry-content"><hr />
+<p>假期学习了斯坦福的<a href="http://cs224d.stanford.edu/syllabus.html">CS224d</a>课程，该课
+程的主要内容是神经网络在自然语言处理领域的应用。 这里记录相关的学习笔记，大概分
+成以下几个部分：word2vec，窗口分类，神经网络，循环神经网络，递归神经网络，卷积&nbsp;神经网络。</p>
+<h2>为什么需要深度学习</h2>
+<p>传统的机器学习方法都是认为的设计特征或者表示，深度学习的目的是希望能够通过神经
+网络让机器自动学习到有效的特征表示，这里所说的深度学习更偏向于关注各种类型的神
+经网络。探索机器学习的<a href="http://www.52nlp.cn/%E6%96%AF%E5%9D%A6%E7%A6%8F%E5%A4%A7%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%8E%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86%E7%AC%AC%E4%B8%80%E8%AE%B2%E5%BC%95%E8%A8%80">原因</a>主要有以下几方面：</p>
+<ul>
+<li>人工设计的特征常常定义过多，不完整并且需要花费大量的时间去设计和验证</li>
+<li>自动学习的特征容易自适应，并且可以很快的学习</li>
+<li>深度学习提供了一个弹性的，通用的学习框架用来表征自然的，视觉的和语言的信息。</li>
+<li>深度学习可以用来学习非监督的（来自于生文本）和有监督的（带有特别标记的文本，&nbsp;例如正向和负向标记）</li>
+<li>在2006年深度学习技术开始在一些任务中表现出众，为什么现在才热起来？<ul>
+<li>深度学习技术受益于越来越多的数据</li>
+<li>更快的机器与更多核<span class="caps">CPU</span>/<span class="caps">GPU</span>对深度学习的普及起了很大的促进作用</li>
+<li>新的模型，算法和idea层出不穷</li>
+</ul>
+</li>
+<li>通过深度学习技术提升效果首先发生在语音识别和机器视觉领域，然后开始过渡到<span class="caps">NLP</span>领&nbsp;域</li>
+</ul>
+<p>深度学习在所有的<span class="caps">NLP</span>层次（音素、形态学、句法、语义）都得到了应用，在所有的<span class="caps">NLP</span>层&nbsp;次的表示都涉及到向量（Vectors），下面主要讲如何用向量来表示词。</p>
+<h2>词向量</h2>
+<p>在传统意义上会使用<a href="http://wordnet.princeton.edu/">WordNet</a>来表示词的含义，通过WordNet可以查询词之间的
+上下位关系、一个词的同义词、度量词之间的相似度等。但是WordNet是由人工维护，存在&nbsp;一些问题：</p>
+<ul>
+<li>语义词典资源很棒但是可能在一些细微之处有缺失，例如这些同义词准确吗：adept,
+  expert, good, practiced,&nbsp;proficient,skillful?</li>
+<li>新词缺失（无法及时更新）</li>
+<li>人为构建，具有一定的主观性</li>
+<li>需要耗费大量的人力来构建</li>
+<li>很难用来计算词与词的相似度</li>
+</ul>
+<h3>One-hot向量</h3>
+<p>首先我们把词表中的词从0到<span class="math">\(|V|-1\)</span>进行编号，ont-hot向量把每个词表示成一个<span class="math">\(|V|\)</span>维
+（词表大小为<span class="math">\(|V|\)</span>）的向量，该向量只有特定词的编号对应的位置为1，其他位置全部为0
+。这种方法把每个词表示成独立的个体，无法通过one-hot向量直接到词之间的关系。解决&nbsp;方法是通过一个词的上下文来表示一个词。</p>
+<h3>基于<span class="caps">SVD</span>分解的方法</h3>
+<p>这种方法的基本思想是通过大量的数据统计到词的累计共现矩阵<span class="math">\(X\)</span>，然后对<span class="math">\(X\)</span>进行奇异值
+分解得到<span class="math">\(USV^T\)</span>，<span class="math">\(U\)</span>的每一行对应一个词的向量表示，<span class="caps">SVD</span>更多信息参考<a href="http://www.cnblogs.com/LeftNotEasy/archive/2011/01/19/svd-and-applications.html">这里</a>。&nbsp;共现矩阵一般分为词-文档共现矩阵和词-词共现矩阵。</p>
+<h4>词-文档共现矩阵</h4>
+<p>这种共现矩阵的思想认为相关的词会出现在同一个文档中。假设词表大小为<span class="math">\(|V|\)</span>，文档数
+量为<span class="math">\(|M|\)</span>，那么词-文档共现矩阵规模为<span class="math">\(|V|\times|M|\)</span>，矩阵元素<span class="math">\(X_{ij}\)</span>表示词i在文&nbsp;档j中的出现次数，只要对所有文档循环一次就可以统计得到该矩阵</p>
+<h4>词-词共现矩阵</h4>
+<p>词-词共现矩阵的思想是词i的窗口内出现了j，那么认为i和j的共现次数加一，<span class="math">\(X_{ij}\)</span>表
+示两个词的共现次数，<span class="math">\(X\)</span>是一个<span class="math">\(|V|\times|V|\)</span>的方阵。窗口一般是对称的，长度一般为&nbsp;5-10。下面举一个简单的例子，例子中窗口大小为1，语料如下：</p>
+<ol>
+<li>I enjoy&nbsp;flying.</li>
+<li>I like <span class="caps">NLP</span>.</li>
+<li>I like deep&nbsp;learning.</li>
+</ol>
+<p>得到共现矩阵如下：
+<img alt="词-词共现矩阵" src="https://wugh.github.io/images/NLP/word-word-matrix.png" /></p>
+<p>对该矩阵进行<span class="caps">SVD</span>分解：
+<img alt="svd" src="https://wugh.github.io/images/NLP/word-word-matrix-svd.png" /></p>
+<p>之后区<span class="math">\(U\)</span>的前<span class="math">\(k\)</span>列作为所有单词的<span class="math">\(k\)</span>维向量表示。
+<img alt="向量表示" src="https://wugh.github.io/images/NLP/word-word-matrix-embeding.png" /></p>
+<p>这种基于共现矩阵进行<span class="caps">SVD</span>分解的方法存在问题：</p>
+<ul>
+<li>矩阵的维度经常发生变化（新词和新文档的加入）</li>
+<li>矩阵非常稀疏</li>
+<li>矩阵过大</li>
+<li><span class="caps">SVD</span>分解的计算复杂度大，对于<span class="math">\(n\times m\)</span>的矩阵进行分解的复杂度为<span class="math">\(O(mn^2)\)</span></li>
+<li>需要对<span class="math">\(X\)</span>矩阵进行一些修正来修复词频分布不均匀问题</li>
+</ul>
+<p>对<span class="math">\(X\)</span>矩阵的一些修正：</p>
+<ul>
+<li>功能词(the, he,&nbsp;has)过于频繁，对语法有很大影响，解决办法是降低使用或完全忽略功能词</li>
+<li>采用带权重的窗口，距离当前词距离越近共现权重越大</li>
+<li>用皮尔逊相关系数代替计数，并置负数为0</li>
+</ul>
+<h3>Word2vec</h3>
+<p>Word2vec的基本思想与共现计数不同，word2vec主要分为两种，采用当前词来预测窗口中&nbsp;的其他词（skip-gram），另一种是用窗口中的词来预测当前词（cbow）。</p>
+<h4><span class="caps">CBOW</span></h4>
+<p><span class="caps">CBOW</span>（Continuous Bag of Words）的基本使用窗口中的词的向量求平均之后来预测中心词
+。训练语料是上下文和对应的中心词的对，上下文窗口内的每个词都用一个one-hot向量
+<span class="math">\(x^(i)\)</span>表示，中心词用one-hot向量<span class="math">\(y^(i)\)</span>表示，<span class="caps">CBOW</span>中预测的中心词只有一个所以直接把
+输出向量表示成<span class="math">\(y\)</span>。</p>
+<p>随机初始化两个矩阵（一般用正态分布进行初始化）<span class="math">\(W^{(1)}\in \mathbb{R}^{n\times |V|}\)</span>和
+<span class="math">\(W^{(2)}\in \mathbb{R}^{|V|\times n}\)</span>分别用来存储输入向量和输出向量，最后训练完每个词
+有两个向量，一个是当作输入时的向量，一个是当作输出时的向量。<span class="math">\(n\)</span>为词向量的维度；<span class="math">\(W^{(1)}\)</span>
+的第<span class="math">\(i\)</span>列表示词<span class="math">\(w^(i)\)</span>当作输入时的向量表示，记作<span class="math">\(u^{(i)}\)</span>；<span class="math">\(W^{(2)}\)</span>的第<span class="math">\(j\)</span>行表
+示词<span class="math">\(w^(j)\)</span>当作输出时的向量表示，记作<span class="math">\(v^{(j)}\)</span>。利用上下文预测中心词的步骤如下：</p>
+<ol>
+<li>把大小为<span class="math">\(C\)</span>的上下文用one-hot向量表示
+   <span class="math">\((x^{(i-C)},\ldots,x^{(i-1)},x^{(i+1)},\ldots,x^{(i+C)})\)</span></li>
+<li>把<span class="math">\(W^{(1)}\)</span>分别和<span class="math">\(2C\)</span>个one-hot向量相乘，得到上下文的输入向量，例如
+   <span class="math">\(x^{(i-C)}\)</span>作为输入时的向量为<span class="math">\(u^{(i-C)}=W^{(1)}x^{(i-C)}\)</span></li>
+<li>将上下文中的向量进行平均<span class="math">\(h=\frac{u^{(i-C)}+u^{(i-C+1)}+\ldots&nbsp;+u^{(i+C)}}{2C}\)</span></li>
+<li>生成得分向量<span class="math">\(z=W^{(2)}h\)</span></li>
+<li>利用softmax函数将得分转换成概率<span class="math">\(\hat{y}=\text{softmax}(z)\)</span></li>
+<li>我们的目标是希望预测的概率<span class="math">\(\hat{y}\)</span>和真实的中心词one-hot向量<span class="math">\(y\)</span>一致</li>
+</ol>
+<p>我们希望模型输出的概率分布和真实分布的尽量相似，可以利用信息论中的交叉熵来衡量两个概率分布
+的距离，离散情况下两个概率分布的交叉熵<span class="math">\(H(\hat{y},y)\)</span>如下：
+</p>
+<div class="math">$$H(y,\hat{y})=-\sum_{j=1}^{|V|}y_j\log(\hat{y}_j)$$</div>
+<p>
+考虑<span class="caps">CBOW</span>中的情况，此时<span class="math">\(y\)</span>是一个one-hot向量，假设<span class="math">\(y\)</span>的第<span class="math">\(i\)</span>维为1，那么交叉熵可以简化成：
+</p>
+<div class="math">$$H(y,\hat{y})=-y_i\log(\hat{y}_i)=\log(\hat{y}_i)$$</div>
+<p>
+可以看出交叉熵的最小值为0，优化目标就是最小化交叉熵：
+</p>
+<div class="math">\begin{align*}
+J&amp;=-\log P(w^{(i)}|x^{(i-C)},\ldots,x^{(i-1)},x^{(i+1)},\ldots,x^{(i+C)})\\
+&amp;=-\log P(v^{(i)}|h)\\
+&amp;=-\log \frac{\exp{(v^{(i)}\cdot h)}}{\sum_{j=1}^{|V|}\exp(v^{(j)}\cdot h)}\\
+&amp;=-v^{(i)}\cdot h + \log{\sum_{j=1}^{|V|}\exp(v^{(j)}\cdot h)}
+\end{align*}</div>
+<h4>Skip-Gram</h4>
+<p>Skip-Gram的基本思想用当前词预测窗口长度为<span class="math">\(c\)</span>内的其他词</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+    <footer>
+<p class="meta">
+  <span class="byline author vcard">
+    Posted by <span class="fn">
+        Guohua Wu
+    </span>
+  </span>
+<time datetime="2016-02-26T10:03:00+08:00" pubdate>2016-02-26(Fri)</time>  <span class="categories">
+    <a class='category' href='https://wugh.github.io/category/nlp.html'>NLP</a>
+  </span>
+  <span class="categories">
+    <a class="category" href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a class="category" href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>  </span>
+</p><div class="sharing">
+</div>    </footer>
+  </article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></div>
+  </section>
+</div>
+<aside class="sidebar">
+  <section>
+    <h1>Recent Posts</h1>
+    <ul id="recent_posts">
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224D笔记1——word2vec</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Pelican自定义Jinja过滤器</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/">Linux通过Pulse混合麦克风和音频输出</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2014/11/maxent/">最大熵</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">MDP入门</a>
+      </li>
+    </ul>
+  </section>
+  <section>
+      
+    <h1>Categories</h1>
+    <ul id="recent_posts">
+        <li><a href="https://wugh.github.io/category/linux.html">Linux</a></li>
+        <li><a href="https://wugh.github.io/category/machine-learning.html">Machine Learning</a></li>
+        <li><a href="https://wugh.github.io/category/nlp.html">NLP</a></li>
+        <li><a href="https://wugh.github.io/category/web.html">Web</a></li>
+    </ul>
+  </section>
+ 
+
+  <section>
+  <h1>Tags</h1>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>  </section>
+
+
+    <section>
+        <h1>Social</h1>
+        <ul>
+            <li><a href="https://wugh.github.io/feeds/main.atom.xml" type="application/atom+xml" rel="alternate">Atom</a></li>
+            <li><a href="https://github.com/wugh" target="_blank">GitHub</a></li>
+        </ul>
+    </section>
+
+</aside>    </div>
+  </div>
+  <footer role="contentinfo"><p>
+    Copyright &copy;  2013&ndash;2016  Guohua Wu &mdash;
+  <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
+</p></footer>
+  <script src="https://wugh.github.io/theme/js/modernizr-2.0.js"></script>
+  <script src="https://wugh.github.io/theme/js/ender.js"></script>
+  <script src="https://wugh.github.io/theme/js/octopress.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var disqus_shortname = 'guohuasblog';
+    var disqus_identifier = '/posts/2016/02/cs224d-notes1-word2vec/';
+    var disqus_url = 'https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/';
+    var disqus_title = '<span class="caps">CS224D</span>笔记1——word2vec';
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = "//" + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+  </script>
+</body>
+</html>

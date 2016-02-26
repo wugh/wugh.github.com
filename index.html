@@ -48,6 +48,39 @@
   		<article>
 <header>
       <h1 class="entry-title">
+        <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224D笔记1——word2vec</a>
+      </h1>
+    <p class="meta">
+<time datetime="2016-02-26T10:03:00+08:00" pubdate>2016-02-26(Fri)</time>    </p>
+</header>
+
+  <div class="entry-content"><hr />
+<p>假期学习了斯坦福的<a href="http://cs224d.stanford.edu/syllabus.html">CS224d</a>课程，该课
+程的主要内容是神经网络在自然语言处理领域的应用。 这里记录相关的学习笔记，大概分
+成以下几个部分：word2vec，窗口分类，神经网络，循环神经网络，递归神经网络，卷积&nbsp;神经网络。</p>
+<h2>为什么需要深度学习</h2>
+<p>传统的机器学习方法都是认为的设计特征或者表示，深度学习的目的是希望能够通过神经
+网络让机器自动学习到有效的特征表示，这里所说的深度学习更偏向于关注各种类型的神
+经网络。探索机器学习的<a href="http://www.52nlp.cn/%E6%96%AF%E5%9D%A6%E7%A6%8F%E5%A4%A7%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%8E%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86%E7%AC%AC%E4%B8%80%E8%AE%B2%E5%BC%95%E8%A8%80">原因</a>主要有以下几方面：</p>
+<ul>
+<li>人工设计的特征常常定义过多，不完整并且需要花费大量的时间去设计和验证</li>
+<li>自动学习的特征容易自适应，并且可以很快的学习</li>
+<li>深度学习提供了一个弹性的，通用的学习框架用来表征自然的，视觉的和语言的信息。</li>
+<li>深度学习可以用来学习非监督的（来自于生文本）和有监督的（带有特别标记的文本，&nbsp;例如正向和负向标记）</li>
+<li>在2006年深度学习技术开始在一些任务中表现出众，为什么现在才热起来？<ul>
+<li>深度学习技术受益于越来越多的数据</li>
+<li>更快的机器与更多核<span class="caps">CPU</span>/<span class="caps">GPU</span>对深度学习的普及起了很大的促进作用</li>
+<li>新的模型，算法和idea层出不穷</li>
+</ul>
+</li>
+<li>通过深度学习技术提升效果首先发生在语音识别和机器视觉领域，然后开始过渡到<span class="caps">NLP</span>领&nbsp;域 ...</li></ul></div>
+  <footer>
+    <a rel="full-article" href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">Read On &crarr;</a>
+  </footer>
+  		</article>
+  		<article>
+<header>
+      <h1 class="entry-title">
         <a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Pelican自定义Jinja过滤器</a>
       </h1>
     <p class="meta">
@@ -360,32 +393,6 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
     <a rel="full-article" href="https://wugh.github.io/posts/2013/11/linux-fontconfig/">Read On &crarr;</a>
   </footer>
   		</article>
-  		<article>
-<header>
-      <h1 class="entry-title">
-        <a href="https://wugh.github.io/posts/2013/11/linux-mp3-tag-problem/">解决Linux下mp3标签乱码</a>
-      </h1>
-    <p class="meta">
-<time datetime="2013-11-09T09:29:46+08:00" pubdate>2013-11-09(Sat)</time>    </p>
-</header>
-
-  <div class="entry-content"><hr />
-<p>在Linux下mp3标签出现乱码的原因主要是下载到的mp3都使用<a href="http://zh.wikipedia.org/wiki/GB_2312"><span class="caps">GB2312</span></a>编码，然而Linux下使用的编码是<a href="http://zh.wikipedia.org/wiki/UTF-8"><span class="caps">UTF</span>-8</a>编码，所以只要对标签编码做一个转换就可以解决问题。</p>
-<h3>安装软件</h3>
-<p>下面以Gentoo为例子安装<a href="https://code.google.com/p/mutagen/">Mutagen</a>，其他的发行&nbsp;版自行Google。</p>
-<div class="highlight"><pre>emerge --ask media-libs/mutagen
-</pre></div>
-
-
-<h3>转换当前目录下的所有mp3文件标签</h3>
-<div class="highlight"><pre>find . -iname <span class="s2">&quot;*.mp3&quot;</span> -exec mid3iconv -e gbk <span class="o">{}</span> <span class="se">\;</span>
-</pre></div>
-
-
-<h3>转换当前目录下的所有ape文件标签</h3>
-<div class="highlight"><pre>find . -iname <span class="s2">&quot;*.ape&quot;</span> -exec mid3iconv -e gbk <span class="o">{}</span> <span class="se">\;</span>
-</pre></div></div>
-  		</article>
 <div class="pagination">
     <a class="prev" href="https://wugh.github.io/index2.html">&larr; Older</a>
 
@@ -395,6 +402,9 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
   <section>
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224D笔记1——word2vec</a>
+      </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Pelican自定义Jinja过滤器</a>
       </li>
@@ -406,9 +416,6 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
       </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">MDP入门</a>
-      </li>
-      <li class="post">
-          <a href="https://wugh.github.io/posts/2013/11/text-classification/">文本分类</a>
       </li>
     </ul>
   </section>
@@ -426,7 +433,7 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
 
   <section>
   <h1>Tags</h1>
-    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>  </section>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>  </section>
 
 
     <section>
@@ -440,7 +447,7 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
 </aside>    </div>
   </div>
   <footer role="contentinfo"><p>
-    Copyright &copy;  2013&ndash;2015  Guohua Wu &mdash;
+    Copyright &copy;  2013&ndash;2016  Guohua Wu &mdash;
   <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
 </p></footer>
   <script src="https://wugh.github.io/theme/js/modernizr-2.0.js"></script>

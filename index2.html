@@ -48,6 +48,32 @@
   		<article>
 <header>
       <h1 class="entry-title">
+        <a href="https://wugh.github.io/posts/2013/11/linux-mp3-tag-problem/">解决Linux下mp3标签乱码</a>
+      </h1>
+    <p class="meta">
+<time datetime="2013-11-09T09:29:46+08:00" pubdate>2013-11-09(Sat)</time>    </p>
+</header>
+
+  <div class="entry-content"><hr />
+<p>在Linux下mp3标签出现乱码的原因主要是下载到的mp3都使用<a href="http://zh.wikipedia.org/wiki/GB_2312"><span class="caps">GB2312</span></a>编码，然而Linux下使用的编码是<a href="http://zh.wikipedia.org/wiki/UTF-8"><span class="caps">UTF</span>-8</a>编码，所以只要对标签编码做一个转换就可以解决问题。</p>
+<h3>安装软件</h3>
+<p>下面以Gentoo为例子安装<a href="https://code.google.com/p/mutagen/">Mutagen</a>，其他的发行&nbsp;版自行Google。</p>
+<div class="highlight"><pre>emerge --ask media-libs/mutagen
+</pre></div>
+
+
+<h3>转换当前目录下的所有mp3文件标签</h3>
+<div class="highlight"><pre>find . -iname <span class="s2">&quot;*.mp3&quot;</span> -exec mid3iconv -e gbk <span class="o">{}</span> <span class="se">\;</span>
+</pre></div>
+
+
+<h3>转换当前目录下的所有ape文件标签</h3>
+<div class="highlight"><pre>find . -iname <span class="s2">&quot;*.ape&quot;</span> -exec mid3iconv -e gbk <span class="o">{}</span> <span class="se">\;</span>
+</pre></div></div>
+  		</article>
+  		<article>
+<header>
+      <h1 class="entry-title">
         <a href="https://wugh.github.io/posts/2013/11/linux-audio-format-convert/">Linux 音频格式转换</a>
       </h1>
     <p class="meta">
@@ -129,6 +155,9 @@ emerge -a iptables
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
       <li class="post">
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224D笔记1——word2vec</a>
+      </li>
+      <li class="post">
           <a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Pelican自定义Jinja过滤器</a>
       </li>
       <li class="post">
@@ -139,9 +168,6 @@ emerge -a iptables
       </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">MDP入门</a>
-      </li>
-      <li class="post">
-          <a href="https://wugh.github.io/posts/2013/11/text-classification/">文本分类</a>
       </li>
     </ul>
   </section>
@@ -159,7 +185,7 @@ emerge -a iptables
 
   <section>
   <h1>Tags</h1>
-    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>  </section>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>  </section>
 
 
     <section>
@@ -173,7 +199,7 @@ emerge -a iptables
 </aside>    </div>
   </div>
   <footer role="contentinfo"><p>
-    Copyright &copy;  2013&ndash;2015  Guohua Wu &mdash;
+    Copyright &copy;  2013&ndash;2016  Guohua Wu &mdash;
   <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
 </p></footer>
   <script src="https://wugh.github.io/theme/js/modernizr-2.0.js"></script>

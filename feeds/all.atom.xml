@@ -1,5 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/all.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2015-09-28T10:18:00+08:00</updated><entry><title>Pelican自定义Jinja过滤器</title><link href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/" rel="alternate"></link><updated>2015-09-28T10:18:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2015-09-28:posts/2015/09/pelican-custom-jinja-filter/</id><summary type="html">&lt;p&gt;使用&lt;code&gt;Pelican&lt;/code&gt;的时候发现需要在模板中使用&lt;code&gt;Hash&lt;/code&gt;函数，但是&lt;code&gt;Jinja&lt;/code&gt;并没有提供&lt;code&gt;Hash&lt;/code&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/all.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2016-02-26T10:03:00+08:00</updated><entry><title>CS224D笔记1——word2vec</title><link href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/" rel="alternate"></link><updated>2016-02-26T10:03:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-02-26:posts/2016/02/cs224d-notes1-word2vec/</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;假期学习了斯坦福的&lt;a href="http://cs224d.stanford.edu/syllabus.html"&gt;CS224d&lt;/a&gt;课程，该课
+程的主要内容是神经网络在自然语言处理领域的应用。 这里记录相关的学习笔记，大概分
+成以下几个部分：word2vec，窗口分类，神经网络，循环神经网络，递归神经网络，卷积&amp;nbsp;神经网络。&lt;/p&gt;
+&lt;h2&gt;为什么需要深度学习&lt;/h2&gt;
+&lt;p&gt;传统的机器学习方法都是认为的设计特征或者表示，深度学习的目的是希望能够通过神经
+网络让机器自动学习到有效的特征表示，这里所说的深度学习更偏向于关注各种类型的神
+经网络。探索机器学习的&lt;a href="http://www.52nlp.cn/%E6%96%AF%E5%9D%A6%E7%A6%8F%E5%A4%A7%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%8E%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86%E7%AC%AC%E4%B8%80%E8%AE%B2%E5%BC%95%E8%A8%80"&gt;原因&lt;/a&gt;主要有以下几方面：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;人工设计的特征常常定义过多，不完整并且需要花费大量的时间去设计和验证&lt;/li&gt;
+&lt;li&gt;自动学习的特征容易自适应，并且可以很快的学习&lt;/li&gt;
+&lt;li&gt;深度学习提供了一个弹性的，通用的学习框架用来表征自然的，视觉的和语言的信息。&lt;/li&gt;
+&lt;li&gt;深度学习可以用来学习非监督的（来自于生文本）和有监督的（带有特别标记的文本，&amp;nbsp;例如正向和负向标记）&lt;/li&gt;
+&lt;li&gt;在2006年深度学习技术开始在一些任务中表现出众，为什么现在才热起来？&lt;ul&gt;
+&lt;li&gt;深度学习技术受益于越来越多的数据&lt;/li&gt;
+&lt;li&gt;更快的机器与更多核&lt;span class="caps"&gt;CPU&lt;/span&gt;/&lt;span class="caps"&gt;GPU&lt;/span&gt;对深度学习的普及起了很大的促进作用&lt;/li&gt;
+&lt;li&gt;新的模型，算法和idea层出不穷&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;通过深度学习技术提升效果首先发生在语音识别和机器视觉领域，然后开始过渡到&lt;span class="caps"&gt;NLP&lt;/span&gt;领&amp;nbsp;域&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;深度学习在所有的&lt;span class="caps"&gt;NLP&lt;/span&gt;层次（音素、形态学、句法、语义）都得到了应用，在所有的&lt;span class="caps"&gt;NLP&lt;/span&gt;层&amp;nbsp;次的表示都涉及到向量（Vectors），下面主要讲如何用向量来表示词。&lt;/p&gt;
+&lt;h2&gt;词向量&lt;/h2&gt;
+&lt;p&gt;在传统意义上会使用&lt;a href="http://wordnet.princeton.edu/"&gt;WordNet&lt;/a&gt;来表示词的含义，通过WordNet可以查询词之间的
+上下位关系、一个词的同义词、度量词之间的相似度等。但是WordNet是由人工维护，存在&amp;nbsp;一些问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;语义词典资源很棒但是可能在一些细微之处有缺失，例如这些同义词准确吗：adept,
+  expert, good, practiced,&amp;nbsp;proficient,skillful?&lt;/li&gt;
+&lt;li&gt;新词缺失（无法及时更新）&lt;/li&gt;
+&lt;li&gt;人为构建，具有一定的主观性&lt;/li&gt;
+&lt;li&gt;需要耗费大量的人力来构建&lt;/li&gt;
+&lt;li&gt;很难用来计算词与词的相似度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;One-hot向量&lt;/h3&gt;
+&lt;p&gt;首先我们把词表中的词从0到&lt;span class="math"&gt;\(|V|-1\)&lt;/span&gt;进行编号，ont-hot向量把每个词表示成一个&lt;span class="math"&gt;\(|V|\)&lt;/span&gt;维
+（词表大小为&lt;span class="math"&gt;\(|V|\)&lt;/span&gt;）的向量，该向量只有特定词的编号对应的位置为1，其他位置全部为0
+。这种方法把每个词表示成独立的个体，无法通过one-hot向量直接到词之间的关系。解决&amp;nbsp;方法是通过一个词的上下文来表示一个词。&lt;/p&gt;
+&lt;h3&gt;基于&lt;span class="caps"&gt;SVD&lt;/span&gt;分解的方法&lt;/h3&gt;
+&lt;p&gt;这种方法的基本思想是通过大量的数据统计到词的累计共现矩阵&lt;span class="math"&gt;\(X\)&lt;/span&gt;，然后对&lt;span class="math"&gt;\(X\)&lt;/span&gt;进行奇异值
+分解得到&lt;span class="math"&gt;\(USV^T\)&lt;/span&gt;，&lt;span class="math"&gt;\(U\)&lt;/span&gt;的每一行对应一个词的向量表示，&lt;span class="caps"&gt;SVD&lt;/span&gt;更多信息参考&lt;a href="http://www.cnblogs.com/LeftNotEasy/archive/2011/01/19/svd-and-applications.html"&gt;这里&lt;/a&gt;。&amp;nbsp;共现矩阵一般分为词-文档共现矩阵和词-词共现矩阵。&lt;/p&gt;
+&lt;h4&gt;词-文档共现矩阵&lt;/h4&gt;
+&lt;p&gt;这种共现矩阵的思想认为相关的词会出现在同一个文档中。假设词表大小为&lt;span class="math"&gt;\(|V|\)&lt;/span&gt;，文档数
+量为&lt;span class="math"&gt;\(|M|\)&lt;/span&gt;，那么词-文档共现矩阵规模为&lt;span class="math"&gt;\(|V|\times|M|\)&lt;/span&gt;，矩阵元素&lt;span class="math"&gt;\(X_{ij}\)&lt;/span&gt;表示词i在文&amp;nbsp;档j中的出现次数，只要对所有文档循环一次就可以统计得到该矩阵&lt;/p&gt;
+&lt;h4&gt;词-词共现矩阵&lt;/h4&gt;
+&lt;p&gt;词-词共现矩阵的思想是词i的窗口内出现了j，那么认为i和j的共现次数加一，&lt;span class="math"&gt;\(X_{ij}\)&lt;/span&gt;表
+示两个词的共现次数，&lt;span class="math"&gt;\(X\)&lt;/span&gt;是一个&lt;span class="math"&gt;\(|V|\times|V|\)&lt;/span&gt;的方阵。窗口一般是对称的，长度一般为&amp;nbsp;5-10。下面举一个简单的例子，例子中窗口大小为1，语料如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;I enjoy&amp;nbsp;flying.&lt;/li&gt;
+&lt;li&gt;I like &lt;span class="caps"&gt;NLP&lt;/span&gt;.&lt;/li&gt;
+&lt;li&gt;I like deep&amp;nbsp;learning.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;得到共现矩阵如下：
+&lt;img alt="词-词共现矩阵" src="https://wugh.github.io/images/NLP/word-word-matrix.png" /&gt;&lt;/p&gt;
+&lt;p&gt;对该矩阵进行&lt;span class="caps"&gt;SVD&lt;/span&gt;分解：
+&lt;img alt="svd" src="https://wugh.github.io/images/NLP/word-word-matrix-svd.png" /&gt;&lt;/p&gt;
+&lt;p&gt;之后区&lt;span class="math"&gt;\(U\)&lt;/span&gt;的前&lt;span class="math"&gt;\(k\)&lt;/span&gt;列作为所有单词的&lt;span class="math"&gt;\(k\)&lt;/span&gt;维向量表示。
+&lt;img alt="向量表示" src="https://wugh.github.io/images/NLP/word-word-matrix-embeding.png" /&gt;&lt;/p&gt;
+&lt;p&gt;这种基于共现矩阵进行&lt;span class="caps"&gt;SVD&lt;/span&gt;分解的方法存在问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;矩阵的维度经常发生变化（新词和新文档的加入）&lt;/li&gt;
+&lt;li&gt;矩阵非常稀疏&lt;/li&gt;
+&lt;li&gt;矩阵过大&lt;/li&gt;
+&lt;li&gt;&lt;span class="caps"&gt;SVD&lt;/span&gt;分解的计算复杂度大，对于&lt;span class="math"&gt;\(n\times m\)&lt;/span&gt;的矩阵进行分解的复杂度为&lt;span class="math"&gt;\(O(mn^2)\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;需要对&lt;span class="math"&gt;\(X\)&lt;/span&gt;矩阵进行一些修正来修复词频分布不均匀问题&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;对&lt;span class="math"&gt;\(X\)&lt;/span&gt;矩阵的一些修正：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;功能词(the, he,&amp;nbsp;has)过于频繁，对语法有很大影响，解决办法是降低使用或完全忽略功能词&lt;/li&gt;
+&lt;li&gt;采用带权重的窗口，距离当前词距离越近共现权重越大&lt;/li&gt;
+&lt;li&gt;用皮尔逊相关系数代替计数，并置负数为0&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Word2vec&lt;/h3&gt;
+&lt;p&gt;Word2vec的基本思想与共现计数不同，word2vec主要分为两种，采用当前词来预测窗口中&amp;nbsp;的其他词（skip-gram），另一种是用窗口中的词来预测当前词（cbow）。&lt;/p&gt;
+&lt;h4&gt;&lt;span class="caps"&gt;CBOW&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span class="caps"&gt;CBOW&lt;/span&gt;（Continuous Bag of Words）的基本使用窗口中的词的向量求平均之后来预测中心词
+。训练语料是上下文和对应的中心词的对，上下文窗口内的每个词都用一个one-hot向量
+&lt;span class="math"&gt;\(x^(i)\)&lt;/span&gt;表示，中心词用one-hot向量&lt;span class="math"&gt;\(y^(i)\)&lt;/span&gt;表示，&lt;span class="caps"&gt;CBOW&lt;/span&gt;中预测的中心词只有一个所以直接把
+输出向量表示成&lt;span class="math"&gt;\(y\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;随机初始化两个矩阵（一般用正态分布进行初始化）&lt;span class="math"&gt;\(W^{(1)}\in \mathbb{R}^{n\times |V|}\)&lt;/span&gt;和
+&lt;span class="math"&gt;\(W^{(2)}\in \mathbb{R}^{|V|\times n}\)&lt;/span&gt;分别用来存储输入向量和输出向量，最后训练完每个词
+有两个向量，一个是当作输入时的向量，一个是当作输出时的向量。&lt;span class="math"&gt;\(n\)&lt;/span&gt;为词向量的维度；&lt;span class="math"&gt;\(W^{(1)}\)&lt;/span&gt;
+的第&lt;span class="math"&gt;\(i\)&lt;/span&gt;列表示词&lt;span class="math"&gt;\(w^(i)\)&lt;/span&gt;当作输入时的向量表示，记作&lt;span class="math"&gt;\(u^{(i)}\)&lt;/span&gt;；&lt;span class="math"&gt;\(W^{(2)}\)&lt;/span&gt;的第&lt;span class="math"&gt;\(j\)&lt;/span&gt;行表
+示词&lt;span class="math"&gt;\(w^(j)\)&lt;/span&gt;当作输出时的向量表示，记作&lt;span class="math"&gt;\(v^{(j)}\)&lt;/span&gt;。利用上下文预测中心词的步骤如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;把大小为&lt;span class="math"&gt;\(C\)&lt;/span&gt;的上下文用one-hot向量表示
+   &lt;span class="math"&gt;\((x^{(i-C)},\ldots,x^{(i-1)},x^{(i+1)},\ldots,x^{(i+C)})\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;把&lt;span class="math"&gt;\(W^{(1)}\)&lt;/span&gt;分别和&lt;span class="math"&gt;\(2C\)&lt;/span&gt;个one-hot向量相乘，得到上下文的输入向量，例如
+   &lt;span class="math"&gt;\(x^{(i-C)}\)&lt;/span&gt;作为输入时的向量为&lt;span class="math"&gt;\(u^{(i-C)}=W^{(1)}x^{(i-C)}\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;将上下文中的向量进行平均&lt;span class="math"&gt;\(h=\frac{u^{(i-C)}+u^{(i-C+1)}+\ldots&amp;nbsp;+u^{(i+C)}}{2C}\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;生成得分向量&lt;span class="math"&gt;\(z=W^{(2)}h\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;利用softmax函数将得分转换成概率&lt;span class="math"&gt;\(\hat{y}=\text{softmax}(z)\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;我们的目标是希望预测的概率&lt;span class="math"&gt;\(\hat{y}\)&lt;/span&gt;和真实的中心词one-hot向量&lt;span class="math"&gt;\(y\)&lt;/span&gt;一致&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;我们希望模型输出的概率分布和真实分布的尽量相似，可以利用信息论中的交叉熵来衡量两个概率分布
+的距离，离散情况下两个概率分布的交叉熵&lt;span class="math"&gt;\(H(\hat{y},y)\)&lt;/span&gt;如下：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$H(y,\hat{y})=-\sum_{j=1}^{|V|}y_j\log(\hat{y}_j)$$&lt;/div&gt;
+&lt;p&gt;
+考虑&lt;span class="caps"&gt;CBOW&lt;/span&gt;中的情况，此时&lt;span class="math"&gt;\(y\)&lt;/span&gt;是一个one-hot向量，假设&lt;span class="math"&gt;\(y\)&lt;/span&gt;的第&lt;span class="math"&gt;\(i\)&lt;/span&gt;维为1，那么交叉熵可以简化成：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$H(y,\hat{y})=-y_i\log(\hat{y}_i)=\log(\hat{y}_i)$$&lt;/div&gt;
+&lt;p&gt;
+可以看出交叉熵的最小值为0，优化目标就是最小化交叉熵：
+&lt;/p&gt;
+&lt;div class="math"&gt;\begin{align*}
+J&amp;amp;=-\log P(w^{(i)}|x^{(i-C)},\ldots,x^{(i-1)},x^{(i+1)},\ldots,x^{(i+C)})\\
+&amp;amp;=-\log P(v^{(i)}|h)\\
+&amp;amp;=-\log \frac{\exp{(v^{(i)}\cdot h)}}{\sum_{j=1}^{|V|}\exp(v^{(j)}\cdot h)}\\
+&amp;amp;=-v^{(i)}\cdot h + \log{\sum_{j=1}^{|V|}\exp(v^{(j)}\cdot h)}
+\end{align*}&lt;/div&gt;
+&lt;h4&gt;Skip-Gram&lt;/h4&gt;
+&lt;p&gt;Skip-Gram的基本思想用当前词预测窗口长度为&lt;span class="math"&gt;\(c\)&lt;/span&gt;内的其他词&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="word2vec"></category><category term="深度学习"></category></entry><entry><title>Pelican自定义Jinja过滤器</title><link href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/" rel="alternate"></link><updated>2015-09-28T10:18:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2015-09-28:posts/2015/09/pelican-custom-jinja-filter/</id><summary type="html">&lt;p&gt;使用&lt;code&gt;Pelican&lt;/code&gt;的时候发现需要在模板中使用&lt;code&gt;Hash&lt;/code&gt;函数，但是&lt;code&gt;Jinja&lt;/code&gt;并没有提供&lt;code&gt;Hash&lt;/code&gt;
 过滤器，需要自己实现一个&lt;code&gt;Hash&lt;/code&gt;过滤器，这里以&lt;code&gt;Hash&lt;/code&gt;过滤器为例子讲讲如何在
 &lt;code&gt;Pelican&lt;/code&gt;中使用自定义过滤器。&lt;/p&gt;
 &lt;h3&gt;Hash函数功能实现&lt;/h3&gt;
