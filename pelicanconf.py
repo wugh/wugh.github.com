@@ -13,6 +13,7 @@ TIMEZONE = 'Asia/Shanghai'
 DEFAULT_LANG = u'zh-CN'
 
 # Feed generation is usually not desired when developing
+FEED_DOMAIN = 'https://wugh.github.io'
 FEED_ATOM = 'feeds/main.atom.xml'
 FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
