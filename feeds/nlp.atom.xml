@@ -50,12 +50,12 @@
 &lt;li&gt;I like &lt;span class="caps"&gt;NLP&lt;/span&gt;.&lt;/li&gt;
 &lt;li&gt;I like deep&amp;nbsp;learning.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;得到共现矩阵如下：
-&lt;img alt="词-词共现矩阵" src="https://wugh.github.io/images/NLP/word-word-matrix.png" /&gt;&lt;/p&gt;
-&lt;p&gt;对该矩阵进行&lt;span class="caps"&gt;SVD&lt;/span&gt;分解：
-&lt;img alt="svd" src="https://wugh.github.io/images/NLP/word-word-matrix-svd.png" /&gt;&lt;/p&gt;
-&lt;p&gt;之后区&lt;span class="math"&gt;\(U\)&lt;/span&gt;的前&lt;span class="math"&gt;\(k\)&lt;/span&gt;列作为所有单词的&lt;span class="math"&gt;\(k\)&lt;/span&gt;维向量表示。
-&lt;img alt="向量表示" src="https://wugh.github.io/images/NLP/word-word-matrix-embeding.png" /&gt;&lt;/p&gt;
+&lt;p&gt;得到共现矩阵如下：&lt;/p&gt;
+&lt;p&gt;&lt;img alt="词-词共现矩阵" src="https://wugh.github.io/images/NLP/word-word-matrix.png" /&gt;&lt;/p&gt;
+&lt;p&gt;对该矩阵进行&lt;span class="caps"&gt;SVD&lt;/span&gt;分解：&lt;/p&gt;
+&lt;p&gt;&lt;img alt="svd" src="https://wugh.github.io/images/NLP/word-word-matrix-svd.png" /&gt;&lt;/p&gt;
+&lt;p&gt;之后区&lt;span class="math"&gt;\(U\)&lt;/span&gt;的前&lt;span class="math"&gt;\(k\)&lt;/span&gt;列作为所有单词的&lt;span class="math"&gt;\(k\)&lt;/span&gt;维向量表示。&lt;/p&gt;
+&lt;p&gt;&lt;img alt="向量表示" src="https://wugh.github.io/images/NLP/word-word-matrix-embeding.png" /&gt;&lt;/p&gt;
 &lt;p&gt;这种基于共现矩阵进行&lt;span class="caps"&gt;SVD&lt;/span&gt;分解的方法存在问题：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;矩阵的维度经常发生变化（新词和新文档的加入）&lt;/li&gt;
@@ -73,7 +73,7 @@
 &lt;h3&gt;Word2vec&lt;/h3&gt;
 &lt;p&gt;Word2vec的基本思想与共现计数不同，word2vec主要分为两种，采用当前词来预测窗口中&amp;nbsp;的其他词（skip-gram），另一种是用窗口中的词来预测当前词（cbow）。&lt;/p&gt;
 &lt;h4&gt;&lt;span class="caps"&gt;CBOW&lt;/span&gt;&lt;/h4&gt;
-&lt;p&gt;&lt;span class="caps"&gt;CBOW&lt;/span&gt;（Continuous Bag of Words）的基本使用窗口中的词的向量求平均之后来预测中心词
+&lt;p&gt;&lt;span class="caps"&gt;CBOW&lt;/span&gt;（Continuous Bag of Words）的基本思想是用窗口中的词的向量求平均之后来预测中心词
 。训练语料是上下文和对应的中心词的对，上下文窗口内的每个词都用一个one-hot向量
 &lt;span class="math"&gt;\(x^(i)\)&lt;/span&gt;表示，中心词用one-hot向量&lt;span class="math"&gt;\(y^(i)\)&lt;/span&gt;表示，&lt;span class="caps"&gt;CBOW&lt;/span&gt;中预测的中心词只有一个所以直接把
 输出向量表示成&lt;span class="math"&gt;\(y\)&lt;/span&gt;。&lt;/p&gt;
@@ -104,13 +104,68 @@
 可以看出交叉熵的最小值为0，优化目标就是最小化交叉熵：
 &lt;/p&gt;
 &lt;div class="math"&gt;\begin{align*}
-J&amp;amp;=-\log P(w^{(i)}|x^{(i-C)},\ldots,x^{(i-1)},x^{(i+1)},\ldots,x^{(i+C)})\\
+\min J&amp;amp;=-\log P(w^{(i)}|w^{(i-C)},\ldots,w^{(i-1)},w^{(i+1)},\ldots,w^{(i+C)})\\
 &amp;amp;=-\log P(v^{(i)}|h)\\
 &amp;amp;=-\log \frac{\exp{(v^{(i)}\cdot h)}}{\sum_{j=1}^{|V|}\exp(v^{(j)}\cdot h)}\\
 &amp;amp;=-v^{(i)}\cdot h + \log{\sum_{j=1}^{|V|}\exp(v^{(j)}\cdot h)}
 \end{align*}&lt;/div&gt;
+&lt;p&gt;
+由上描述可知整个模型的未知参数就是&lt;span class="math"&gt;\(W^{(1)}\)&lt;/span&gt;和&lt;span class="math"&gt;\(W^{(2)}\)&lt;/span&gt;，即对于每个输出向量&lt;span class="math"&gt;\(v^{(j)}\)&lt;/span&gt;和
+上下文中的输入向量&lt;span class="math"&gt;\((u^{(i-C)},\ldots,u^{(i-1)},u^{(i+1)},\ldots,u^{(i+C)})\)&lt;/span&gt;求导。&lt;/p&gt;
+&lt;p&gt;首先是&lt;span class="math"&gt;\(\frac{\partial J}{\partial v^{(j)}}\)&lt;/span&gt;
+&lt;img alt="J对输出向量求导" src="https://wugh.github.io/images/NLP/cbow-gradient-w2.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;然后对窗口内的其中一个输入向量求导&lt;span class="math"&gt;\(\frac{\partial J}{\partial u^{(i-C)}}\)&lt;/span&gt;，其他输入向量
+求导方法与之相同，最后结果相等
+&lt;img alt="J对输出向量求导" src="https://wugh.github.io/images/NLP/cbow-gradient-w1-ui.jpg" /&gt;&lt;/p&gt;
 &lt;h4&gt;Skip-Gram&lt;/h4&gt;
-&lt;p&gt;Skip-Gram的基本思想用当前词预测窗口长度为&lt;span class="math"&gt;\(c\)&lt;/span&gt;内的其他词&lt;/p&gt;
+&lt;p&gt;Skip-Gram的基本思想用当前词预测窗口长度为&lt;span class="math"&gt;\(C\)&lt;/span&gt;内的其他词，此时模型的输入是中心词one-hot
+向量&lt;span class="math"&gt;\(x\)&lt;/span&gt;，窗口内的词one-hot向量为&lt;span class="math"&gt;\((y^{(i-C)},\ldots,y^{(i-1)},y^{(i+1)},\ldots,y^{(i+C)})\)&lt;/span&gt;。&amp;nbsp;利用中心词预测周边词的过程如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;输入one-hot向量为&lt;span class="math"&gt;\(x\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span class="math"&gt;\(x\)&lt;/span&gt;的输入向量表示为&lt;span class="math"&gt;\(u^{(i)}=W^{(1)}x\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;只有一个输入所以不需要像&lt;span class="caps"&gt;CBOW&lt;/span&gt;一样对向量进行平均，&lt;span class="math"&gt;\(h=u^{(i)}\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;生成得分向量&lt;span class="math"&gt;\(z=W^{(2)}h\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;利用softmax函数将得分转换成概率&lt;span class="math"&gt;\(\hat{y}=\text{softmax}(z)\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;我们的目标是希望预测的概率&lt;span class="math"&gt;\(\hat{y}\)&lt;/span&gt;和真实的概率&lt;span class="math"&gt;\((y^{(i-C)},\ldots,y^{(i-1)},y^{(i+1)},\ldots,y^{(i+C)})\)&lt;/span&gt;一致&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这里把&lt;span class="math"&gt;\(P(w^{(i-C)},\ldots,w^{(i-1)},w^{(i+1)},\ldots,w^{(i+C)}|w^{(i)})\)&lt;/span&gt;整体看成一个分布，&amp;nbsp;然后用朴素贝叶斯假设来简化这个条件概率的求解，即：
+&lt;/p&gt;
+&lt;div class="math"&gt;\begin{align*}
+\min J&amp;amp;=-\log P(w^{(i-C)},\ldots,w^{(i-1)},w^{(i+1)},\ldots,w^{(i+C)}|w^{(i)})\\
+&amp;amp;=-\log \Pi_{j=0,j\neq C}^{2C}P(w^{(i-C+j)}|w^{(i)})\\
+&amp;amp;=-\log \Pi_{j=0,j\neq C}^{2C}P(v^{(i-C+j)}|u^{(i)})\\
+&amp;amp;=-\log \Pi_{j=0,j\neq C}^{2C}\frac{\exp{(v^{(i-C+j)}\cdot h)}}{\sum_{k=1}^{|V|}\exp(v^{(k)}\cdot h)}\\
+&amp;amp;=-\sum_{j=0,j\neq C}^{2C}v^{(i-C+j)}\cdot h + 2C\log{\sum_{k=1}^{|V|}\exp(v^{(k)}\cdot h)}\\
+\end{align*}&lt;/div&gt;
+&lt;p&gt;
+对于这个损失函数我们可以先不考虑对窗口内的所有词求和，假设我们现在只针对窗口内的特定词&lt;span class="math"&gt;\(w^{(j)}\)&lt;/span&gt;进行预测，&amp;nbsp;此时
+&lt;/p&gt;
+&lt;div class="math"&gt;$$J=-v^{(j)}\cdot h + \log{\sum_{k=1}^{|V|}\exp(v^{(k)}\cdot h)}$$&lt;/div&gt;
+&lt;p&gt;
+该损失函数对于每个输出向量的导数的求解结果与&lt;span class="caps"&gt;CBOW&lt;/span&gt;类似，损失函数对于输入向量的求导结果也和&lt;span class="caps"&gt;CBOW&lt;/span&gt;类似。唯一的
+区别在于skip-gram的输入向量只有一个，所以&lt;span class="math"&gt;\(J\)&lt;/span&gt;对于&lt;span class="math"&gt;\(u^{(i)}\)&lt;/span&gt;的导数直接为&lt;span class="math"&gt;\({W^{(2)}}^T(\hat{y}-y)\)&lt;/span&gt;不需要除以&lt;span class="math"&gt;\(2C\)&lt;/span&gt;。&lt;/p&gt;
+&lt;h4&gt;负采样&lt;/h4&gt;
+&lt;p&gt;上述的&lt;span class="caps"&gt;CBOW&lt;/span&gt;和Skip-Gram模型都存在一个问题，就是损失函数都有一个求和是&lt;span class="math"&gt;\(|V|\)&lt;/span&gt;规模的，这个计算非常耗时，英文的词汇表
+规模大概是1300万。负采样是基于Skip-Gram模型，但是和优化目标和Skip-Gram不同。给定一对词&lt;span class="math"&gt;\((w,c)\)&lt;/span&gt;，其中&lt;span class="math"&gt;\(w\)&lt;/span&gt;是中心词，
+&lt;span class="math"&gt;\(c\)&lt;/span&gt;代表&lt;span class="math"&gt;\(w\)&lt;/span&gt;的上下文窗口内出现的另一个词，用&lt;span class="math"&gt;\(P(D=1|w,c)\)&lt;/span&gt;表示&lt;span class="math"&gt;\((w,c)\)&lt;/span&gt;确实出现在语料中的概率，相应的&lt;span class="math"&gt;\(P(D=0|w,c)\)&lt;/span&gt;表示&lt;span class="math"&gt;\((w,c)\)&lt;/span&gt;
+没有出现在语料中的概率。用sigmoid函数（下文用&lt;span class="math"&gt;\(\sigma\)&lt;/span&gt;表示sigmoid函数）来表示&lt;span class="math"&gt;\(P(D=1|w,c)\)&lt;/span&gt;这个概率，这里用
+&lt;span class="math"&gt;\(v_c\)&lt;/span&gt;表示输出向量，&lt;span class="math"&gt;\(u_w\)&lt;/span&gt;表示输入向量。
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(D=1|w,c,\theta)=\frac{1}{1+\exp(-v_c^Tu_w)}$$&lt;/div&gt;
+&lt;p&gt;
+我们期望优化的目标是希望真实存在语料中&lt;span class="math"&gt;\((w,c)\)&lt;/span&gt;对&lt;span class="math"&gt;\(P(D=1|w,c)\)&lt;/span&gt;最大化，同时不存在语料中的&lt;span class="math"&gt;\((w,c)\)&lt;/span&gt;对&lt;span class="math"&gt;\(P(D=0|w,c)\)&lt;/span&gt;概率最大化，
+公式中的&lt;span class="math"&gt;\(\theta\)&lt;/span&gt;包括了上面提到的两个矩阵&lt;span class="math"&gt;\(W^{(1)}\)&lt;/span&gt;和&lt;span class="math"&gt;\(W^{(2)}\)&lt;/span&gt;，我们希望&lt;span class="math"&gt;\(\theta\)&lt;/span&gt;满足下列公式：
+&lt;img alt="负采样优化目标" src="https://wugh.github.io/images/NLP/neg-sampling-object.jpg" /&gt;
+上述推导中用到需要用到了一个等式&lt;span class="math"&gt;\(1-\sigma(x)=\sigma(-x)\)&lt;/span&gt;，这个等式比较好验证，其中&lt;span class="math"&gt;\(\tilde{D}\)&lt;/span&gt;为负样本。由此可得新的&amp;nbsp;目标函数
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\min J=-\log\sigma(v_c^Tu_w)-\sum_{k=1}^{K}\log\sigma(-v_k^Tu_w)$$&lt;/div&gt;
+&lt;p&gt;
+在这个目标函数中&lt;span class="math"&gt;\(v_k\)&lt;/span&gt;是从&lt;span class="math"&gt;\(P_n(w)\)&lt;/span&gt;从采样出来的，这个&lt;span class="math"&gt;\(P_n(w)\)&lt;/span&gt;是unigram概率&lt;span class="math"&gt;\(U(w)\)&lt;/span&gt;的&lt;span class="math"&gt;\(3/4\)&lt;/span&gt;次方，&amp;nbsp;这样可以增大一些概率很小的词被采样出来的概率。&lt;/p&gt;
+&lt;p&gt;可以求得&lt;span class="math"&gt;\(\frac{\partial J}{\partial u_w}\)&lt;/span&gt;
+&lt;img alt="负采样输入向量梯度" src="https://wugh.github.io/images/NLP/neg-sampling-gradient-w1.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;然后是&lt;span class="math"&gt;\(J\)&lt;/span&gt;对相关的输出向量求导
+&lt;img alt="负采样输出向量梯度" src="https://wugh.github.io/images/NLP/neg-sampling-gradient-w2.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;求得梯度之后可以采用随机梯度下降优化目标函数，得到向量表示。&lt;/p&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
