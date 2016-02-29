@@ -55,7 +55,7 @@ DATE_FORMATS = {
 }
 
 # Uncomment following line if you want document-relative URLs when developing
-# RELATIVE_URLS = True
+RELATIVE_URLS = True
 
 # add customer filter
 import os

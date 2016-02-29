@@ -1,4 +1,4 @@
-title: CS224D笔记1——word2vec
+title: CS224d笔记1——word2vec
 date: 2016-02-26 10:03
 category: NLP
 tags: word2vec,深度学习
@@ -130,7 +130,7 @@ $W^{(2)}\in \mathbb{R}^{|V|\times n}$分别用来存储输入向量和输出向�
 的距离，离散情况下两个概率分布的交叉熵$H(\hat{y},y)$如下：
 $$H(y,\hat{y})=-\sum_{j=1}^{|V|}y_j\log(\hat{y}_j)$$
 考虑CBOW中的情况，此时$y$是一个one-hot向量，假设$y$的第$i$维为1，那么交叉熵可以简化成：
-$$H(y,\hat{y})=-y_i\log(\hat{y}_i)=\log(\hat{y}_i)$$
+$$H(y,\hat{y})=-y_i\log(\hat{y}_i)=-\log(\hat{y}_i)$$
 可以看出交叉熵的最小值为0，优化目标就是最小化交叉熵：
 \begin{align*}
 \min J&=-\log P(w^{(i)}|w^{(i-C)},\ldots,w^{(i-1)},w^{(i+1)},\ldots,w^{(i+C)})\\
@@ -201,6 +201,9 @@ $$\min J=-\log\sigma(v_c^Tu_w)-\sum_{k=1}^{K}\log\sigma(-v_k^Tu_w)$$
 ![负采样输出向量梯度]({filename}/images/NLP/neg-sampling-gradient-w2.jpg)
 
 求得梯度之后可以采用随机梯度下降优化目标函数，得到向量表示。
+上述三种方法训练完成之后对于每个词都会得到两个向量，一个是作为模型输入时的向量，
+一个是作为模型输出时的向量，最后的向量表示是把这两种向量相加使用，即对于词$w^{(i)}$
+的向量为$v^{(i)}+u^{(i)}$。
 
 ## 词向量评测
 
