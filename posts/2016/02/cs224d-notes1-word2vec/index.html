@@ -4,7 +4,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>CS224D笔记1——word2vec &mdash; Life in a Nutshell</title>
+  <title>CS224d笔记1——word2vec &mdash; Life in a Nutshell</title>
   <meta name="author" content="Guohua Wu">
 
   <link href="https://wugh.github.io/feeds/main.atom.xml" type="application/atom+xml" rel="alternate"
@@ -49,7 +49,7 @@
 <div>
   <article class="hentry" role="article">
 <header>
-      <h1 class="entry-title">CS224D笔记1——word2vec</h1>
+      <h1 class="entry-title">CS224d笔记1——word2vec</h1>
     <p class="meta">
 <time datetime="2016-02-26T10:03:00+08:00" pubdate>2016-02-26(Fri)</time>    </p>
 </header>
@@ -154,7 +154,7 @@
 <p>
 考虑<span class="caps">CBOW</span>中的情况，此时<span class="math">\(y\)</span>是一个one-hot向量，假设<span class="math">\(y\)</span>的第<span class="math">\(i\)</span>维为1，那么交叉熵可以简化成：
 </p>
-<div class="math">$$H(y,\hat{y})=-y_i\log(\hat{y}_i)=\log(\hat{y}_i)$$</div>
+<div class="math">$$H(y,\hat{y})=-y_i\log(\hat{y}_i)=-\log(\hat{y}_i)$$</div>
 <p>
 可以看出交叉熵的最小值为0，优化目标就是最小化交叉熵：
 </p>
@@ -220,7 +220,10 @@
 <img alt="负采样输入向量梯度" src="https://wugh.github.io/images/NLP/neg-sampling-gradient-w1.jpg" /></p>
 <p>然后是<span class="math">\(J\)</span>对相关的输出向量求导
 <img alt="负采样输出向量梯度" src="https://wugh.github.io/images/NLP/neg-sampling-gradient-w2.jpg" /></p>
-<p>求得梯度之后可以采用随机梯度下降优化目标函数，得到向量表示。</p>
+<p>求得梯度之后可以采用随机梯度下降优化目标函数，得到向量表示。
+上述三种方法训练完成之后对于每个词都会得到两个向量，一个是作为模型输入时的向量，
+一个是作为模型输出时的向量，最后的向量表示是把这两种向量相加使用，即对于词<span class="math">\(w^{(i)}\)</span>
+的向量为<span class="math">\(v^{(i)}+u^{(i)}\)</span>。</p>
 <h2>词向量评测</h2>
 <p>词向量的评测方法可以分为内部（intrinsic）评测和外部（extrinsic）评测，两种评测的对比如下：</p>
 <ul>
@@ -333,7 +336,10 @@
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
       <li class="post">
-          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224D笔记1——word2vec</a>
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224d笔记1——word2vec</a>
       </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Pelican自定义Jinja过滤器</a>
@@ -343,9 +349,6 @@
       </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2014/11/maxent/">最大熵</a>
-      </li>
-      <li class="post">
-          <a href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">MDP入门</a>
       </li>
     </ul>
   </section>
@@ -363,7 +366,7 @@
 
   <section>
   <h1>Tags</h1>
-    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>  </section>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
 
 
     <section>
@@ -387,7 +390,7 @@
     var disqus_shortname = 'guohuasblog';
     var disqus_identifier = '/posts/2016/02/cs224d-notes1-word2vec/';
     var disqus_url = 'https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/';
-    var disqus_title = '<span class="caps">CS224D</span>笔记1——word2vec';
+    var disqus_title = 'CS224d笔记1——word2vec';
     (function() {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
       dsq.src = "//" + disqus_shortname + '.disqus.com/embed.js';

@@ -4,11 +4,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>About&nbsp;Me &mdash; Life in a Nutshell</title>
+  <title>CS224d笔记2——Softmax分类和窗口分类 &mdash; Life in a Nutshell</title>
   <meta name="author" content="Guohua Wu">
 
   <link href="https://wugh.github.io/feeds/main.atom.xml" type="application/atom+xml" rel="alternate"
         title="Life in a Nutshell Atom Feed" />
+
+
 
 
 
@@ -45,30 +47,62 @@
   <div id="main">
     <div id="content">
 <div>
-  <article role="article">
-    <header>
-      <h1 class="entry-title">About&nbsp;Me</h1>
-    </header>
-    <h3>主要兴趣</h3>
-<ol>
-<li>Machine&nbsp;Learning</li>
-<li>Nature Language&nbsp;Processing</li>
-<li>Programming</li>
-<li>Linux</li>
-<li>Reading</li>
-</ol>
-<h3>在读书单</h3>
-<ol>
-<li>算法导论</li>
-<li>围城</li>
-<li><span class="caps">PRML</span></li>
-</ol>
-<h3>联系方式</h3>
-<ol>
-<li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#104;&#109;&#101;&#116;&#97;&#64;&#49;&#54;&#51;&#46;&#99;&#111;&#109;">&#103;&#104;&#109;&#101;&#116;&#97;&#64;&#49;&#54;&#51;&#46;&#99;&#111;&#109;</a></li>
-</ol>
-<h3>高斯分布</h3>
-<div class="math">$$f(x, \mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}$$</div>
+  <article class="hentry" role="article">
+<header>
+      <h1 class="entry-title">CS224d笔记2——Softmax分类和窗口分类</h1>
+    <p class="meta">
+<time datetime="2016-02-29T14:18:00+08:00" pubdate>2016-02-29(Mon)</time>    </p>
+</header>
+
+  <div class="entry-content"><hr />
+<p>这部分内容主要总结Softmax分类，以及如何以交叉熵作为Softmax分类的损失度量标准来
+训练Softmax的参数，最后将Softmax分类应用在一个简单的窗口分类任务上，窗口分类
+指的是利用中心词向量以及中心词窗口范围内的向量拼接起来对中心词进行简单的分类&nbsp;（例如把中心词按实体类型分成人名、地名、组织名、其他）。</p>
+<h2>Softmax分类</h2>
+<p>Softmax分类是Logistic回归的扩展版（Logistic回归用于二分类，Softmax分类用于类别
+数量&gt;2的分类任务），词向量<span class="math">\(x\)</span>（假设词向量维度是<span class="math">\(d\)</span>）属于类别<span class="math">\(j\)</span>的概率如下所示：
+</p>
+<div class="math">$$\hat{y}_j = p(y_j=1|x)=\frac{\exp(W_{j\cdot}x)}{\sum_{c=1}^C\exp(W_{c\cdot}x)}$$</div>
+<p>
+其中<span class="math">\(W\in\mathbb{R}^{C\times d}\)</span>，<span class="math">\(W_{j\cdot}x=\sum_{i=1}^d W_{ji}x_i=f_j\)</span>。&nbsp;以交叉熵作为损失函数，可以得到对于特定一个训练样本的损失如下：
+</p>
+<div class="math">$$H(y,\hat{y})=-\sum_{j=1}^C y_j\log(\hat{y}_j)=-\sum_{j=1}^C y_j\log(\frac{\exp(W_{j\cdot}x)}{\sum_{c=1}^C\exp(W_{c\cdot}x)})$$</div>
+<p>
+由于<span class="math">\(y\)</span>是一个one-hot向量，所以<span class="math">\(y\)</span>有<span class="math">\(C-1\)</span>个值为0，假设<span class="math">\(y_k=1\)</span>，那么上式可以写成：
+</p>
+<div class="math">$$-\log(\frac{\exp(W_{k\cdot}x)}{\sum_{c=1}^C\exp(W_{c\cdot}x)})$$</div>
+<p>
+如果有<span class="math">\(N\)</span>个数据点，那么总的损失如下：
+</p>
+<div class="math">$$-\sum_{i=1}^N \log(\frac{\exp(W_{k(i)\cdot}x)}{\sum_{c=1}^C\exp(W_{c\cdot}x)})$$</div>
+<p>
+其中<span class="math">\(k(i)\)</span>代表第<span class="math">\(i\)</span>个数据点正确的类别标签。</p>
+<p>这里有一个地方需要注意，就是我们把利用softmax对词向量分类的时候是否需要对词向量进行更新。
+如果不需要更新词向量那么此时参数只有<span class="math">\(W\)</span>矩阵，参数规模为<span class="math">\(C\cdot d\)</span>；但是如果需要对词向量进行更新，
+那么模型的参数就会变多，因为我们需要对词汇表中的向量进行更新，总的模型参数变成<span class="math">\(C\cdot d + |V|\cdot d\)</span>。
+假设用<span class="math">\(\theta\)</span>表示模型参数，此时损失函数对于<span class="math">\(\theta\)</span>的导数如下：
+<img alt="softmax参数规模" src="https://wugh.github.io/images/NLP/softmax-parameters-W-and-word-vectors.png" />
+如此大的参数规模很容易导致模型过拟合，可以通过加入<span class="math">\(L2\)</span>正则来减缓过拟合（使得模型参数接近0）：
+</p>
+<div class="math">$$J(\theta)=-\sum_{i=1}^N \log(\frac{\exp(W_{k(i)\cdot}x)}{\sum_{c=1}^C\exp(W_{c\cdot}x)})+\lambda\sum_{k=1}^{C\cdot d+|V|\cdot d} \theta_k^2$$</div>
+<p>这里对于单个训练样本的交叉熵损失进行一个初步的导数推导，假设该样本类比为k：
+</p>
+<div class="math">$$\frac{\partial J}{\partial f} = \frac{\partial -\log(\frac{\exp(f_k)}{\sum_{c=1}^C\exp(f_c)})}{\partial f}$$</div>
+<p>
+求导结果如下：
+<img alt="softmax简单求导" src="https://wugh.github.io/images/NLP/softmax-parameters-f-gradient.jpg" /></p>
+<h2>窗口分类</h2>
+<p>窗口分类指的是利用中心词向量以及中心词窗口范围内的向量拼接起来对中心词进行简单的分类
+（例如把中心词按实体类型分成人名、地名、组织名、其他）。下面例子取窗口长度为2，
+对中心词“Paris”进行分类，最后令输入向量<span class="math">\(x_{\text{windows}}=x\in \mathbb{R}^{5\cdot d}\)</span>
+<img alt="窗口分类输入" src="https://wugh.github.io/images/NLP/window-classification-x-window.png" /></p>
+<p>整个模型就是一个简单的softmax分类，所以我们只要把softmax的损失函数对<span class="math">\(W\)</span>和<span class="math">\(x\)</span>求导就可以
+得到梯度，其实求导结果和<a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">上一篇文章</a>相同，
+由于两篇文章在符号表示上略有区别，这里按这篇文章的符号重新推导一次，最后的结果是相同的。
+下一篇文章将介绍神经网络，通过神经网络的后向误差传播过程可以更好地理解这个推导结果。
+<img alt="窗口分类求导结果" src="https://wugh.github.io/images/NLP/window-classification-gradient.jpg" /></p>
+<p>最后把<span class="math">\(x\)</span>上的梯度分配给对应的词向量就可以更新词向量了。
+<img alt="词向量梯度" src="https://wugh.github.io/images/NLP/window-classification-gradient-x-word.jpg" /></p>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
@@ -125,8 +159,27 @@
         "}";
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-</script>
+</script></div>
+    <footer>
+<p class="meta">
+  <span class="byline author vcard">
+    Posted by <span class="fn">
+        Guohua Wu
+    </span>
+  </span>
+<time datetime="2016-02-29T14:18:00+08:00" pubdate>2016-02-29(Mon)</time>  <span class="categories">
+    <a class='category' href='https://wugh.github.io/category/nlp.html'>NLP</a>
+  </span>
+  <span class="categories">
+    <a class="category" href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a class="category" href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>,    <a class="category" href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>  </span>
+</p><div class="sharing">
+</div>    </footer>
   </article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></div>
+  </section>
 </div>
 <aside class="sidebar">
   <section>
@@ -185,6 +238,9 @@
   <script src="https://wugh.github.io/theme/js/octopress.js" type="text/javascript"></script>
   <script type="text/javascript">
     var disqus_shortname = 'guohuasblog';
+    var disqus_identifier = '/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/';
+    var disqus_url = 'https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/';
+    var disqus_title = 'CS224d笔记2——Softmax分类和窗口分类';
     (function() {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
       dsq.src = "//" + disqus_shortname + '.disqus.com/embed.js';

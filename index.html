@@ -48,7 +48,87 @@
   		<article>
 <header>
       <h1 class="entry-title">
-        <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224D笔记1——word2vec</a>
+        <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
+      </h1>
+    <p class="meta">
+<time datetime="2016-02-29T14:18:00+08:00" pubdate>2016-02-29(Mon)</time>    </p>
+</header>
+
+  <div class="entry-content"><hr/>
+<p>这部分内容主要总结Softmax分类，以及如何以交叉熵作为Softmax分类的损失度量标准来
+训练Softmax的参数，最后将Softmax分类应用在一个简单的窗口分类任务上，窗口分类
+指的是利用中心词向量以及中心词窗口范围内的向量拼接起来对中心词进行简单的分类 （例如把中心词按实体类型分成人名、地名、组织名、其他）。</p>
+<h2>Softmax分类</h2>
+<p>Softmax分类是Logistic回归的扩展版（Logistic回归用于二分类，Softmax分类用于类别
+数量&gt;2的分类任务），词向量<span class="math">\(x\)</span>（假设词向量维度是<span class="math">\(d\)</span>）属于类别<span class="math">\(j\)</span>的概率如下所示：
+</p>
+<div class="math">$$\hat{y}_j = p(y_j=1|x)=\frac{\exp(W_{j\cdot}x)}{\sum_{c=1}^C\exp(W_{c\cdot}x)}$$</div>
+<p>
+其中<span class="math">\(W\in\mathbb{R}^{C\times d}\) ...</span></p><script type='text/javascript'>if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+  <footer>
+    <a rel="full-article" href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">Read On &crarr;</a>
+  </footer>
+  		</article>
+  		<article>
+<header>
+      <h1 class="entry-title">
+        <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224d笔记1——word2vec</a>
       </h1>
     <p class="meta">
 <time datetime="2016-02-26T10:03:00+08:00" pubdate>2016-02-26(Fri)</time>    </p>
@@ -366,33 +446,6 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
     <a rel="full-article" href="https://wugh.github.io/posts/2013/11/gentoo-portage-tips/">Read On &crarr;</a>
   </footer>
   		</article>
-  		<article>
-<header>
-      <h1 class="entry-title">
-        <a href="https://wugh.github.io/posts/2013/11/linux-fontconfig/">Linux字体配置</a>
-      </h1>
-    <p class="meta">
-<time datetime="2013-11-09T09:54:23+08:00" pubdate>2013-11-09(Sat)</time>    </p>
-</header>
-
-  <div class="entry-content"><hr />
-<h3>fontconfig简介</h3>
-<p>Linux字体配置采用
-<a href="http://www.freedesktop.org/wiki/Software/fontconfig/">fontconfig</a>来做字体渲染
-，中文的<a href="http://codex.wordpress.org.cn/Fontconfig%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C">fontconfig手册
-</a>&nbsp;参考这里，根据这个手册对Linux的字体进行简单的配置。</p>
-<h3>配置文件</h3>
-<p>根据自己的日常使用习惯，下面对我的fontconfig配置文件做一个描述。</p>
-<h4>dpi设定</h4>
-<p>dpi的详细设定参考这两篇文章，<a href="http://xxb.is-programmer.com/posts/4260.html">dpi设置及sub-pixel次像素微调
-</a>和<a href="http://www.linuxsir.org/bbs/thread266659.html">Linux 字体微调 - windows 效果
-版</a>两篇文章，Windows 7的默认dpi&nbsp;是96，我的字体设定的dpi也采用96。参考前面两篇文章可以知道dpi的计算公式如下：</p>
-<div class="highlight"><pre>屏幕 width = 287 mm = 28.7 cm，height = 215 mm = 21.5 cm
-水平 dpi = 水平 resolution * 2.54 / width = 1024 * 2.54 / 28 ...</pre></div></div>
-  <footer>
-    <a rel="full-article" href="https://wugh.github.io/posts/2013/11/linux-fontconfig/">Read On &crarr;</a>
-  </footer>
-  		</article>
 <div class="pagination">
     <a class="prev" href="https://wugh.github.io/index2.html">&larr; Older</a>
 
@@ -403,7 +456,10 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
       <li class="post">
-          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224D笔记1——word2vec</a>
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224d笔记1——word2vec</a>
       </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Pelican自定义Jinja过滤器</a>
@@ -413,9 +469,6 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
       </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2014/11/maxent/">最大熵</a>
-      </li>
-      <li class="post">
-          <a href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">MDP入门</a>
       </li>
     </ul>
   </section>
@@ -433,7 +486,7 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
 
   <section>
   <h1>Tags</h1>
-    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>  </section>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
 
 
     <section>
