@@ -221,6 +221,35 @@
 <p>然后是<span class="math">\(J\)</span>对相关的输出向量求导
 <img alt="负采样输出向量梯度" src="https://wugh.github.io/images/NLP/neg-sampling-gradient-w2.jpg" /></p>
 <p>求得梯度之后可以采用随机梯度下降优化目标函数，得到向量表示。</p>
+<h2>词向量评测</h2>
+<p>词向量的评测方法可以分为内部（intrinsic）评测和外部（extrinsic）评测，两种评测的对比如下：</p>
+<ul>
+<li>内部评测：<ul>
+<li>在一个特定的子任务中进行评测</li>
+<li>计算迅速</li>
+<li>有助于理解相关的系统</li>
+<li>不太清楚是否有助于真实任务除非和实际的<span class="caps">NLP</span>任务的相关性已经建立起来</li>
+</ul>
+</li>
+<li>外部评测：<ul>
+<li>在一个真实任务中进行评测</li>
+<li>需要花很长的实际来计算精度</li>
+<li>不太清楚是否是这个子系统或者其他子系统引起的问题</li>
+<li>如果用这个子系统替换原有的系统后获得精度提升–&gt;有效(Winning!)</li>
+</ul>
+</li>
+</ul>
+<h3>词向量内部评测方法</h3>
+<p>词向量内部评测方法主要有词向量类比、词向量相关度，这两种方法有相应的数据集。</p>
+<p>词向量类比的基本思想如下
+<img alt="词向量类比" src="https://wugh.github.io/images/NLP/word-vector-analogy.png" /></p>
+<p>目前评测的数据集主要是word2vec项目提供的<a href="https://code.google.com/p/word2vec/source/browse/trunk/questions-words.txt">数据集</a>
+包含了语义类比和语法类比两种。语义类比的数据有州名包含城市名、首都和国家，&nbsp;语法类比的数据是比较级类比和时态类比。</p>
+<p>词向量相关度的数据集例如<a href="http://www.cs.technion.ac.il/~gabr/resources/data/wordsim353/">WordSim353</a>，
+该数据集是人为地给两个词的相关度打分（从0-10），然后通过计算词向量的Cosine相似度与&nbsp;这个相关度进行对比。</p>
+<h3>词向量外部评测方法</h3>
+<p>简单来说就是把词向量应用于具体的任务中来评测不同的词向量对于任务整体性能的影响。
+这里需要注意的问题是，应用于具体任务的时候是否还需要调整词向量，&nbsp;一般来说调整词向量会降低向量的范化能力。所以一般具体任务的训练集足够大时才考虑调整词向量。</p>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
