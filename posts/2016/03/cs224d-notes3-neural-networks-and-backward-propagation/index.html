@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CS224d笔记3——神经网络 &mdash; Life in a Nutshell</title>
+  <meta name="author" content="Guohua Wu">
+
+  <link href="https://wugh.github.io/feeds/main.atom.xml" type="application/atom+xml" rel="alternate"
+        title="Life in a Nutshell Atom Feed" />
+
+
+
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link href="https://wugh.github.io/favicon.png" rel="icon">
+
+  <link href="https://wugh.github.io/theme/css/main.css" media="screen, projection"
+        rel="stylesheet" type="text/css">
+
+  <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="https://wugh.github.io/">Life in a Nutshell</a></h1>
+</hgroup></header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="https://wugh.github.io/feeds/main.atom.xml" rel="subscribe-atom">Atom</a></li>
+</ul>
+
+
+<ul class="main-navigation">
+    <li><a href="/archives.html">Archives</a></li>
+      <li><a href="https://wugh.github.io/pages/about-me.html">About&nbsp;Me</a></li>
+</ul></nav>
+  <div id="main">
+    <div id="content">
+<div>
+  <article class="hentry" role="article">
+<header>
+      <h1 class="entry-title">CS224d笔记3——神经网络</h1>
+    <p class="meta">
+<time datetime="2016-03-01T09:00:00+08:00" pubdate>2016-03-01(Tue)</time>    </p>
+</header>
+
+  <div class="entry-content"><hr />
+<p>这部分首先介绍神经元，接着介绍只有一个隐藏层的神经网络，这个神经网络要解决的
+问题和<a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">上一篇文章</a>类似，这里对窗口分类任务进一步
+简化，我们只需要判断中心词是否为地点。利用这个简单的神经网络说明前向传播和
+后向误差传播算法，然后推出通用的后向误差传播算法。最后介绍一些神经网络在工程&nbsp;实现中的一些技巧。</p>
+<h2>神经元</h2>
+<p>神经元是组成神经网络的基础单元，神经元通常接受<span class="math">\(n\)</span>个输入产生一个输出，运算过程如下图：
+<img alt="神经元" src="https://wugh.github.io/images/NLP/neural-network-neuron.png" style="display:block;margin:0 auto" />
+神经元的参数包括一个<span class="math">\(n\)</span>维的权重向量<span class="math">\(w\)</span>和一个偏置<span class="math">\(b\)</span>（<span class="math">\(b\)</span>为标量），偏置可以看成判断类别的先验，
+神经元的输出为<span class="math">\(h{w,b}(x)=f(w^Tx + b)\)</span>，<span class="math">\(f\)</span>被成为“激活函数”。本文默认使用的激活函数为sigmoid函数
+（用符号<span class="math">\(\sigma\)</span>表示）：
+</p>
+<div class="math">$$f(z)=\sigma(z)=\frac{1}{1+\exp(-z)}$$</div>
+<p>
+更多的激活函数将在后文讨论，这里不再展开，需要注意的是sigmoid函数的求导结果为
+</p>
+<div class="math">$$\sigma'(z)=\sigma(z)(1-\sigma(z))$$</div>
+<h2>单隐藏层神经网络</h2>
+<p>神经网络的特点在于把一个输入向量同时输入到一系列神经元，然后得到新的输出向量，
+然后这个新的向量又可以作为下一层一系列神经元的输入，如下图所示：
+<img alt="神经网络例子" src="https://wugh.github.io/images/NLP/neural-network-3-layers-example.png" style="display:block;margin:0 auto" />
+我们使用圆圈来表示神经网络的输入，标上“+1”的圆圈被称为偏置节点，也就是截距项。
+神经网络最左边的一层叫做输入层，最右的一层叫做输出层（本例中，输出层只有一个节
+点）。中间所有节点组成的一层叫做隐藏层，因为我们不能在训练样本集中观测到它们的
+值。同时可以看到，以上神经网络的例子中有3个输入单元（偏置单元不计在内），3个隐
+藏单元及一个输出单元。本文使用的符号参考<a href="ufldl"><span class="caps">UFLDL</span>教程</a>，计算隐藏层的过程如下图所示：
+<img alt="神经网络记号" src="https://wugh.github.io/images/NLP/neural-network-3-layers-example-notation.png" style="display:block;margin:0 auto" /></p>
+<h2>前向计算</h2>
+<p>可以把神经网络应用于<a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">上一篇文章</a>中提到的窗口分
+类问题，这里我们主要只是为了用这个简单的神经网络说明前向计算和后向误差传播，所
+以将任务限定为只需要判断中心词是否为地点，并且采用的网络只有一个隐藏层。
+例如窗口内容为“meseums in Paris are amazing”，判断中心词“Paris”是否为地点，
+假设词向量维度为4，那么窗口向量<span class="math">\(x_{\text{window}}=x\in \mathbb{R}^{20}\)</span>，
+隐藏层用8个神经元，然后用8个神经元的输出来计算得分，最后利用这个得分判断中心词是否为实体。
+下图为计算<span class="math">\(\text{score(meseums in Paris are amazing)}\)</span>的示意图，
+从输入逐层向输出层传播最后得到输出的过程成为前向传播：
+<img alt="前向计算" src="https://wugh.github.io/images/NLP/neural-network-3-layers-ner-forward-computation.png" style="display:block;margin:0 auto" />
+通过非线性的隐藏层可以学习到词向量之间的非线性关系来帮助分类任务，例如“第一个词是‘meseums’&nbsp;并且第二个词是‘in’&#8221;可以帮助判断第三个词是否为地点。</p>
+<h2>Max-margin目标函数</h2>
+<p>本文的窗口分类任务将使用Max-margin目标函数，Max-margin的思想是使得网络在“正确”
+记作<span class="math">\(s\)</span>，数据点上的得分大于“错误”数据点上的得分记作<span class="math">\(s_c\)</span>（c代表corrupt），在窗
+口分类任务中“正确”数据点指的是中心词为地点的窗口例如“meseums in Paris are amazing”，
+“错误”数据点指的是中心词非地点的窗口例如“not all meseums in&nbsp;Paris”。</p>
+<p>我们的优化目标就变成<span class="math">\(\text{maxmize}(s-s_c)\)</span>或者<span class="math">\(\text{minimize}(s_c-s)\)</span>，
+这里对优化目标进行修改，只有当<span class="math">\(s_c&gt;s\)</span>即<span class="math">\(s_c-s&gt;0\)</span>时才计算梯度更新参数，主要思想是我们&nbsp;比较关心那些“错误”数据点得分大于“正确”样本点的数据对，优化目标变成下面形式：
+</p>
+<div class="math">$$\text{minimize}J=\max(s_c-s,0)$$</div>
+<p>
+上述的目标生成的边缘不够安全，我们希望最后正确样本点的得分<span class="math">\(s\)</span>比任意错误样本点的得分高出一个正数<span class="math">\(\Delta\)</span>。
+所以我们希望对于<span class="math">\(s-s_c&lt;\Delta\)</span>即<span class="math">\(s_c+\Delta-s&gt;0\)</span>的正负样本对计算梯度，如果取<span class="math">\(\Delta=1\)</span>可以得到下面的优化目标：
+</p>
+<div class="math">$$\text{minimize}J=\max(1+s_c-s,0)$$</div>
+<p>
+其中<span class="math">\(s=U^Tf(Wx+b)\)</span>，<span class="math">\(s_c=U^Tf(Wx_c+b)\)</span>。</p>
+<h2>后向传播（链式法则）</h2>
+<p>有了目标函数之后，优化神经网络的关键在于如何对<span class="math">\(J\)</span>求每个参数的导数。在我们的三层网络中参数有
+<span class="math">\(U\)</span>，<span class="math">\(W\)</span>，<span class="math">\(b\)</span>，<span class="math">\(x\)</span>。假设<span class="math">\(J=(1+s_c-s)&gt;0\)</span>，可得：
+</p>
+<div class="math">$$\frac{\partial J}{\partial s}=-\frac{\partial J}{\partial s_c}=-1$$</div>
+<p>
+所以我们只要关心<span class="math">\(s\)</span>对于<span class="math">\(U\)</span>，<span class="math">\(W\)</span>，<span class="math">\(b\)</span>，<span class="math">\(x\)</span>的导数，求导过程中需要用到链式法则
+<span class="math">\(\frac{\partial y}{\partial x}=\frac{\partial y}{\partial u}\frac{\partial u}{\partial x}\)</span>。</p>
+<p>首先是<span class="math">\(s\)</span>对<span class="math">\(U\)</span>求导，由于<span class="math">\(s=U^Ta=U^Tf(z)=U^Tf(Wx+b)\)</span>，所以：
+<img alt="s对U求导" src="https://wugh.github.io/images/NLP/neural-network-3-layers-ner-derivate-wrt-U.png" style="display:block;margin:0 auto" /></p>
+<p>考虑<span class="math">\(s\)</span>对于<span class="math">\(W_{ij}\)</span>的导数，由前向传播过程可知<span class="math">\(W_{ij}\)</span>只在计算<span class="math">\(a_i\)</span>的过程中使用，例如下图说明了<span class="math">\(W_{23}\)</span>只在计算<span class="math">\(a_2\)</span>的时候用到：
+<img alt="网络示意图" src="https://wugh.github.io/images/NLP/neural-network-3-layers-ner-graph.png" style="display:block;margin:0 auto" />
+所以导数计算过程如下：
+<img alt="s对W求导" src="https://wugh.github.io/images/NLP/neural-network-3-layers-ner-derivate-wrt-W.jpg" style="display:block;margin:0 auto" />
+需要注意这个求导过程中我们将<span class="math">\(s\)</span>对于<span class="math">\(z\)</span>的导数记作<span class="math">\(\delta=U\circ f'(z)\)</span>，这个将在后面的求导过程中反复用到。</p>
+<p>考虑<span class="math">\(s\)</span>对于<span class="math">\(b_i\)</span>的导数，计算过程与<span class="math">\(W_{ij}\)</span>的导数类似：
+</p>
+<div class="math">\begin{align*}
+\frac{\partial s}{\partial W_{ij}}&amp;=\frac{\partial s}{\partial a_i}\frac{\partial a_i}{\partial z_i}\frac{\partial z_i}{\partial b_i}\\
+&amp;=U_if'(z_i)\frac{\partial (W_{i\cdot}x+b_i)}{b_i}\\
+&amp;=\delta_i
+\end{align*}</div>
+<p>
+所以<span class="math">\(s\)</span>对于<span class="math">\(b_i\)</span>的导数为<span class="math">\(\delta\)</span>。</p>
+<p>现在考虑<span class="math">\(s\)</span>对于<span class="math">\(x_j\)</span>的导数，由于每个<span class="math">\(a_i\)</span>都和特定的<span class="math">\(x_j\)</span>相连，所以<span class="math">\(x_j\)</span>会影响所有隐藏层的输出，求导过程如下：
+<img alt="s对x求导" src="https://wugh.github.io/images/NLP/neural-network-3-layers-ner-derivate-wrt-x.png" style="display:block;margin:0 auto" />
+所以<span class="math">\(s\)</span>对于<span class="math">\(x\)</span>的导数为<span class="math">\(W^T\delta\)</span>。</p>
+<h2>后向传播（误差传播）</h2>
+<p>下面从误差（error）后向传播的角度来解释<span class="math">\(s\)</span>对于<span class="math">\(W_{ij}^{(1)}\)</span>的梯度。<span class="math">\(W^{(k)}\)</span>为第<span class="math">\(k\)</span>层和第<span class="math">\(k+1\)</span>层之间的权重矩阵，
+图中<span class="math">\(W^{(1)}\)</span>等价于上文提到的<span class="math">\(W\)</span>，<span class="math">\(W^{(2)}\)</span>等价于上文提到的<span class="math">\(U\)</span>。<span class="math">\(b_j^{(k)}\)</span>为第<span class="math">\(k+1\)</span>层第j个神经元的偏置，
+图中的<span class="math">\(b^{(1)}\)</span>等价于上文提到的<span class="math">\(b\)</span>。下图中<span class="math">\(a_j^{(k)}\)</span>表示第k层第j个神经元的输出，
+下图中<span class="math">\(z_j^{(k)}\)</span>表示第k层第j个神经元的标量输入。
+<img alt="神经网络符号说明" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-symbol.jpg" style="display:block;margin:0 auto" />
+<span class="math">\(\delta_1^{(2)}\)</span>表示传播到<span class="math">\(z_1^{(2)}\)</span>位置的误差，即<span class="math">\(s\)</span>相对于<span class="math">\(z_1^{(2)}\)</span>的导数，如下图：
+<img alt="delta含义" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-delta.png" style="display:block;margin:0 auto" /></p>
+<p>下图说明了如何利用反向误差来计算<span class="math">\(W_{12}^{(1)}\)</span>处的误差：
+<img alt="误差传播" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-error-w12.jpg" style="display:block;margin:0 auto" />
+可知最后<span class="math">\(W_{12}^{(1)}\)</span>处的误差为<span class="math">\(\delta_1^{(2)}a_2^{(1)}\)</span>，那么对于整个矩阵<span class="math">\(W^{(1)}\)</span>的误差可以写成<span class="math">\({\delta^{(2)}}^Ta^{(1)}\)</span>。&nbsp;可以看出反向误差传播本质上也是链式法则，不过看起来更直观，下面总结了反向误差传播的两个要点：</p>
+<ol>
+<li>误差<span class="math">\(x\)</span>向后传播穿过一个神经元时只需要将误差乘以当前神经元的局部梯度，如下图
+<img alt="误差传播" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-delta-neuron.png" style="display:block;margin:0 auto" /></li>
+<li>误差<span class="math">\(\delta\)</span>沿着线性变换后向传播时，只需要将误差乘以前向传播时的对应线性变换权重，如下图（绿色为前向，黄色为后向）
+<img alt="误差传播" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-delta-affine.png" style="display:block;margin:0 auto" /></li>
+</ol>
+<p>整个后向传播过程可以看出我们定义的<span class="math">\(\delta^{(k)}\)</span>在计算误差的过程中十分重要，
+需要知道如何从<span class="math">\(\delta^{(k)}\)</span>计算<span class="math">\(\delta^{(k-1)}\)</span>，即如何把<span class="math">\(z^{(k)}\)</span>处的误差传播到<span class="math">\(z^{(k-1)}\)</span>，
+现在先考虑如何得到<span class="math">\(z_j^{(k-1)}\)</span>处的误差：
+<img alt="误差传播" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-delta-to-delta.png" style="display:block;margin:0 auto" /></p>
+<ol>
+<li>对于第k层特定的<span class="math">\(z_i^{(k)}\)</span>处的误差首先需要传播到<span class="math">\(a_j^{(k-1)}\)</span>位置，在前向计算时从<span class="math">\(a_j^{(k-1)}\)</span>到
+<span class="math">\(z_i^{(k)}\)</span>是线性变换，所以<span class="math">\(a_j^{(k-1)}\)</span>从<span class="math">\(z_i^{(k)}\)</span>处接收到的误差为<span class="math">\(\delta_i^{(k)}W_{ij}^{(k-1)}\)</span></li>
+<li>由于第k层每个<span class="math">\(z_i^{(k)}\)</span>处的误差都会传播到<span class="math">\(a_j^{(k-1)}\)</span>位置（层与层之间全连接），
+所以<span class="math">\(a_j^{(k-1)}\)</span>从所有的<span class="math">\(z_i^{(k)}\)</span>处收到的总误差为<span class="math">\(\sum_i&nbsp;\delta_i^{(k)}W_{ij}^{(k-1)}\)</span></li>
+<li>可以看到从<span class="math">\(z_j^{(k-1)}\)</span>到<span class="math">\(a_j^{(k-1)}\)</span>穿过了一个神经元，所以<span class="math">\(a_j^{(k-1)}\)</span>处的误差传播到<span class="math">\(z_j^{(k-1)}\)</span>
+时需要乘以这个神经元的局部梯度<span class="math">\(f'(z_j^{(k-1)})\)</span>，得到<span class="math">\(z_j^{(k-1)}\)</span>处的误差<span class="math">\(\delta_j^{(k-1)}\)</span>
+为<span class="math">\(f'(z_j^{(k-1)})\sum_i&nbsp;\delta_i^{(k)}W_{ij}^{(k-1)}\)</span></li>
+</ol>
+<p>根据<span class="math">\(\delta_j^{(k-1)}=f'(z_j^{(k-1)})\sum_i \delta_i^{(k)}W_{ij}^{(k-1)}\)</span>，
+从<span class="math">\(\delta^{(k)}\)</span>计算<span class="math">\(\delta^{(k-1)}\)</span>的过程可以写成矩阵形式：
+</p>
+<div class="math">$$\delta^{(k-1)}=f'(z^{(k-1)})\circ({W^{(k-1)}}^T\delta^{(k)})$$</div>
+<h2>Tips和Tricks</h2>
+<p>剩下部分将讨论一下神经网络在工程首先中的一些技巧。</p>
+<h3>神经网络的使用策略</h3>
+<ol>
+<li>选择适当的网络结构<ol>
+<li>结构：单个词，固定窗口，词袋，递归 vs 循环，<span class="caps">CNN</span>，基于句子 vs&nbsp;基于文档</li>
+<li>非线性函数选择</li>
+</ol>
+</li>
+<li>用梯度检查来校验是否有实现bug</li>
+<li>参数初始化</li>
+<li>优化技巧</li>
+<li>检查模型是否能够在数据集上过拟合<ol>
+<li>如果不能，那么需要改变模型结果或者让模型参数规模更大（例如增加隐藏层）</li>
+<li>如果可以，那么增加正则化项</li>
+</ol>
+</li>
+</ol>
+<h3>神经元非线性函数选择</h3>
+<p>最常用的两个非线性函数是sigmoid和tanh函数，tanh可以看成对sigmoid函数进行了缩放和平移
+</p>
+<div class="math">$$\tanh(z)=2\sigma(2z)-1$$</div>
+<p>
+sigmoid和tanh的函数图像和导数形式如下：
+<img alt="sigmoid和tanh" src="https://wugh.github.io/images/NLP/neural-network-tricks-non-linearities.png" style="display:block;margin:0 auto" />
+tanh函数在深度网络中的表现通常要比sigmoid好，这里还有一些额外的非线性函数，
+其中<a href="https://en.wikipedia.org/wiki/Rectifier_(neural_networks)">ReLu函数</a>在2015年成为了深度神经网络最受欢迎的非线性函数。
+<img alt="更多的非线性函数" src="https://wugh.github.io/images/NLP/neural-network-tricks-non-linearities-more.png" style="display:block;margin:0 auto" /></p>
+<h3>梯度检查（Gradient&nbsp;Check）</h3>
+<p>前文描述的后向算法采用使用微积分来计算偏导数，但是其实我们可以根据导数的定义，&nbsp;采用数值方法来估计偏导数，检查过程如下：</p>
+<ol>
+<li>实现前向计算和后向误差传播</li>
+<li>对于网络中的每一个参数（假设记作<span class="math">\(\theta\)</span>，<span class="math">\(\theta\)</span>包含了网络所有的<span class="math">\(W\)</span>，<span class="math">\(b\)</span>），
+然后按下列公式计算<span class="math">\(\theta\)</span>每一维的梯度，<span class="math">\(h\)</span>一般取一个较小的数（例如0.00001）：
+<img alt="梯度检查" src="https://wugh.github.io/images/NLP/neural-network-tricks-non-gradient-check.png" style="display:block;margin:0 auto" /></li>
+<li>对比后向误差传播计算的梯度和第2步计算的梯度是否很接近</li>
+</ol>
+<h3>参数初始化</h3>
+<p>把偏置初始化成0，然后权重矩阵的初始化方式如下：
+</p>
+<div class="math">$$W^{(l)}\sim U\left[-\frac{\sqrt{6}}{\sqrt{n^{(l)} + n^{(l+1)}}},\frac{\sqrt{6}}{\sqrt{n^{(l)}+n^{(l+1)}}}\right]$$</div>
+<p>
+其中<span class="math">\(n^{(l)}\)</span>表示第<span class="math">\(l\)</span>层的神经元个数，<span class="math">\(n^{(l+1)}\)</span>表示第<span class="math">\(l+1\)</span>层的神经元个数。</p>
+<h3>学习率</h3>
+<p>随机梯度下降一般在一个或者数个样本（mini-batch）上计算梯度，然后进行参数更新，
+最简单的随机梯度下降采用固定的学习率<span class="math">\(\alpha\)</span>，学习率不能设置太大：
+<img alt="固定的alpha" src="https://wugh.github.io/images/NLP/neural-network-tricks-learning-rate-fixed-alpha.png" style="display:block;margin:0 auto" /></p>
+<p>较好的方法是让学习率随着迭代次数<span class="math">\(t\)</span>逐步下降：
+<img alt="alpha随时间下降" src="https://wugh.github.io/images/NLP/neural-network-tricks-learning-rate-decrease-alpha.png" style="display:block;margin:0 auto" />
+其中<span class="math">\(\alpha(0)\)</span>表示初始的学习率是一个可调参数，<span class="math">\(\tau\)</span>是另一个参数表示从何时开始学习率开始降低。&nbsp;在实践中，这种方法取得的结果通常不错。</p>
+<p>下面将讨论一种不需要手工设定学习率的方法，称之为Adagrad，这种方法的特点在于每个参数使用的学习率都不同。</p>
+<h3>Adagrad</h3>
+<p>不同参数使用不同的学习率，越少进行更新的参数采用的学习率大于那些更新频繁的参数，具体每个参数的学习率变化如下：
+<img alt="adagrad" src="https://wugh.github.io/images/NLP/neural-network-tricks-adagrad.png" style="display:block;margin:0 auto" /></p>
+<h3>正则化（Regularization）</h3>
+<p>当我们的模型在训练集上过拟合之后，需要对模型进行正则化，一般来说是将权重矩阵的<span class="math">\(L_2\)</span>正则项加入损失函数（偏置不加入）：
+<img alt="L2正则" src="https://wugh.github.io/images/NLP/neural-network-tricks-regularization.png" style="display:block;margin:0 auto" />
+其中<span class="math">\({\Vert W^{(i)}\Vert}_F\)</span>称为弗罗贝尼乌斯范数（Frobenius norm）：
+<img alt="弗罗贝尼乌斯范数" src="https://wugh.github.io/images/NLP/neural-network-tricks-matrix-F-norm.png" style="display:block;margin:0 auto" />
+可以看出正则项会惩罚大的参数，<span class="math">\(\lambda\)</span>是超参（越大则越认为<span class="math">\(W\)</span>应该接近0），加入<span class="math">\(L_2\)</span>正则项之后会使得<span class="math">\(W\)</span>接近0，
+使得网络拟合的目标函数灵活性降低从而避免过拟合。
+防止过拟合的方法除了加入正则项之外，还有<code>Early Stopping</code>（根据模型在发展集上的性能停止训练）。</p>
+<h3>防止特征共同适应（Co-adaptation）</h3>
+<p>特征Co-adaptation指的是某个特征只有在另个特征出现时才有用。防止特征
+Co-adaptation的方法是Dropout，顾名思义就是在训练模型的时候随机扔掉一部分的输入&nbsp;（即随机把一部分输入变成0）
+</p>
+<div class="math">$$a^{(k+1)}=f\left (W^{(k)}(r\circ a^{(k)})+b\right )$$</div>
+<p>
+<span class="math">\(p\)</span>为超参，其中<span class="math">\(r\)</span>的每一维以概率<span class="math">\(p\)</span>置成1，以<span class="math">\(1-p\)</span>的概率置成0。测试的时候不需要Dropout，&nbsp;采用Dropout可以也防止模型对于特定的特征共现过拟合。</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+    <footer>
+<p class="meta">
+  <span class="byline author vcard">
+    Posted by <span class="fn">
+        Guohua Wu
+    </span>
+  </span>
+<time datetime="2016-03-01T09:00:00+08:00" pubdate>2016-03-01(Tue)</time>  <span class="categories">
+    <a class='category' href='https://wugh.github.io/category/nlp.html'>NLP</a>
+  </span>
+  <span class="categories">
+    <a class="category" href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a class="category" href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a class="category" href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>  </span>
+</p><div class="sharing">
+</div>    </footer>
+  </article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></div>
+  </section>
+</div>
+<aside class="sidebar">
+  <section>
+    <h1>Recent Posts</h1>
+    <ul id="recent_posts">
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">CS224d笔记3——神经网络</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224d笔记1——word2vec</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Pelican自定义Jinja过滤器</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/">Linux通过Pulse混合麦克风和音频输出</a>
+      </li>
+    </ul>
+  </section>
+  <section>
+      
+    <h1>Categories</h1>
+    <ul id="recent_posts">
+        <li><a href="https://wugh.github.io/category/linux.html">Linux</a></li>
+        <li><a href="https://wugh.github.io/category/machine-learning.html">Machine Learning</a></li>
+        <li><a href="https://wugh.github.io/category/nlp.html">NLP</a></li>
+        <li><a href="https://wugh.github.io/category/web.html">Web</a></li>
+    </ul>
+  </section>
+ 
+
+  <section>
+  <h1>Tags</h1>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
+
+
+    <section>
+        <h1>Social</h1>
+        <ul>
+            <li><a href="https://wugh.github.io/feeds/main.atom.xml" type="application/atom+xml" rel="alternate">Atom</a></li>
+            <li><a href="https://github.com/wugh" target="_blank">GitHub</a></li>
+        </ul>
+    </section>
+
+</aside>    </div>
+  </div>
+  <footer role="contentinfo"><p>
+    Copyright &copy;  2013&ndash;2016  Guohua Wu &mdash;
+  <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
+</p></footer>
+  <script src="https://wugh.github.io/theme/js/modernizr-2.0.js"></script>
+  <script src="https://wugh.github.io/theme/js/ender.js"></script>
+  <script src="https://wugh.github.io/theme/js/octopress.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var disqus_shortname = 'guohuasblog';
+    var disqus_identifier = '/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/';
+    var disqus_url = 'https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/';
+    var disqus_title = 'CS224d笔记3——神经网络';
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = "//" + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+  </script>
+</body>
+</html>

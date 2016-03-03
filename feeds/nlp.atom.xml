@@ -1,5 +1,245 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/nlp.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2016-02-29T14:18:00+08:00</updated><entry><title>CS224d笔记2——Softmax分类和窗口分类</title><link href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/" rel="alternate"></link><updated>2016-02-29T14:18:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-02-29:posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/</id><summary type="html">&lt;hr /&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/nlp.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2016-03-01T09:00:00+08:00</updated><entry><title>CS224d笔记3——神经网络</title><link href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/" rel="alternate"></link><updated>2016-03-01T09:00:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-03-01:posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/</id><summary type="html">&lt;hr /&gt;
+&lt;p&gt;这部分首先介绍神经元，接着介绍只有一个隐藏层的神经网络，这个神经网络要解决的
+问题和&lt;a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/"&gt;上一篇文章&lt;/a&gt;类似，这里对窗口分类任务进一步
+简化，我们只需要判断中心词是否为地点。利用这个简单的神经网络说明前向传播和
+后向误差传播算法，然后推出通用的后向误差传播算法。最后介绍一些神经网络在工程&amp;nbsp;实现中的一些技巧。&lt;/p&gt;
+&lt;h2&gt;神经元&lt;/h2&gt;
+&lt;p&gt;神经元是组成神经网络的基础单元，神经元通常接受&lt;span class="math"&gt;\(n\)&lt;/span&gt;个输入产生一个输出，运算过程如下图：
+&lt;img alt="神经元" src="https://wugh.github.io/images/NLP/neural-network-neuron.png" style="display:block;margin:0 auto" /&gt;
+神经元的参数包括一个&lt;span class="math"&gt;\(n\)&lt;/span&gt;维的权重向量&lt;span class="math"&gt;\(w\)&lt;/span&gt;和一个偏置&lt;span class="math"&gt;\(b\)&lt;/span&gt;（&lt;span class="math"&gt;\(b\)&lt;/span&gt;为标量），偏置可以看成判断类别的先验，
+神经元的输出为&lt;span class="math"&gt;\(h{w,b}(x)=f(w^Tx + b)\)&lt;/span&gt;，&lt;span class="math"&gt;\(f\)&lt;/span&gt;被成为“激活函数”。本文默认使用的激活函数为sigmoid函数
+（用符号&lt;span class="math"&gt;\(\sigma\)&lt;/span&gt;表示）：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$f(z)=\sigma(z)=\frac{1}{1+\exp(-z)}$$&lt;/div&gt;
+&lt;p&gt;
+更多的激活函数将在后文讨论，这里不再展开，需要注意的是sigmoid函数的求导结果为
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sigma'(z)=\sigma(z)(1-\sigma(z))$$&lt;/div&gt;
+&lt;h2&gt;单隐藏层神经网络&lt;/h2&gt;
+&lt;p&gt;神经网络的特点在于把一个输入向量同时输入到一系列神经元，然后得到新的输出向量，
+然后这个新的向量又可以作为下一层一系列神经元的输入，如下图所示：
+&lt;img alt="神经网络例子" src="https://wugh.github.io/images/NLP/neural-network-3-layers-example.png" style="display:block;margin:0 auto" /&gt;
+我们使用圆圈来表示神经网络的输入，标上“+1”的圆圈被称为偏置节点，也就是截距项。
+神经网络最左边的一层叫做输入层，最右的一层叫做输出层（本例中，输出层只有一个节
+点）。中间所有节点组成的一层叫做隐藏层，因为我们不能在训练样本集中观测到它们的
+值。同时可以看到，以上神经网络的例子中有3个输入单元（偏置单元不计在内），3个隐
+藏单元及一个输出单元。本文使用的符号参考&lt;a href="ufldl"&gt;&lt;span class="caps"&gt;UFLDL&lt;/span&gt;教程&lt;/a&gt;，计算隐藏层的过程如下图所示：
+&lt;img alt="神经网络记号" src="https://wugh.github.io/images/NLP/neural-network-3-layers-example-notation.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;h2&gt;前向计算&lt;/h2&gt;
+&lt;p&gt;可以把神经网络应用于&lt;a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/"&gt;上一篇文章&lt;/a&gt;中提到的窗口分
+类问题，这里我们主要只是为了用这个简单的神经网络说明前向计算和后向误差传播，所
+以将任务限定为只需要判断中心词是否为地点，并且采用的网络只有一个隐藏层。
+例如窗口内容为“meseums in Paris are amazing”，判断中心词“Paris”是否为地点，
+假设词向量维度为4，那么窗口向量&lt;span class="math"&gt;\(x_{\text{window}}=x\in \mathbb{R}^{20}\)&lt;/span&gt;，
+隐藏层用8个神经元，然后用8个神经元的输出来计算得分，最后利用这个得分判断中心词是否为实体。
+下图为计算&lt;span class="math"&gt;\(\text{score(meseums in Paris are amazing)}\)&lt;/span&gt;的示意图，
+从输入逐层向输出层传播最后得到输出的过程成为前向传播：
+&lt;img alt="前向计算" src="https://wugh.github.io/images/NLP/neural-network-3-layers-ner-forward-computation.png" style="display:block;margin:0 auto" /&gt;
+通过非线性的隐藏层可以学习到词向量之间的非线性关系来帮助分类任务，例如“第一个词是‘meseums’&amp;nbsp;并且第二个词是‘in’&amp;#8221;可以帮助判断第三个词是否为地点。&lt;/p&gt;
+&lt;h2&gt;Max-margin目标函数&lt;/h2&gt;
+&lt;p&gt;本文的窗口分类任务将使用Max-margin目标函数，Max-margin的思想是使得网络在“正确”
+记作&lt;span class="math"&gt;\(s\)&lt;/span&gt;，数据点上的得分大于“错误”数据点上的得分记作&lt;span class="math"&gt;\(s_c\)&lt;/span&gt;（c代表corrupt），在窗
+口分类任务中“正确”数据点指的是中心词为地点的窗口例如“meseums in Paris are amazing”，
+“错误”数据点指的是中心词非地点的窗口例如“not all meseums in&amp;nbsp;Paris”。&lt;/p&gt;
+&lt;p&gt;我们的优化目标就变成&lt;span class="math"&gt;\(\text{maxmize}(s-s_c)\)&lt;/span&gt;或者&lt;span class="math"&gt;\(\text{minimize}(s_c-s)\)&lt;/span&gt;，
+这里对优化目标进行修改，只有当&lt;span class="math"&gt;\(s_c&amp;gt;s\)&lt;/span&gt;即&lt;span class="math"&gt;\(s_c-s&amp;gt;0\)&lt;/span&gt;时才计算梯度更新参数，主要思想是我们&amp;nbsp;比较关心那些“错误”数据点得分大于“正确”样本点的数据对，优化目标变成下面形式：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{minimize}J=\max(s_c-s,0)$$&lt;/div&gt;
+&lt;p&gt;
+上述的目标生成的边缘不够安全，我们希望最后正确样本点的得分&lt;span class="math"&gt;\(s\)&lt;/span&gt;比任意错误样本点的得分高出一个正数&lt;span class="math"&gt;\(\Delta\)&lt;/span&gt;。
+所以我们希望对于&lt;span class="math"&gt;\(s-s_c&amp;lt;\Delta\)&lt;/span&gt;即&lt;span class="math"&gt;\(s_c+\Delta-s&amp;gt;0\)&lt;/span&gt;的正负样本对计算梯度，如果取&lt;span class="math"&gt;\(\Delta=1\)&lt;/span&gt;可以得到下面的优化目标：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{minimize}J=\max(1+s_c-s,0)$$&lt;/div&gt;
+&lt;p&gt;
+其中&lt;span class="math"&gt;\(s=U^Tf(Wx+b)\)&lt;/span&gt;，&lt;span class="math"&gt;\(s_c=U^Tf(Wx_c+b)\)&lt;/span&gt;。&lt;/p&gt;
+&lt;h2&gt;后向传播（链式法则）&lt;/h2&gt;
+&lt;p&gt;有了目标函数之后，优化神经网络的关键在于如何对&lt;span class="math"&gt;\(J\)&lt;/span&gt;求每个参数的导数。在我们的三层网络中参数有
+&lt;span class="math"&gt;\(U\)&lt;/span&gt;，&lt;span class="math"&gt;\(W\)&lt;/span&gt;，&lt;span class="math"&gt;\(b\)&lt;/span&gt;，&lt;span class="math"&gt;\(x\)&lt;/span&gt;。假设&lt;span class="math"&gt;\(J=(1+s_c-s)&amp;gt;0\)&lt;/span&gt;，可得：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\partial J}{\partial s}=-\frac{\partial J}{\partial s_c}=-1$$&lt;/div&gt;
+&lt;p&gt;
+所以我们只要关心&lt;span class="math"&gt;\(s\)&lt;/span&gt;对于&lt;span class="math"&gt;\(U\)&lt;/span&gt;，&lt;span class="math"&gt;\(W\)&lt;/span&gt;，&lt;span class="math"&gt;\(b\)&lt;/span&gt;，&lt;span class="math"&gt;\(x\)&lt;/span&gt;的导数，求导过程中需要用到链式法则
+&lt;span class="math"&gt;\(\frac{\partial y}{\partial x}=\frac{\partial y}{\partial u}\frac{\partial u}{\partial x}\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;首先是&lt;span class="math"&gt;\(s\)&lt;/span&gt;对&lt;span class="math"&gt;\(U\)&lt;/span&gt;求导，由于&lt;span class="math"&gt;\(s=U^Ta=U^Tf(z)=U^Tf(Wx+b)\)&lt;/span&gt;，所以：
+&lt;img alt="s对U求导" src="https://wugh.github.io/images/NLP/neural-network-3-layers-ner-derivate-wrt-U.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;p&gt;考虑&lt;span class="math"&gt;\(s\)&lt;/span&gt;对于&lt;span class="math"&gt;\(W_{ij}\)&lt;/span&gt;的导数，由前向传播过程可知&lt;span class="math"&gt;\(W_{ij}\)&lt;/span&gt;只在计算&lt;span class="math"&gt;\(a_i\)&lt;/span&gt;的过程中使用，例如下图说明了&lt;span class="math"&gt;\(W_{23}\)&lt;/span&gt;只在计算&lt;span class="math"&gt;\(a_2\)&lt;/span&gt;的时候用到：
+&lt;img alt="网络示意图" src="https://wugh.github.io/images/NLP/neural-network-3-layers-ner-graph.png" style="display:block;margin:0 auto" /&gt;
+所以导数计算过程如下：
+&lt;img alt="s对W求导" src="https://wugh.github.io/images/NLP/neural-network-3-layers-ner-derivate-wrt-W.jpg" style="display:block;margin:0 auto" /&gt;
+需要注意这个求导过程中我们将&lt;span class="math"&gt;\(s\)&lt;/span&gt;对于&lt;span class="math"&gt;\(z\)&lt;/span&gt;的导数记作&lt;span class="math"&gt;\(\delta=U\circ f'(z)\)&lt;/span&gt;，这个将在后面的求导过程中反复用到。&lt;/p&gt;
+&lt;p&gt;考虑&lt;span class="math"&gt;\(s\)&lt;/span&gt;对于&lt;span class="math"&gt;\(b_i\)&lt;/span&gt;的导数，计算过程与&lt;span class="math"&gt;\(W_{ij}\)&lt;/span&gt;的导数类似：
+&lt;/p&gt;
+&lt;div class="math"&gt;\begin{align*}
+\frac{\partial s}{\partial W_{ij}}&amp;amp;=\frac{\partial s}{\partial a_i}\frac{\partial a_i}{\partial z_i}\frac{\partial z_i}{\partial b_i}\\
+&amp;amp;=U_if'(z_i)\frac{\partial (W_{i\cdot}x+b_i)}{b_i}\\
+&amp;amp;=\delta_i
+\end{align*}&lt;/div&gt;
+&lt;p&gt;
+所以&lt;span class="math"&gt;\(s\)&lt;/span&gt;对于&lt;span class="math"&gt;\(b_i\)&lt;/span&gt;的导数为&lt;span class="math"&gt;\(\delta\)&lt;/span&gt;。&lt;/p&gt;
+&lt;p&gt;现在考虑&lt;span class="math"&gt;\(s\)&lt;/span&gt;对于&lt;span class="math"&gt;\(x_j\)&lt;/span&gt;的导数，由于每个&lt;span class="math"&gt;\(a_i\)&lt;/span&gt;都和特定的&lt;span class="math"&gt;\(x_j\)&lt;/span&gt;相连，所以&lt;span class="math"&gt;\(x_j\)&lt;/span&gt;会影响所有隐藏层的输出，求导过程如下：
+&lt;img alt="s对x求导" src="https://wugh.github.io/images/NLP/neural-network-3-layers-ner-derivate-wrt-x.png" style="display:block;margin:0 auto" /&gt;
+所以&lt;span class="math"&gt;\(s\)&lt;/span&gt;对于&lt;span class="math"&gt;\(x\)&lt;/span&gt;的导数为&lt;span class="math"&gt;\(W^T\delta\)&lt;/span&gt;。&lt;/p&gt;
+&lt;h2&gt;后向传播（误差传播）&lt;/h2&gt;
+&lt;p&gt;下面从误差（error）后向传播的角度来解释&lt;span class="math"&gt;\(s\)&lt;/span&gt;对于&lt;span class="math"&gt;\(W_{ij}^{(1)}\)&lt;/span&gt;的梯度。&lt;span class="math"&gt;\(W^{(k)}\)&lt;/span&gt;为第&lt;span class="math"&gt;\(k\)&lt;/span&gt;层和第&lt;span class="math"&gt;\(k+1\)&lt;/span&gt;层之间的权重矩阵，
+图中&lt;span class="math"&gt;\(W^{(1)}\)&lt;/span&gt;等价于上文提到的&lt;span class="math"&gt;\(W\)&lt;/span&gt;，&lt;span class="math"&gt;\(W^{(2)}\)&lt;/span&gt;等价于上文提到的&lt;span class="math"&gt;\(U\)&lt;/span&gt;。&lt;span class="math"&gt;\(b_j^{(k)}\)&lt;/span&gt;为第&lt;span class="math"&gt;\(k+1\)&lt;/span&gt;层第j个神经元的偏置，
+图中的&lt;span class="math"&gt;\(b^{(1)}\)&lt;/span&gt;等价于上文提到的&lt;span class="math"&gt;\(b\)&lt;/span&gt;。下图中&lt;span class="math"&gt;\(a_j^{(k)}\)&lt;/span&gt;表示第k层第j个神经元的输出，
+下图中&lt;span class="math"&gt;\(z_j^{(k)}\)&lt;/span&gt;表示第k层第j个神经元的标量输入。
+&lt;img alt="神经网络符号说明" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-symbol.jpg" style="display:block;margin:0 auto" /&gt;
+&lt;span class="math"&gt;\(\delta_1^{(2)}\)&lt;/span&gt;表示传播到&lt;span class="math"&gt;\(z_1^{(2)}\)&lt;/span&gt;位置的误差，即&lt;span class="math"&gt;\(s\)&lt;/span&gt;相对于&lt;span class="math"&gt;\(z_1^{(2)}\)&lt;/span&gt;的导数，如下图：
+&lt;img alt="delta含义" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-delta.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;p&gt;下图说明了如何利用反向误差来计算&lt;span class="math"&gt;\(W_{12}^{(1)}\)&lt;/span&gt;处的误差：
+&lt;img alt="误差传播" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-error-w12.jpg" style="display:block;margin:0 auto" /&gt;
+可知最后&lt;span class="math"&gt;\(W_{12}^{(1)}\)&lt;/span&gt;处的误差为&lt;span class="math"&gt;\(\delta_1^{(2)}a_2^{(1)}\)&lt;/span&gt;，那么对于整个矩阵&lt;span class="math"&gt;\(W^{(1)}\)&lt;/span&gt;的误差可以写成&lt;span class="math"&gt;\({\delta^{(2)}}^Ta^{(1)}\)&lt;/span&gt;。&amp;nbsp;可以看出反向误差传播本质上也是链式法则，不过看起来更直观，下面总结了反向误差传播的两个要点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;误差&lt;span class="math"&gt;\(x\)&lt;/span&gt;向后传播穿过一个神经元时只需要将误差乘以当前神经元的局部梯度，如下图
+&lt;img alt="误差传播" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-delta-neuron.png" style="display:block;margin:0 auto" /&gt;&lt;/li&gt;
+&lt;li&gt;误差&lt;span class="math"&gt;\(\delta\)&lt;/span&gt;沿着线性变换后向传播时，只需要将误差乘以前向传播时的对应线性变换权重，如下图（绿色为前向，黄色为后向）
+&lt;img alt="误差传播" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-delta-affine.png" style="display:block;margin:0 auto" /&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;整个后向传播过程可以看出我们定义的&lt;span class="math"&gt;\(\delta^{(k)}\)&lt;/span&gt;在计算误差的过程中十分重要，
+需要知道如何从&lt;span class="math"&gt;\(\delta^{(k)}\)&lt;/span&gt;计算&lt;span class="math"&gt;\(\delta^{(k-1)}\)&lt;/span&gt;，即如何把&lt;span class="math"&gt;\(z^{(k)}\)&lt;/span&gt;处的误差传播到&lt;span class="math"&gt;\(z^{(k-1)}\)&lt;/span&gt;，
+现在先考虑如何得到&lt;span class="math"&gt;\(z_j^{(k-1)}\)&lt;/span&gt;处的误差：
+&lt;img alt="误差传播" src="https://wugh.github.io/images/NLP/neural-network-3-layers-bp-delta-to-delta.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;对于第k层特定的&lt;span class="math"&gt;\(z_i^{(k)}\)&lt;/span&gt;处的误差首先需要传播到&lt;span class="math"&gt;\(a_j^{(k-1)}\)&lt;/span&gt;位置，在前向计算时从&lt;span class="math"&gt;\(a_j^{(k-1)}\)&lt;/span&gt;到
+&lt;span class="math"&gt;\(z_i^{(k)}\)&lt;/span&gt;是线性变换，所以&lt;span class="math"&gt;\(a_j^{(k-1)}\)&lt;/span&gt;从&lt;span class="math"&gt;\(z_i^{(k)}\)&lt;/span&gt;处接收到的误差为&lt;span class="math"&gt;\(\delta_i^{(k)}W_{ij}^{(k-1)}\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;由于第k层每个&lt;span class="math"&gt;\(z_i^{(k)}\)&lt;/span&gt;处的误差都会传播到&lt;span class="math"&gt;\(a_j^{(k-1)}\)&lt;/span&gt;位置（层与层之间全连接），
+所以&lt;span class="math"&gt;\(a_j^{(k-1)}\)&lt;/span&gt;从所有的&lt;span class="math"&gt;\(z_i^{(k)}\)&lt;/span&gt;处收到的总误差为&lt;span class="math"&gt;\(\sum_i&amp;nbsp;\delta_i^{(k)}W_{ij}^{(k-1)}\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;可以看到从&lt;span class="math"&gt;\(z_j^{(k-1)}\)&lt;/span&gt;到&lt;span class="math"&gt;\(a_j^{(k-1)}\)&lt;/span&gt;穿过了一个神经元，所以&lt;span class="math"&gt;\(a_j^{(k-1)}\)&lt;/span&gt;处的误差传播到&lt;span class="math"&gt;\(z_j^{(k-1)}\)&lt;/span&gt;
+时需要乘以这个神经元的局部梯度&lt;span class="math"&gt;\(f'(z_j^{(k-1)})\)&lt;/span&gt;，得到&lt;span class="math"&gt;\(z_j^{(k-1)}\)&lt;/span&gt;处的误差&lt;span class="math"&gt;\(\delta_j^{(k-1)}\)&lt;/span&gt;
+为&lt;span class="math"&gt;\(f'(z_j^{(k-1)})\sum_i&amp;nbsp;\delta_i^{(k)}W_{ij}^{(k-1)}\)&lt;/span&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;根据&lt;span class="math"&gt;\(\delta_j^{(k-1)}=f'(z_j^{(k-1)})\sum_i \delta_i^{(k)}W_{ij}^{(k-1)}\)&lt;/span&gt;，
+从&lt;span class="math"&gt;\(\delta^{(k)}\)&lt;/span&gt;计算&lt;span class="math"&gt;\(\delta^{(k-1)}\)&lt;/span&gt;的过程可以写成矩阵形式：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\delta^{(k-1)}=f'(z^{(k-1)})\circ({W^{(k-1)}}^T\delta^{(k)})$$&lt;/div&gt;
+&lt;h2&gt;Tips和Tricks&lt;/h2&gt;
+&lt;p&gt;剩下部分将讨论一下神经网络在工程首先中的一些技巧。&lt;/p&gt;
+&lt;h3&gt;神经网络的使用策略&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;选择适当的网络结构&lt;ol&gt;
+&lt;li&gt;结构：单个词，固定窗口，词袋，递归 vs 循环，&lt;span class="caps"&gt;CNN&lt;/span&gt;，基于句子 vs&amp;nbsp;基于文档&lt;/li&gt;
+&lt;li&gt;非线性函数选择&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;用梯度检查来校验是否有实现bug&lt;/li&gt;
+&lt;li&gt;参数初始化&lt;/li&gt;
+&lt;li&gt;优化技巧&lt;/li&gt;
+&lt;li&gt;检查模型是否能够在数据集上过拟合&lt;ol&gt;
+&lt;li&gt;如果不能，那么需要改变模型结果或者让模型参数规模更大（例如增加隐藏层）&lt;/li&gt;
+&lt;li&gt;如果可以，那么增加正则化项&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;神经元非线性函数选择&lt;/h3&gt;
+&lt;p&gt;最常用的两个非线性函数是sigmoid和tanh函数，tanh可以看成对sigmoid函数进行了缩放和平移
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\tanh(z)=2\sigma(2z)-1$$&lt;/div&gt;
+&lt;p&gt;
+sigmoid和tanh的函数图像和导数形式如下：
+&lt;img alt="sigmoid和tanh" src="https://wugh.github.io/images/NLP/neural-network-tricks-non-linearities.png" style="display:block;margin:0 auto" /&gt;
+tanh函数在深度网络中的表现通常要比sigmoid好，这里还有一些额外的非线性函数，
+其中&lt;a href="https://en.wikipedia.org/wiki/Rectifier_(neural_networks)"&gt;ReLu函数&lt;/a&gt;在2015年成为了深度神经网络最受欢迎的非线性函数。
+&lt;img alt="更多的非线性函数" src="https://wugh.github.io/images/NLP/neural-network-tricks-non-linearities-more.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;h3&gt;梯度检查（Gradient&amp;nbsp;Check）&lt;/h3&gt;
+&lt;p&gt;前文描述的后向算法采用使用微积分来计算偏导数，但是其实我们可以根据导数的定义，&amp;nbsp;采用数值方法来估计偏导数，检查过程如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;实现前向计算和后向误差传播&lt;/li&gt;
+&lt;li&gt;对于网络中的每一个参数（假设记作&lt;span class="math"&gt;\(\theta\)&lt;/span&gt;，&lt;span class="math"&gt;\(\theta\)&lt;/span&gt;包含了网络所有的&lt;span class="math"&gt;\(W\)&lt;/span&gt;，&lt;span class="math"&gt;\(b\)&lt;/span&gt;），
+然后按下列公式计算&lt;span class="math"&gt;\(\theta\)&lt;/span&gt;每一维的梯度，&lt;span class="math"&gt;\(h\)&lt;/span&gt;一般取一个较小的数（例如0.00001）：
+&lt;img alt="梯度检查" src="https://wugh.github.io/images/NLP/neural-network-tricks-non-gradient-check.png" style="display:block;margin:0 auto" /&gt;&lt;/li&gt;
+&lt;li&gt;对比后向误差传播计算的梯度和第2步计算的梯度是否很接近&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;参数初始化&lt;/h3&gt;
+&lt;p&gt;把偏置初始化成0，然后权重矩阵的初始化方式如下：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$W^{(l)}\sim U\left[-\frac{\sqrt{6}}{\sqrt{n^{(l)} + n^{(l+1)}}},\frac{\sqrt{6}}{\sqrt{n^{(l)}+n^{(l+1)}}}\right]$$&lt;/div&gt;
+&lt;p&gt;
+其中&lt;span class="math"&gt;\(n^{(l)}\)&lt;/span&gt;表示第&lt;span class="math"&gt;\(l\)&lt;/span&gt;层的神经元个数，&lt;span class="math"&gt;\(n^{(l+1)}\)&lt;/span&gt;表示第&lt;span class="math"&gt;\(l+1\)&lt;/span&gt;层的神经元个数。&lt;/p&gt;
+&lt;h3&gt;学习率&lt;/h3&gt;
+&lt;p&gt;随机梯度下降一般在一个或者数个样本（mini-batch）上计算梯度，然后进行参数更新，
+最简单的随机梯度下降采用固定的学习率&lt;span class="math"&gt;\(\alpha\)&lt;/span&gt;，学习率不能设置太大：
+&lt;img alt="固定的alpha" src="https://wugh.github.io/images/NLP/neural-network-tricks-learning-rate-fixed-alpha.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;p&gt;较好的方法是让学习率随着迭代次数&lt;span class="math"&gt;\(t\)&lt;/span&gt;逐步下降：
+&lt;img alt="alpha随时间下降" src="https://wugh.github.io/images/NLP/neural-network-tricks-learning-rate-decrease-alpha.png" style="display:block;margin:0 auto" /&gt;
+其中&lt;span class="math"&gt;\(\alpha(0)\)&lt;/span&gt;表示初始的学习率是一个可调参数，&lt;span class="math"&gt;\(\tau\)&lt;/span&gt;是另一个参数表示从何时开始学习率开始降低。&amp;nbsp;在实践中，这种方法取得的结果通常不错。&lt;/p&gt;
+&lt;p&gt;下面将讨论一种不需要手工设定学习率的方法，称之为Adagrad，这种方法的特点在于每个参数使用的学习率都不同。&lt;/p&gt;
+&lt;h3&gt;Adagrad&lt;/h3&gt;
+&lt;p&gt;不同参数使用不同的学习率，越少进行更新的参数采用的学习率大于那些更新频繁的参数，具体每个参数的学习率变化如下：
+&lt;img alt="adagrad" src="https://wugh.github.io/images/NLP/neural-network-tricks-adagrad.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;h3&gt;正则化（Regularization）&lt;/h3&gt;
+&lt;p&gt;当我们的模型在训练集上过拟合之后，需要对模型进行正则化，一般来说是将权重矩阵的&lt;span class="math"&gt;\(L_2\)&lt;/span&gt;正则项加入损失函数（偏置不加入）：
+&lt;img alt="L2正则" src="https://wugh.github.io/images/NLP/neural-network-tricks-regularization.png" style="display:block;margin:0 auto" /&gt;
+其中&lt;span class="math"&gt;\({\Vert W^{(i)}\Vert}_F\)&lt;/span&gt;称为弗罗贝尼乌斯范数（Frobenius norm）：
+&lt;img alt="弗罗贝尼乌斯范数" src="https://wugh.github.io/images/NLP/neural-network-tricks-matrix-F-norm.png" style="display:block;margin:0 auto" /&gt;
+可以看出正则项会惩罚大的参数，&lt;span class="math"&gt;\(\lambda\)&lt;/span&gt;是超参（越大则越认为&lt;span class="math"&gt;\(W\)&lt;/span&gt;应该接近0），加入&lt;span class="math"&gt;\(L_2\)&lt;/span&gt;正则项之后会使得&lt;span class="math"&gt;\(W\)&lt;/span&gt;接近0，
+使得网络拟合的目标函数灵活性降低从而避免过拟合。
+防止过拟合的方法除了加入正则项之外，还有&lt;code&gt;Early Stopping&lt;/code&gt;（根据模型在发展集上的性能停止训练）。&lt;/p&gt;
+&lt;h3&gt;防止特征共同适应（Co-adaptation）&lt;/h3&gt;
+&lt;p&gt;特征Co-adaptation指的是某个特征只有在另个特征出现时才有用。防止特征
+Co-adaptation的方法是Dropout，顾名思义就是在训练模型的时候随机扔掉一部分的输入&amp;nbsp;（即随机把一部分输入变成0）
+&lt;/p&gt;
+&lt;div class="math"&gt;$$a^{(k+1)}=f\left (W^{(k)}(r\circ a^{(k)})+b\right )$$&lt;/div&gt;
+&lt;p&gt;
+&lt;span class="math"&gt;\(p\)&lt;/span&gt;为超参，其中&lt;span class="math"&gt;\(r\)&lt;/span&gt;的每一维以概率&lt;span class="math"&gt;\(p\)&lt;/span&gt;置成1，以&lt;span class="math"&gt;\(1-p\)&lt;/span&gt;的概率置成0。测试的时候不需要Dropout，&amp;nbsp;采用Dropout可以也防止模型对于特定的特征共现过拟合。&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="神经网络"></category><category term="后向传播"></category><category term="bp算法"></category></entry><entry><title>CS224d笔记2——Softmax分类和窗口分类</title><link href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/" rel="alternate"></link><updated>2016-02-29T14:18:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-02-29:posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/</id><summary type="html">&lt;hr /&gt;
 &lt;p&gt;这部分内容主要总结Softmax分类，以及如何以交叉熵作为Softmax分类的损失度量标准来
 训练Softmax的参数，最后将Softmax分类应用在一个简单的窗口分类任务上，窗口分类
 指的是利用中心词向量以及中心词窗口范围内的向量拼接起来对中心词进行简单的分类&amp;nbsp;（例如把中心词按实体类型分成人名、地名、组织名、其他）。&lt;/p&gt;
@@ -48,6 +288,9 @@
 &lt;img alt="窗口分类求导结果" src="https://wugh.github.io/images/NLP/window-classification-gradient.jpg" /&gt;&lt;/p&gt;
 &lt;p&gt;最后把&lt;span class="math"&gt;\(x\)&lt;/span&gt;上的梯度分配给对应的词向量就可以更新词向量了。
 &lt;img alt="词向量梯度" src="https://wugh.github.io/images/NLP/window-classification-gradient-x-word.jpg" /&gt;&lt;/p&gt;
+&lt;h2&gt;总结&lt;/h2&gt;
+&lt;p&gt;Softmax分类最后得到的只是原始数据空间上的线性分类面，利用神经网络可以学习到非线性的决策边界，
+将在&lt;a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/"&gt;下一篇&lt;/a&gt;笔记总结神经网络。&lt;/p&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
@@ -155,12 +398,12 @@
 &lt;li&gt;I like &lt;span class="caps"&gt;NLP&lt;/span&gt;.&lt;/li&gt;
 &lt;li&gt;I like deep&amp;nbsp;learning.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;得到共现矩阵如下：&lt;/p&gt;
-&lt;p&gt;&lt;img alt="词-词共现矩阵" src="https://wugh.github.io/images/NLP/word-word-matrix.png" /&gt;&lt;/p&gt;
-&lt;p&gt;对该矩阵进行&lt;span class="caps"&gt;SVD&lt;/span&gt;分解：&lt;/p&gt;
-&lt;p&gt;&lt;img alt="svd" src="https://wugh.github.io/images/NLP/word-word-matrix-svd.png" /&gt;&lt;/p&gt;
-&lt;p&gt;之后区&lt;span class="math"&gt;\(U\)&lt;/span&gt;的前&lt;span class="math"&gt;\(k\)&lt;/span&gt;列作为所有单词的&lt;span class="math"&gt;\(k\)&lt;/span&gt;维向量表示。&lt;/p&gt;
-&lt;p&gt;&lt;img alt="向量表示" src="https://wugh.github.io/images/NLP/word-word-matrix-embeding.png" /&gt;&lt;/p&gt;
+&lt;p&gt;得到共现矩阵如下：
+&lt;img alt="词-词共现矩阵" src="https://wugh.github.io/images/NLP/word-word-matrix.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;p&gt;对该矩阵进行&lt;span class="caps"&gt;SVD&lt;/span&gt;分解：
+&lt;img alt="svd" src="https://wugh.github.io/images/NLP/word-word-matrix-svd.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;p&gt;之后区&lt;span class="math"&gt;\(U\)&lt;/span&gt;的前&lt;span class="math"&gt;\(k\)&lt;/span&gt;列作为所有单词的&lt;span class="math"&gt;\(k\)&lt;/span&gt;维向量表示。
+&lt;img alt="向量表示" src="https://wugh.github.io/images/NLP/word-word-matrix-embeding.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
 &lt;p&gt;这种基于共现矩阵进行&lt;span class="caps"&gt;SVD&lt;/span&gt;分解的方法存在问题：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;矩阵的维度经常发生变化（新词和新文档的加入）&lt;/li&gt;

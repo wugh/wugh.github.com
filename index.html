@@ -48,6 +48,88 @@
   		<article>
 <header>
       <h1 class="entry-title">
+        <a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">CS224d笔记3——神经网络</a>
+      </h1>
+    <p class="meta">
+<time datetime="2016-03-01T09:00:00+08:00" pubdate>2016-03-01(Tue)</time>    </p>
+</header>
+
+  <div class="entry-content"><hr/>
+<p>这部分首先介绍神经元，接着介绍只有一个隐藏层的神经网络，这个神经网络要解决的
+问题和<a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">上一篇文章</a>类似，这里对窗口分类任务进一步
+简化，我们只需要判断中心词是否为地点。利用这个简单的神经网络说明前向传播和
+后向误差传播算法，然后推出通用的后向误差传播算法。最后介绍一些神经网络在工程 实现中的一些技巧。</p>
+<h2>神经元</h2>
+<p>神经元是组成神经网络的基础单元，神经元通常接受<span class="math">\(n\)</span>个输入产生一个输出，运算过程如下图：
+<img alt="神经元" src="https://wugh.github.io/images/NLP/neural-network-neuron.png" style="display:block;margin:0 auto"/>
+神经元的参数包括一个<span class="math">\(n\)</span>维的权重向量<span class="math">\(w\)</span>和一个偏置<span class="math">\(b\)</span>（<span class="math">\(b\)</span>为标量），偏置可以看成判断类别的先验，
+神经元的输出为<span class="math">\(h{w,b}(x)=f(w^Tx + b)\)</span>，<span class="math">\(f\)</span>被成为“激活函数”。本文默认使用的激活函数为sigmoid函数
+（用符号<span class="math">\(\sigma\)</span>表示）：
+</p>
+<div class="math">$$f(z)=\sigma(z)=\frac{1}{1+\exp(-z)}$$ ...</div><script type='text/javascript'>if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+  <footer>
+    <a rel="full-article" href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">Read On &crarr;</a>
+  </footer>
+  		</article>
+  		<article>
+<header>
+      <h1 class="entry-title">
         <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
       </h1>
     <p class="meta">
@@ -422,30 +504,6 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
     <a rel="full-article" href="https://wugh.github.io/posts/2013/11/bcm57780-network-problem/">Read On &crarr;</a>
   </footer>
   		</article>
-  		<article>
-<header>
-      <h1 class="entry-title">
-        <a href="https://wugh.github.io/posts/2013/11/gentoo-portage-tips/">Gentoo Portage使用技巧</a>
-      </h1>
-    <p class="meta">
-<time datetime="2013-11-09T10:06:01+08:00" pubdate>2013-11-09(Sat)</time>    </p>
-</header>
-
-  <div class="entry-content"><hr />
-<p>本文章记录一些使用Gentoo&nbsp;Portage的技巧。</p>
-<h3>指定Slot安装软件</h3>
-<p><code>Slot</code>是在<code>Gentoo</code>的包管理的一个重要功能，当一个软件有多个分支的时候Portage能够&nbsp;保证不同的版本并存。例如，Python一般有多个版本</p>
-<div class="highlight"><pre><span class="nv">$ </span>eix dev-lang/python
-<span class="o">[</span>I<span class="o">]</span> dev-lang/python
-     Available versions:  
-        <span class="o">(</span>2.5<span class="o">)</span>   2.5.4-r4 ~2.5.4-r5
-        <span class="o">(</span>2.6<span class="o">)</span>   2.6.8 ~2.6.8-r1
-        <span class="o">(</span>2.7<span class="o">)</span>   2.7.3-r2 ~2.7.3-r3
-        <span class="o">(</span>3.1<span class="o">)</span>   3.1.5 ~3.1 ...</pre></div></div>
-  <footer>
-    <a rel="full-article" href="https://wugh.github.io/posts/2013/11/gentoo-portage-tips/">Read On &crarr;</a>
-  </footer>
-  		</article>
 <div class="pagination">
     <a class="prev" href="https://wugh.github.io/index2.html">&larr; Older</a>
 
@@ -455,6 +513,9 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
   <section>
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">CS224d笔记3——神经网络</a>
+      </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
       </li>
@@ -466,9 +527,6 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
       </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/">Linux通过Pulse混合麦克风和音频输出</a>
-      </li>
-      <li class="post">
-          <a href="https://wugh.github.io/posts/2014/11/maxent/">最大熵</a>
       </li>
     </ul>
   </section>
@@ -486,7 +544,7 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
 
   <section>
   <h1>Tags</h1>
-    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
 
 
     <section>
