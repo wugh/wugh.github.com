@@ -53,3 +53,8 @@ $$\frac{\partial J}{\partial f} = \frac{\partial -\log(\frac{\exp(f_k)}{\sum_{c=
 最后把$x$上的梯度分配给对应的词向量就可以更新词向量了。
 ![词向量梯度]({filename}/images/NLP/window-classification-gradient-x-word.jpg)
 
+## 总结
+
+Softmax分类最后得到的只是原始数据空间上的线性分类面，利用神经网络可以学习到非线性的决策边界，
+将在[下一篇]({filename}/NLP/cs224d-notes3.md)笔记总结神经网络。
+

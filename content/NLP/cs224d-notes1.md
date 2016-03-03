@@ -74,16 +74,13 @@ slug: cs224d-notes1-word2vec
 1. I like deep learning.
 
 得到共现矩阵如下：
-
-![词-词共现矩阵]({filename}/images/NLP/word-word-matrix.png)
+![词-词共现矩阵]({filename}/images/NLP/word-word-matrix.png){: style="display:block;margin:0 auto"}
 
 对该矩阵进行SVD分解：
-
-![svd]({filename}/images/NLP/word-word-matrix-svd.png)
+![svd]({filename}/images/NLP/word-word-matrix-svd.png){: style="display:block;margin:0 auto"}
 
 之后区$U$的前$k$列作为所有单词的$k$维向量表示。
-
-![向量表示]({filename}/images/NLP/word-word-matrix-embeding.png)
+![向量表示]({filename}/images/NLP/word-word-matrix-embeding.png){: style="display:block;margin:0 auto"}
 
 这种基于共现矩阵进行SVD分解的方法存在问题：
 
