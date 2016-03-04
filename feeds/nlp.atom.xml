@@ -115,7 +115,7 @@
 &lt;/p&gt;
 &lt;div class="math"&gt;$$\delta^{(k-1)}=f'(z^{(k-1)})\circ({W^{(k-1)}}^T\delta^{(k)})$$&lt;/div&gt;
 &lt;h2&gt;Tips和Tricks&lt;/h2&gt;
-&lt;p&gt;剩下部分将讨论一下神经网络在工程首先中的一些技巧。&lt;/p&gt;
+&lt;p&gt;剩下部分将讨论一下神经网络在工程实现中的一些技巧。&lt;/p&gt;
 &lt;h3&gt;神经网络的使用策略&lt;/h3&gt;
 &lt;ol&gt;
 &lt;li&gt;选择适当的网络结构&lt;ol&gt;
