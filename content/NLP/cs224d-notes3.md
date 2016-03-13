@@ -1,7 +1,7 @@
 title: CS224d笔记3——神经网络
 date: 2016-03-01 09:00
 category: NLP
-tags: 神经网络,后向传播,bp算法
+tags: 神经网络,后向传播,bp算法,深度学习
 slug: cs224d-notes3-neural-networks-and-backward-propagation
 ---
 

@@ -58,7 +58,7 @@ DATE_FORMATS = {
 GOOGLE_UNIVERSAL_ANALYTICS = 'UA-52495737-1'
 
 # Uncomment following line if you want document-relative URLs when developing
-# RELATIVE_URLS = True
+RELATIVE_URLS = True
 
 # add customer filter
 import os
