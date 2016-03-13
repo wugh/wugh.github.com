@@ -23,9 +23,9 @@
   <link href="https://wugh.github.io/theme/css/main.css" media="screen, projection"
         rel="stylesheet" type="text/css">
 
-  <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
+  <link href="//fonts.useso.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
         rel="stylesheet" type="text/css">
-  <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
+  <link href="//fonts.useso.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
         rel="stylesheet" type="text/css">
 </head>
 
@@ -45,6 +45,100 @@
   <div id="main">
     <div id="content">
 <div class="blog-index">
+  		<article>
+<header>
+      <h1 class="entry-title">
+        <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/">CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</a>
+      </h1>
+    <p class="meta">
+<time datetime="2016-03-13T21:22:00+08:00" pubdate>2016-03-13(Sun)</time>    </p>
+</header>
+
+  <div class="entry-content"><hr />
+<p>本篇文章主要介绍两种<span class="caps">RNN</span>的隐藏层信息计算方法<span class="caps">GRU</span>（Gated Recurrent Units）和
+<span class="caps">LSTM</span>（Long-Short-Term-Memories）。</p></div>
+  		</article>
+  		<article>
+<header>
+      <h1 class="entry-title">
+        <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/">CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</a>
+      </h1>
+    <p class="meta">
+<time datetime="2016-03-05T11:13:00+08:00" pubdate>2016-03-05(Sat)</time>    </p>
+</header>
+
+  <div class="entry-content"><hr/>
+<p>这部分首先介绍语言模型，通过分析传统语言模型的问题引入循环神经网络（Recurrent Neural Network, <span class="caps">RNN</span>）以及
+<span class="caps">RNN</span>的扩展（双向<span class="caps">RNN</span>，深度<span class="caps">RNN</span>），最后为了改善<span class="caps">RNN</span>对长距依存信息的捕获引入<span class="caps">GRU</span>（Gated Recurrent Units）和
+<span class="caps">LSTM</span>（Long-Short-Term-Memories）。</p>
+<h2>语言模型</h2>
+<p>这里将介绍传统的n-gram语言模型，然后简单介绍神经概率语言模型，最后总结两者的问题所在引出循环神经网络。</p>
+<p>语言模型通常用来衡量一个单词序列出现的概率。假设词序列为<span class="math">\(\{w_1,\ldots,w_T\}\)</span>，
+那么把这个序列出现的概率记为<span class="math">\(P(w_1,\ldots,w_T)\)</span>，计算词序列的概率在机器翻译中有着重要用途，
+机器翻译需要给各个候选的词序列打分，这个分数可以用这个概率来衡量。
+<span class="math">\(P(w_1,\ldots,w_T)\)</span>的计算可以用链式法则展开：
+</p>
+<div class="math">$$P(w_1,\ldots,w_T)=\Pi_{i=1}^{i=T}P(w_i|w_1,\ldots,w_{i-1})$$ ...</div><script type='text/javascript'>if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+  <footer>
+    <a rel="full-article" href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/">Read On &crarr;</a>
+  </footer>
+  		</article>
   		<article>
 <header>
       <h1 class="entry-title">
@@ -438,72 +532,6 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
     <a rel="full-article" href="https://wugh.github.io/posts/2013/11/text-classification/">Read On &crarr;</a>
   </footer>
   		</article>
-  		<article>
-<header>
-      <h1 class="entry-title">
-        <a href="https://wugh.github.io/posts/2013/11/hexo-math-equation/">hexo数学公式</a>
-      </h1>
-    <p class="meta">
-<time datetime="2013-11-12T12:20:30+08:00" pubdate>2013-11-12(Tue)</time>    </p>
-</header>
-
-  <div class="entry-content"><hr />
-<p>在使用<a href="https://github.com/tommy351/hexo" title="Hexo">Hexo</a>写博客的时候无法插入数学公
-式，通过调研发现<a href="http://www.mathjax.org/" title="MathJax">MathJax</a>可以很好的在网页里&nbsp;面显示数学公式，并且能够支持很多浏览器，下面分步骤描述生成公式的方法。</p>
-<h3>修改主题</h3>
-<p>MathJax的<a href="http://docs.mathjax.org/en/latest/platforms/index.html">官方文档</a>说只
-要在每个页面的<code>head</code>标签里面插入下面的<code>javascript</code>代码：</p>
-<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span>
-   <span class="na">src=</span><span class="s">&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</pre></div>
-
-
-<p>接下来的步骤就是要把这个代码加入所有的文章页面里面，这里参考
-<a href="https://github.com/nuklly/hexo-theme-greyshade" title="hexo theme
-greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
-  <footer>
-    <a rel="full-article" href="https://wugh.github.io/posts/2013/11/hexo-math-equation/">Read On &crarr;</a>
-  </footer>
-  		</article>
-  		<article>
-<header>
-      <h1 class="entry-title">
-        <a href="https://wugh.github.io/posts/2013/11/bcm57780-network-problem/">BCM57780没有网络连接</a>
-      </h1>
-    <p class="meta">
-<time datetime="2013-11-10T00:16:36+08:00" pubdate>2013-11-10(Sun)</time>    </p>
-</header>
-
-  <div class="entry-content"><hr />
-<h3>问题描述</h3>
-<p>安装完Gentoo之后发现系统一直没有办法上网，通过<code>lspci</code>找到自己的网卡之后，搜索问&nbsp;题，发现通过下面几条命令之后才能够激活网卡：</p>
-<div class="highlight"><pre><span class="c"># rmmod broadcom </span>
-<span class="c"># rmmod tg3 </span>
-<span class="c"># modprobe broadcom </span>
-<span class="c"># modprobe tg3 </span>
-<span class="c"># dhcpcd eth0</span>
-</pre></div>
-
-
-<h3>问题解决</h3>
-<p>但是并不能永久解决问题，由上面看来问题应该出在内核那边，需要安装下面的方法重新&nbsp;编译一下模块：</p>
-<div class="highlight"><pre>Device Drivers ---&gt; 
-     Network Device Support ---&gt; 
-          Ethernet driver support ---&gt; 
-               Broadcom devices 
-                 &lt;M&gt; Broadcom Tigon3 support 
-          PHY Device support and infrastrcutre ---&gt; 
-             &lt;M&gt; Drivers <span class="k">for</span> Broadcom PHYs
-</pre></div>
-
-
-<h3>参考文章</h3>
-<ul>
-<li><a href="http://forums.gentoo.org/viewtopic-t-925416-start-0.html">No Connection ...</a></li></ul></div>
-  <footer>
-    <a rel="full-article" href="https://wugh.github.io/posts/2013/11/bcm57780-network-problem/">Read On &crarr;</a>
-  </footer>
-  		</article>
 <div class="pagination">
     <a class="prev" href="https://wugh.github.io/index2.html">&larr; Older</a>
 
@@ -514,6 +542,12 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
       <li class="post">
+          <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/">CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/">CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</a>
+      </li>
+      <li class="post">
           <a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">CS224d笔记3——神经网络</a>
       </li>
       <li class="post">
@@ -521,12 +555,6 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
       </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224d笔记1——word2vec</a>
-      </li>
-      <li class="post">
-          <a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Pelican自定义Jinja过滤器</a>
-      </li>
-      <li class="post">
-          <a href="https://wugh.github.io/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/">Linux通过Pulse混合麦克风和音频输出</a>
       </li>
     </ul>
   </section>
@@ -544,7 +572,7 @@ greyshade">greyshade</a>中对这段代码的处理方式 ...</p></div>
 
   <section>
   <h1>Tags</h1>
-    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/lstm.html">LSTM</a>,    <a href="https://wugh.github.io/tag/gru.html">GRU</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/rnn.html">RNN</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/xun-huan-shen-jing-wang-luo.html">循环神经网络</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/yu-yan-mo-xing.html">语言模型</a>,    <a href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
 
 
     <section>

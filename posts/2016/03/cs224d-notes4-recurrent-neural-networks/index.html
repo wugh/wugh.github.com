@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN） &mdash; Life in a Nutshell</title>
+  <meta name="author" content="Guohua Wu">
+
+  <link href="https://wugh.github.io/feeds/main.atom.xml" type="application/atom+xml" rel="alternate"
+        title="Life in a Nutshell Atom Feed" />
+
+
+
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link href="https://wugh.github.io/favicon.png" rel="icon">
+
+  <link href="https://wugh.github.io/theme/css/main.css" media="screen, projection"
+        rel="stylesheet" type="text/css">
+
+  <link href="//fonts.useso.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+  <link href="//fonts.useso.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="https://wugh.github.io/">Life in a Nutshell</a></h1>
+</hgroup></header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="https://wugh.github.io/feeds/main.atom.xml" rel="subscribe-atom">Atom</a></li>
+</ul>
+
+
+<ul class="main-navigation">
+    <li><a href="/archives.html">Archives</a></li>
+      <li><a href="https://wugh.github.io/pages/about-me.html">About&nbsp;Me</a></li>
+</ul></nav>
+  <div id="main">
+    <div id="content">
+<div>
+  <article class="hentry" role="article">
+<header>
+      <h1 class="entry-title">CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</h1>
+    <p class="meta">
+<time datetime="2016-03-05T11:13:00+08:00" pubdate>2016-03-05(Sat)</time>    </p>
+</header>
+
+  <div class="entry-content"><hr />
+<p>这部分首先介绍语言模型，通过分析传统语言模型的问题引入循环神经网络（Recurrent Neural Network, <span class="caps">RNN</span>）以及
+<span class="caps">RNN</span>的扩展（双向<span class="caps">RNN</span>，深度<span class="caps">RNN</span>），最后为了改善<span class="caps">RNN</span>对长距依存信息的捕获引入<span class="caps">GRU</span>（Gated Recurrent Units）和
+<span class="caps">LSTM</span>（Long-Short-Term-Memories）。</p>
+<h2>语言模型</h2>
+<p>这里将介绍传统的n-gram语言模型，然后简单介绍神经概率语言模型，最后总结两者的问题所在引出循环神经网络。</p>
+<p>语言模型通常用来衡量一个单词序列出现的概率。假设词序列为<span class="math">\(\{w_1,\ldots,w_T\}\)</span>，
+那么把这个序列出现的概率记为<span class="math">\(P(w_1,\ldots,w_T)\)</span>，计算词序列的概率在机器翻译中有着重要用途，
+机器翻译需要给各个候选的词序列打分，这个分数可以用这个概率来衡量。
+<span class="math">\(P(w_1,\ldots,w_T)\)</span>的计算可以用链式法则展开：
+</p>
+<div class="math">$$P(w_1,\ldots,w_T)=\Pi_{i=1}^{i=T}P(w_i|w_1,\ldots,w_{i-1})$$</div>
+<p>
+这个概率估计起来比较复杂（因为<span class="math">\(w_i\)</span>出现的概率依赖于<span class="math">\(w_i\)</span>之前所有的词），
+一般进行马尔可夫假设（假设<span class="math">\(w_i\)</span>出现的概率仅依赖<span class="math">\(w_i\)</span>之前的<span class="math">\(n-1\)</span>个词，称为为n-gram）。
+</p>
+<div class="math">$$P(w_1,\ldots,w_T)=\Pi_{i=1}^{i=T}P(w_i|w_1,\ldots,w_{i-1})=\Pi_{i=1}^{i=T}P(w_i|w_{i-(n-1)},\ldots,w_{i-1})$$</div>
+<p>
+一般来说通过语料我们就可以估计出n-gram的概率，下面分别是bigram（2-gram）和trigram（3-gram）的概率计算方法：
+<img alt="n-gram计算" src="https://wugh.github.io/images/NLP/rnn-language-model-bigram-trigram.png" style="display:block;margin:0 auto" />
+<span class="math">\(n\)</span>越大估计出来的序列的概率越准确，但是这种方法需要大量的内存，假设我们不做任何优化且词表大小为<span class="math">\(|V|\)</span>，
+那么对于n-gram，需要一个<span class="math">\(|V|^n\)</span>规模的矩阵来存储，需要的内存随着<span class="math">\(n\)</span>增大指数增长，一般5-gram已经是非常大的规模（Google提供）。</p>
+<p>Bengio等人利用神经网络来表示语言模型，在语言模型的训练过程中可以得到单词的分布式表示，具体的神经概率语言模型图如下：
+<img alt="神经语言模型" src="https://wugh.github.io/images/NLP/rnn-neural-language-model.png" style="display:block;margin:0 auto" />
+该网络的主要思想是用前<span class="math">\(n-1\)</span>个词的向量来估计当前词的概率，具体公式为：
+</p>
+<div class="math">$$\hat{y}=\textit{softmax}(W^{(2)}\tanh(W^{(1)}+b{^{(1)}})+W^{(3)}+b^{(3)})$$</div>
+<p>可以看出传统语言模型在估计概率的时候需要固定<span class="math">\(n\)</span>的大小，否则无法统计概率<span class="math">\(P(w_i|w_{i-(n-1)},\ldots,w_{i-1})\)</span>。
+而<span class="caps">RNN</span>的最大优势在于可以统计<span class="math">\(P(w_i|w_1,\ldots,w_{i-1})\)</span>的概率。</p>
+<h2>循环神经网络（Recurrent Neural Network, <span class="caps">RNN</span>）</h2>
+<p><span class="caps">RNN</span>的优势在于当前词的概率依赖于之前出现的所有词，并且需要的内存并不会随着依赖的上下文长度增加而指数增长，
+需要的内存和词表大小规模相关。<span class="caps">RNN</span>的网络结构图如下：
+<img alt="RNN结构" src="https://wugh.github.io/images/NLP/rnn-structure.png" style="display:block;margin:0 auto" />
+可以看出<span class="caps">RNN</span>是一个序列模型，比较符合认知上人理解句子的顺序（从左到右）。在时刻<span class="math">\(t\)</span>，将<span class="math">\(t-1\)</span>
+时刻的隐藏层输出<span class="math">\(h_{t-1}\)</span>和当前时刻的词向量<span class="math">\(x_t\)</span>输入隐藏层之后得到<span class="math">\(t\)</span>时刻的特征表示<span class="math">\(h_t\)</span>，
+然后用这个特征表示得到<span class="math">\(t\)</span>时刻的预测输出<span class="math">\(\hat{y}\)</span>。本节的重点是将<span class="caps">RNN</span>应用于语言模型，
+下面来详细描述<span class="caps">RNN</span>语言模型中用到的参数：</p>
+<ul>
+<li><span class="math">\(x_1,\ldots,x_{t-1},x_t,x_{t+1},\ldots,x_T\)</span>：<span class="math">\(T\)</span>长度的单词序列中每个时刻的词对应的词向量。</li>
+<li><span class="math">\(h_t=\sigma(W^{(hh)}h_{t-1}+W^{(hx)}x_t)\)</span>：如何计算<span class="math">\(t\)</span>时刻的隐藏层输出：<ul>
+<li><span class="math">\(x_t\in\mathbb{R}^d\)</span>：<span class="math">\(t\)</span>时刻的单词对应的词向量</li>
+<li><span class="math">\(W^{(hx)}\in\mathbb{R}^{D_h\times d}\)</span>：连接当前隐藏层和<span class="math">\(x_t\)</span>的权重矩阵</li>
+<li><span class="math">\(W^{(hh)}\in\mathbb{R}^{D_h\times D_h}\)</span>：连接当前隐藏和前一个时刻隐藏层输出<span class="math">\(h_{t-1}\)</span>的权重矩阵</li>
+<li><span class="math">\(h_{t-1}\in\mathbb{R}^{D_h}\)</span>：表示<span class="math">\(t-1\)</span>时刻隐藏层的输出，<span class="math">\(h_0\in\mathbb{R}^{D_h}\)</span>表示<span class="math">\(t=0\)</span>时刻随机初始化的隐藏层输出向量</li>
+<li><span class="math">\(\sigma()\)</span>：表示神经元使用的非线性函数为sigmoid，当然也可以采用tanh等函数</li>
+</ul>
+</li>
+<li><span class="math">\(\hat{y}_t=\text{softmax}(W^{(S)}h_t)\)</span>：根据<span class="math">\(t\)</span>时刻的隐藏层输出进行softmax分类得到整个词汇表上的概率分布，
+这里的<span class="math">\(\hat{y}_t\)</span>是对下个时刻（<span class="math">\(t+1\)</span>）词的预测，即根据已经给定的上下文信息<span class="math">\(h_{t-1}\)</span>和当前观测到的词向量<span class="math">\(x_t\)</span>
+来预测<span class="math">\(t+1\)</span>时刻的词。其中<span class="math">\(W^{(S)}\in\mathbb{R}^{|V|\times D_h}\)</span>，<span class="math">\(\hat{y}_t\in \mathbb{R}^{|V|}\)</span>，<span class="math">\(|V|\)</span>为词表大小。</li>
+<li><span class="math">\(\hat{P}(x_{t+1}=v_j|x_t,\ldots,x_1)=\hat{y}_{t,j}\)</span></li>
+</ul>
+<p><span class="caps">RNN</span>语言模型中非常关键的一点是每个时刻采用的<span class="math">\(W\)</span>矩阵都是一个，所以参数规模不会随着依赖上下文的长度增加而指数增长。
+通常来说采用交叉熵作为损失函数，那么在<span class="math">\(t\)</span>时刻的损失为：
+</p>
+<div class="math">$$J^{(t)}(\theta)=-\sum_{j=1}^{|V|}y_{t,j}\log \hat{y}_{t,j}$$</div>
+<p>
+在一个长度为<span class="math">\(T\)</span>的序列上的总交叉熵为：
+</p>
+<div class="math">$$J=-\frac{1}{T}\sum_{t=1}^T J^{(t)}(\theta)=-\frac{1}{T}\sum_{t=1}^T \sum_{j=1}^{|V|}y_{t,j}\log \hat{y}_{t,j}$$</div>
+<p>
+用来衡量语言模型的一个常用指标是困惑度（perplexity），困惑度越低表示预测下个词的置信度越高，困惑度和交叉熵的关系如下：
+</p>
+<div class="math">$$\text{Perplexity}=2^J$$</div>
+<p>
+<span class="caps">RNN</span>语言模型需要的内存正比于序列长度，因为需要将这个序列的词向量存储在内存中。</p>
+<h2><span class="caps">RNN</span>训练</h2>
+<p>其实<span class="caps">RNN</span>本质上还是一个普通的多层神经网络，只是层与层之间使用的是同一个权重矩阵而已，
+同样可以利用<a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">上一篇文章</a>介绍的后向误差传播的原理来进行后向误差传播，
+只需要把<span class="math">\(t\)</span>时刻的误差一直传播到<span class="math">\(t=0\)</span>时刻，但是在实际实现的时候一般只需要向后传播<span class="math">\(\tau\approx 3-5\)</span>个时间单位。</p>
+<p>对于<span class="math">\(t\)</span>时刻需要求的梯度如下：
+</p>
+<div class="math">$$\frac{\partial{J^{(t)}}}{\partial{W^{(S)}}}\qquad{}
+\left. \frac{\partial{J^{(t)}}}{\partial{W^{(hh)}}}\right|_t\qquad{}
+\left. \frac{\partial{J^{(t)}}}{\partial{W^{(hx)}}}\right|_t\qquad{}
+\frac{\partial{J^{(t)}}}{\partial{x_t}}
+$$</div>
+<p>
+其中<span class="math">\(|_t\)</span>表示求<span class="math">\(t\)</span>某个参数的梯度，因为<span class="math">\(W^{^(hh)}\)</span>和<span class="math">\(W^{(hx)}\)</span>两个参数在不同时刻用到，&nbsp;需要求出不同时刻两个矩阵的梯度，然后进行累加。</p>
+<p>对于<span class="math">\(t-1,\ldots,t-(\tau - 1)\)</span>时刻需要求的梯度如下：
+</p>
+<div class="math">$$
+\left. \frac{\partial{J^{(t)}}}{\partial{W^{(hh)}}}\right|_{t-s}\qquad{}
+\left. \frac{\partial{J^{(t)}}}{\partial{W^{(hx)}}}\right|_{t-s}\qquad{}
+\frac{\partial{J^{(t)}}}{\partial{x_{t-s}}}
+$$</div>
+<p>这里以<span class="caps">RNN</span>语言模型为例，将<span class="math">\(t\)</span>时刻的<span class="caps">RNN</span>展开一个多层神经网络，其中包含一个softmax层，进行后向传播，示意图如下：
+<img alt="RNN误差传播" src="https://wugh.github.io/images/NLP/rnn-gradient-bp.jpg" style="display:block;margin:0 auto" /></p>
+<p>假设<span class="math">\(a_t=W^{(S)}h_t\)</span>，那么<span class="math">\(\hat{y}_t=\text{softmax}(a_t)\)</span>，根据<a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">之前文章</a>可知
+<span class="math">\(J^{(t)}\)</span>相对于<span class="math">\(a_t\)</span>的梯度为：
+</p>
+<div class="math">$$\nabla_{a_t}J^{(t)}=\hat{y}_t-y_t=\delta_t^{(S)}$$</div>
+<p>
+<span class="math">\(J^{(t)}\)</span>相对于<span class="math">\(W^{(S)}\)</span>的梯度如下：
+</p>
+<div class="math">$$\frac{\partial{J^{(t)}}}{\partial{W^{(S)}}}=\delta_t^{(S)}(h_t)^T$$</div>
+<p>假设<span class="math">\(z_t=W^{(hh)}h_{t-1}+W^{(hx)}x_t\)</span>，那么<span class="math">\(h_t=\sigma(z_t)\)</span>，现在我们需要把<span class="math">\(a_t\)</span>处的误差传播到<span class="math">\(z_t\)</span>处，
+其实就是<a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">上一篇文章</a>如何从<span class="math">\(\delta^{(t+1)}\)</span>得到<span class="math">\(\delta^{(t)}\)</span>，
+<span class="math">\(z_t\)</span>的误差如下：
+</p>
+<div class="math">$$\nabla_{z_t}J^{(t)}=(W^{(S)})^T\delta_t^{(S)}\circ \sigma'(z_t)=\delta_t$$</div>
+<p>
+类似地可知<span class="math">\(J^{(t)}\)</span>相对于<span class="math">\(t\)</span>时刻<span class="math">\(W^{(hh)}\)</span>的梯度如下：
+</p>
+<div class="math">$$\left. \frac{\partial{J^{(t)}}}{\partial{W^{(hh)}}}\right|_t=\delta_t (h_{t-1})^T$$</div>
+<p>
+<span class="math">\(J^{(t)}\)</span>相对于<span class="math">\(t\)</span>时刻<span class="math">\(W^{(hx)}\)</span>的梯度如下：
+</p>
+<div class="math">$$\left. \frac{\partial{J^{(t)}}}{\partial{W^{(hx)}}}\right|_t=\delta_t (x_{t})^T$$</div>
+<p>
+<span class="math">\(J^{(t)}\)</span>相对于<span class="math">\(x_t\)</span>的梯度如下：
+</p>
+<div class="math">$$\frac{\partial{J^{(t)}}}{\partial{x_t}}=(W^{(hx)})^T\delta_t$$</div>
+<p>对于<span class="math">\(t-s\)</span>时刻来说，首先我们要得到<span class="math">\(z_{t-s}\)</span>处的误差，计算如下：
+</p>
+<div class="math">$$\begin{equation}
+\delta_{t-s}=(W^{(hh)})^T\delta_{t-s+1}\circ \sigma'(z_{t-s})
+\label{eq:delta_bp}
+\end{equation}$$</div>
+<p>
+得到<span class="math">\(\delta_{t-s}\)</span>，求解
+<span class="math">\(\left. \frac{\partial{J^{(t)}}}{\partial{W^{(hh)}}}\right|_{t-s}\)</span>，
+<span class="math">\(\left. \frac{\partial{J^{(t)}}}{\partial{W^{(hx)}}}\right|_{t-s}\)</span>和
+<span class="math">\(\frac{\partial{J^{(t)}}}{\partial{x_{t-s}}}\)</span>
+都和<span class="math">\(t\)</span>时刻一致，直接表示成<span class="math">\(\delta_{t-s}\)</span>的式子。</p>
+<h2>梯度消失（vanishing gradient）和梯度爆炸（exploding&nbsp;gradient）</h2>
+<p>当我们把<span class="math">\(t\)</span>时刻的误差往后传播的时候就可以得到<span class="math">\(J^{(t)}\)</span>对于各个参数的梯度，
+在这个后向传播的过程中我们为了方便计算<span class="math">\(t-s\)</span>时刻的梯度引入了<span class="math">\(\delta_{t-s}\)</span>，
+式<span class="math">\(\ref{eq:delta_bp}\)</span>是根据<span class="math">\(\delta_{t-s+1}\)</span>计算<span class="math">\(\delta_{t-s}\)</span>的公式，可以改写成：
+</p>
+<div class="math">$$
+\delta_{t-s}=
+ \begin{pmatrix}
+  {f'(z_{t-s})}_1 &amp; 0 &amp; \cdots &amp; 0 \\
+  0 &amp; {f'(z_{t-s})}_2 &amp; \cdots &amp; 0 \\
+  \vdots  &amp; \vdots  &amp; \ddots &amp; \vdots  \\
+  0 &amp; 0 &amp; \cdots &amp; {f'(z_{t-s})}_{D_h}
+ \end{pmatrix}
+(W^{(hh)})^T\delta_{t-s+1}
+$$</div>
+<p>
+简化之后写成下面式子
+</p>
+<div class="math">$$
+\delta_{t-s}=
+  \text{diag}[f'(z_{t-s})]
+(W^{(hh)})^T\delta_{t-s+1}
+$$</div>
+<p>
+假设<span class="math">\({(W^{(hh)})}^T\)</span>和<span class="math">\(\text{diag}[f'(z_{t-s})]\)</span>的范数上限分别为<span class="math">\(\beta_W\)</span>和<span class="math">\(\beta_z\)</span>，那么：
+</p>
+<div class="math">$$
+\lVert \delta_{t-s} \rVert\leq \lVert \text{diag}[f'(z_{t-s})]\rVert \lVert (W^{(hh)})^T\rVert \lVert \delta_{t-s+1}\rVert
+\leq \beta_W \beta_z\lVert \delta_{t-s+1}\rVert
+$$</div>
+<p>
+那么可以看出<span class="math">\(t\)</span>时刻<span class="math">\(z_t\)</span>处的误差<span class="math">\(\delta_t\)</span>后向传播到<span class="math">\(t-s\)</span>时刻<span class="math">\(\delta_{t-s}\)</span>的误差有下面关系：
+</p>
+<div class="math">$$
+\lVert \delta_{t-s} \rVert \leq {(\beta_W \beta_z)}^s \lVert \delta_{t}\rVert
+$$</div>
+<p>
+可以看出<span class="math">\(\delta_{t-s}\)</span>随着<span class="math">\(s\)</span>增大会迅速增大或者减小，这种现象称为梯度爆炸或梯度消失。</p>
+<p>以语言模型为例来看一下梯度消失带来的问题，本来引入<span class="caps">RNN</span>的目的是为了能够表示长距离的上下文信息。
+例如下面两个句子，我们要用已有的上下文信息预测句子的最后一个词：
+<img alt="梯度消失例子" src="https://wugh.github.io/images/NLP/rnn-gradient-vanishing-example.png" style="display:block;margin:0 auto" />
+可以看出根据上下文信息，这个句子的答案应该都是“John”。理想状态下<span class="caps">RNN</span>应该也应该能够根据上下文中信息预测出下个词应该是“John”，
+因为这个词在之前在上下文中出现过。但是实际情况是对于第一个句子<span class="caps">RNN</span>更容易预测正确，这是因为在后向误差传播过程中，
+梯度传播到比较早的时刻就逐渐消失了。对于较长的句子（第二个句子），与答案有关的信息距离最后那个时刻比较远，&nbsp;对预测答案的贡献很小，所以容易出错。</p>
+<p>为了解决梯度爆炸问题，Mikolov提出了一种启发式的解决方法，当梯度超过一个阈值的时候，将梯度裁剪到一个合适的值，算法流程如下：
+<img alt="clip gradient" src="https://wugh.github.io/images/NLP/rnn-clip-gradients.png" style="display:block;margin:0 auto" /></p>
+<p>对于梯度消失问题，这里介绍两个方法。第一个方法是将<span class="math">\(W^{(hh)}\)</span>初始化称一个单位矩；第二个方法是使用ReLU神经元，&nbsp;因为这个神经元的局部梯度要不是0就是1，这样后向传播经过神经元的时候误差不会变小。</p>
+<h2>双向<span class="caps">RNN</span>和深度双向<span class="caps">RNN</span></h2>
+<p>单向<span class="caps">RNN</span>的问题在于<span class="math">\(t\)</span>时刻进行分类的时候只能利用<span class="math">\(t\)</span>时刻之前的信息，
+但是在<span class="math">\(t\)</span>时刻进行分类的时候可能也需要利用未来时刻的信息。双向<span class="caps">RNN</span>（bi-directional <span class="caps">RNN</span>）模型正是为了解决这个问题，
+双向<span class="caps">RNN</span>在任意时刻<span class="math">\(t\)</span>都保持两个隐藏层，一个隐藏层用于从左往右的信息传播记作<span class="math">\(\overrightarrow{h}_t\)</span>，
+另一个隐藏层用于从右往左的信息传播记作<span class="math">\(\overleftarrow{h}_t\)</span>。
+双向<span class="caps">RNN</span>模型需要的内存是单向<span class="caps">RNN</span>的两倍，因为在每个时间点需要保存两个隐藏层，还需要保存从右往左方向的相关权重矩阵。
+在<span class="math">\(t\)</span>时刻进行分类的时候同时使用两个隐藏层的信息作为输入进行分类，下图为网络结果示意：
+<img alt="双向RNN" src="https://wugh.github.io/images/NLP/bi-directional-rnn.png" style="display:block;margin:0 auto" />
+下面是<span class="math">\(t\)</span>时刻两个隐藏层的计算方法，两个公式的区别仅仅在于计算方向不同：
+<img alt="隐藏层计算" src="https://wugh.github.io/images/NLP/bi-directional-rnn-hidden-layer.png" style="display:block;margin:0 auto" />
+最后利用<span class="math">\(t\)</span>时刻的两个隐藏层信息进行分类，如下式：
+<img alt="双向RNN分类" src="https://wugh.github.io/images/NLP/bi-directional-rnn-classification.png" style="display:block;margin:0 auto" />
+此时式中的<span class="math">\(h_t\)</span>同时表示了词左边和右边的上下文信息。</p>
+<p>有了单层的双向<span class="caps">RNN</span>之后，可以构建深度双向<span class="caps">RNN</span>，下图为多层双向<span class="caps">RNN</span>的网络结构图：
+<img alt="双向RNN" src="https://wugh.github.io/images/NLP/deep-bi-directional-rnn.png" style="display:block;margin:0 auto" />
+可以看出<span class="math">\(t\)</span>时刻计算第<span class="math">\(i\)</span>层从左往右传播的隐藏层信息<span class="math">\(\overrightarrow{h}_t^{(i)}\)</span>时，输入有两部分，
+第一部分是同一层之前一个时刻的隐藏层信息<span class="math">\(\overrightarrow{h}_{t-1}^{(i)}\)</span>，
+第二部分是前一层同个时刻的两个方向隐藏层信息<span class="math">\(h_t^{(i-1)}=[\overrightarrow{h}_{t}^{(i-1)};\overleftarrow{h}_{t}^{(i-1)}]\)</span>。
+下面给出第<span class="math">\(i\)</span>层<span class="math">\(t\)</span>时刻两个隐藏层的计算方法：
+<img alt="深度隐藏层计算" src="https://wugh.github.io/images/NLP/deep-bi-directional-rnn-hidden-layer.png" style="display:block;margin:0 auto" />
+多层的双向<span class="caps">RNN</span>利用最后一个隐层的信息进行分类任务，假设深度<span class="caps">RNN</span>共有<span class="math">\(L\)</span>个<span class="caps">RNN</span>层，深度<span class="caps">RNN</span>会利用第<span class="math">\(L\)</span>层的隐藏层信息进行分类任务：
+<img alt="深度双向RNN分类" src="https://wugh.github.io/images/NLP/deep-bi-directional-rnn-classification.png" style="display:block;margin:0 auto" /></p>
+<h2><span class="caps">RNN</span>的应用</h2>
+<p><span class="caps">RNN</span>是一个序列模型，跟<span class="caps">CRF</span>类似，可以应用于大量的序列标注问题上。
+例如<a href="http://aclweb.org/anthology/D15-1141">中文分词</a>，
+命名实体识别，词情感极性标注，<a href="https://www.cs.cornell.edu/~oirsoy/files/emnlp14drnt.pdf">观点挖掘</a>，
+<a href="http://arxiv.org/abs/1406.1078">机器翻译</a>等。
+由于普通<span class="caps">RNN</span>的隐藏层无法保存长距离的信息，<a href="{filename}/NLP/cs224d-notes4-continue">下篇文章</a>将介绍两种新的<span class="caps">RNN</span>隐藏层计算方法来缓解这个问题，
+一个是<span class="caps">GRU</span>，另一个是<span class="caps">LSTM</span>。</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+    <footer>
+<p class="meta">
+  <span class="byline author vcard">
+    Posted by <span class="fn">
+        Guohua Wu
+    </span>
+  </span>
+<time datetime="2016-03-05T11:13:00+08:00" pubdate>2016-03-05(Sat)</time>  <span class="categories">
+    <a class='category' href='https://wugh.github.io/category/nlp.html'>NLP</a>
+  </span>
+  <span class="categories">
+    <a class="category" href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a class="category" href="https://wugh.github.io/tag/rnn.html">RNN</a>,    <a class="category" href="https://wugh.github.io/tag/xun-huan-shen-jing-wang-luo.html">循环神经网络</a>,    <a class="category" href="https://wugh.github.io/tag/yu-yan-mo-xing.html">语言模型</a>,    <a class="category" href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>  </span>
+</p><div class="sharing">
+</div>    </footer>
+  </article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></div>
+  </section>
+</div>
+<aside class="sidebar">
+  <section>
+    <h1>Recent Posts</h1>
+    <ul id="recent_posts">
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/">CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/">CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">CS224d笔记3——神经网络</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224d笔记1——word2vec</a>
+      </li>
+    </ul>
+  </section>
+  <section>
+      
+    <h1>Categories</h1>
+    <ul id="recent_posts">
+        <li><a href="https://wugh.github.io/category/linux.html">Linux</a></li>
+        <li><a href="https://wugh.github.io/category/machine-learning.html">Machine Learning</a></li>
+        <li><a href="https://wugh.github.io/category/nlp.html">NLP</a></li>
+        <li><a href="https://wugh.github.io/category/web.html">Web</a></li>
+    </ul>
+  </section>
+ 
+
+  <section>
+  <h1>Tags</h1>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/lstm.html">LSTM</a>,    <a href="https://wugh.github.io/tag/gru.html">GRU</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/rnn.html">RNN</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/xun-huan-shen-jing-wang-luo.html">循环神经网络</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/yu-yan-mo-xing.html">语言模型</a>,    <a href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
+
+
+    <section>
+        <h1>Social</h1>
+        <ul>
+            <li><a href="https://wugh.github.io/feeds/main.atom.xml" type="application/atom+xml" rel="alternate">Atom</a></li>
+            <li><a href="https://github.com/wugh" target="_blank">GitHub</a></li>
+        </ul>
+    </section>
+
+</aside>    </div>
+  </div>
+  <footer role="contentinfo"><p>
+    Copyright &copy;  2013&ndash;2016  Guohua Wu &mdash;
+  <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
+</p></footer>
+  <script src="https://wugh.github.io/theme/js/modernizr-2.0.js"></script>
+  <script src="https://wugh.github.io/theme/js/ender.js"></script>
+  <script src="https://wugh.github.io/theme/js/octopress.js" type="text/javascript"></script>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-52495737-1', 'auto');
+
+    ga('send', 'pageview');
+    </script>
+  <script type="text/javascript">
+    var disqus_shortname = 'guohuasblog';
+    var disqus_identifier = '/posts/2016/03/cs224d-notes4-recurrent-neural-networks/';
+    var disqus_url = 'https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/';
+    var disqus_title = 'CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, <span class="caps">RNN</span>）';
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = "//" + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+  </script>
+</body>
+</html>
