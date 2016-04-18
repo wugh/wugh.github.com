@@ -197,7 +197,7 @@ RNN是一个序列模型，跟CRF类似，可以应用于大量的序列标注�
 例如[中文分词](http://aclweb.org/anthology/D15-1141)，
 命名实体识别，词情感极性标注，[观点挖掘](https://www.cs.cornell.edu/~oirsoy/files/emnlp14drnt.pdf)，
 [机器翻译](http://arxiv.org/abs/1406.1078)等。
-由于普通RNN的隐藏层无法保存长距离的信息，[下篇文章]({filename}/NLP/cs224d-notes4-continue)将介绍两种新的RNN隐藏层计算方法来缓解这个问题，
+由于普通RNN的隐藏层无法保存长距离的信息，[下篇文章]({filename}/NLP/cs224d-notes4-continue.md)将介绍两种新的RNN隐藏层计算方法来缓解这个问题，
 一个是GRU，另一个是LSTM。
 
 

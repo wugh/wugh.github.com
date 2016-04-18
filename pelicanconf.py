@@ -32,11 +32,11 @@ SOCIAL = (('GitHub', 'https://github.com/wugh'),)
 DEFAULT_PAGINATION = 10
 
 # 插件
-PLUGIN_PATHS = ['pelican-plugins']
+PLUGIN_PATHS = ['../pelican-plugins']
 PLUGINS = ['render_math']
 
 # 主题
-THEME = './pelican-themes/octopress'
+THEME = '../pelican-themes/pelican-octopress-theme'
 MENUITEMS = [('Archives', '/archives.html')]
 DISQUS_SITENAME = 'guohuasblog'
 
