@@ -60,3 +60,5 @@ target/
 /pelican-themes/
 /pelican-plugins/
 /Nuja/
+
+*.pid

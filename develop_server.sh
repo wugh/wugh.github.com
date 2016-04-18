@@ -67,7 +67,7 @@ function start_up(){
   pelican_pid=$!
   echo $pelican_pid > $PELICAN_PID
   cd $OUTPUTDIR
-  $PY -m pelican.server $port 0.0.0.0 &
+  $PY -m pelican.server $port 127.0.0.1 &
   srv_pid=$!
   echo $srv_pid > $SRV_PID
   cd $BASEDIR
