@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/nlp.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2016-03-13T21:22:00+08:00</updated><entry><title>CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</title><link href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/" rel="alternate"></link><updated>2016-03-13T21:22:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-03-13:posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/</id><summary type="html">&lt;hr /&gt;
-&lt;p&gt;本篇文章主要介绍两种&lt;span class="caps"&gt;RNN&lt;/span&gt;的隐藏层信息计算方法&lt;span class="caps"&gt;GRU&lt;/span&gt;（Gated Recurrent Units）和
-&lt;span class="caps"&gt;LSTM&lt;/span&gt;（Long-Short-Term-Memories）。&lt;/p&gt;</summary><category term="神经网络"></category><category term="RNN"></category><category term="循环神经网络"></category><category term="深度学习"></category><category term="GRU"></category><category term="LSTM"></category></entry><entry><title>CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</title><link href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/" rel="alternate"></link><updated>2016-03-05T11:13:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-03-05:posts/2016/03/cs224d-notes4-recurrent-neural-networks/</id><summary type="html">&lt;hr /&gt;
-&lt;p&gt;这部分首先介绍语言模型，通过分析传统语言模型的问题引入循环神经网络（Recurrent Neural Network, &lt;span class="caps"&gt;RNN&lt;/span&gt;）以及
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/nlp.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2016-03-13T21:22:00+08:00</updated><entry><title>CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</title><link href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/" rel="alternate"></link><published>2016-03-13T21:22:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-03-13:posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/</id><summary type="html">&lt;p&gt;本篇文章主要介绍两种&lt;span class="caps"&gt;RNN&lt;/span&gt;的隐藏层信息计算方法&lt;span class="caps"&gt;GRU&lt;/span&gt;（Gated Recurrent Units）和
+&lt;span class="caps"&gt;LSTM&lt;/span&gt;（Long-Short-Term-Memories）。&lt;/p&gt;</summary><category term="神经网络"></category><category term="RNN"></category><category term="循环神经网络"></category><category term="深度学习"></category><category term="GRU"></category><category term="LSTM"></category></entry><entry><title>CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</title><link href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/" rel="alternate"></link><published>2016-03-05T11:13:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-03-05:posts/2016/03/cs224d-notes4-recurrent-neural-networks/</id><summary type="html">&lt;p&gt;这部分首先介绍语言模型，通过分析传统语言模型的问题引入循环神经网络（Recurrent Neural Network, &lt;span class="caps"&gt;RNN&lt;/span&gt;）以及
 &lt;span class="caps"&gt;RNN&lt;/span&gt;的扩展（双向&lt;span class="caps"&gt;RNN&lt;/span&gt;，深度&lt;span class="caps"&gt;RNN&lt;/span&gt;），最后为了改善&lt;span class="caps"&gt;RNN&lt;/span&gt;对长距依存信息的捕获引入&lt;span class="caps"&gt;GRU&lt;/span&gt;（Gated Recurrent Units）和
 &lt;span class="caps"&gt;LSTM&lt;/span&gt;（Long-Short-Term-Memories）。&lt;/p&gt;
 &lt;h2&gt;语言模型&lt;/h2&gt;
@@ -200,7 +198,7 @@ $$&lt;/div&gt;
 例如&lt;a href="http://aclweb.org/anthology/D15-1141"&gt;中文分词&lt;/a&gt;，
 命名实体识别，词情感极性标注，&lt;a href="https://www.cs.cornell.edu/~oirsoy/files/emnlp14drnt.pdf"&gt;观点挖掘&lt;/a&gt;，
 &lt;a href="http://arxiv.org/abs/1406.1078"&gt;机器翻译&lt;/a&gt;等。
-由于普通&lt;span class="caps"&gt;RNN&lt;/span&gt;的隐藏层无法保存长距离的信息，&lt;a href="{filename}/NLP/cs224d-notes4-continue"&gt;下篇文章&lt;/a&gt;将介绍两种新的&lt;span class="caps"&gt;RNN&lt;/span&gt;隐藏层计算方法来缓解这个问题，
+由于普通&lt;span class="caps"&gt;RNN&lt;/span&gt;的隐藏层无法保存长距离的信息，&lt;a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/"&gt;下篇文章&lt;/a&gt;将介绍两种新的&lt;span class="caps"&gt;RNN&lt;/span&gt;隐藏层计算方法来缓解这个问题，
 一个是&lt;span class="caps"&gt;GRU&lt;/span&gt;，另一个是&lt;span class="caps"&gt;LSTM&lt;/span&gt;。&lt;/p&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
@@ -258,8 +256,7 @@ $$&lt;/div&gt;
         "}";
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-&lt;/script&gt;</summary><category term="神经网络"></category><category term="RNN"></category><category term="循环神经网络"></category><category term="语言模型"></category><category term="深度学习"></category></entry><entry><title>CS224d笔记3——神经网络</title><link href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/" rel="alternate"></link><updated>2016-03-01T09:00:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-03-01:posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/</id><summary type="html">&lt;hr /&gt;
-&lt;p&gt;这部分首先介绍神经元，接着介绍只有一个隐藏层的神经网络，这个神经网络要解决的
+&lt;/script&gt;</summary><category term="神经网络"></category><category term="RNN"></category><category term="循环神经网络"></category><category term="语言模型"></category><category term="深度学习"></category></entry><entry><title>CS224d笔记3——神经网络</title><link href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/" rel="alternate"></link><published>2016-03-01T09:00:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-03-01:posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/</id><summary type="html">&lt;p&gt;这部分首先介绍神经元，接着介绍只有一个隐藏层的神经网络，这个神经网络要解决的
 问题和&lt;a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/"&gt;上一篇文章&lt;/a&gt;类似，这里对窗口分类任务进一步
 简化，我们只需要判断中心词是否为地点。利用这个简单的神经网络说明前向传播和
 后向误差传播算法，然后推出通用的后向误差传播算法。最后介绍一些神经网络在工程&amp;nbsp;实现中的一些技巧。&lt;/p&gt;
@@ -498,8 +495,7 @@ Co-adaptation的方法是Dropout，顾名思义就是在训练模型的时候随
         "}";
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-&lt;/script&gt;</summary><category term="神经网络"></category><category term="后向传播"></category><category term="bp算法"></category><category term="深度学习"></category></entry><entry><title>CS224d笔记2——Softmax分类和窗口分类</title><link href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/" rel="alternate"></link><updated>2016-02-29T14:18:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-02-29:posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/</id><summary type="html">&lt;hr /&gt;
-&lt;p&gt;这部分内容主要总结Softmax分类，以及如何以交叉熵作为Softmax分类的损失度量标准来
+&lt;/script&gt;</summary><category term="神经网络"></category><category term="后向传播"></category><category term="bp算法"></category><category term="深度学习"></category></entry><entry><title>CS224d笔记2——Softmax分类和窗口分类</title><link href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/" rel="alternate"></link><published>2016-02-29T14:18:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-02-29:posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/</id><summary type="html">&lt;p&gt;这部分内容主要总结Softmax分类，以及如何以交叉熵作为Softmax分类的损失度量标准来
 训练Softmax的参数，最后将Softmax分类应用在一个简单的窗口分类任务上，窗口分类
 指的是利用中心词向量以及中心词窗口范围内的向量拼接起来对中心词进行简单的分类&amp;nbsp;（例如把中心词按实体类型分成人名、地名、组织名、其他）。&lt;/p&gt;
 &lt;h2&gt;Softmax分类&lt;/h2&gt;
@@ -606,8 +602,7 @@ Co-adaptation的方法是Dropout，顾名思义就是在训练模型的时候随
         "}";
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-&lt;/script&gt;</summary><category term="softmax"></category><category term="窗口分类"></category><category term="深度学习"></category></entry><entry><title>CS224d笔记1——word2vec</title><link href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/" rel="alternate"></link><updated>2016-02-26T10:03:00+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-02-26:posts/2016/02/cs224d-notes1-word2vec/</id><summary type="html">&lt;hr /&gt;
-&lt;p&gt;假期学习了斯坦福的&lt;a href="http://cs224d.stanford.edu/syllabus.html"&gt;CS224d&lt;/a&gt;课程，该课
+&lt;/script&gt;</summary><category term="softmax"></category><category term="窗口分类"></category><category term="深度学习"></category></entry><entry><title>CS224d笔记1——word2vec</title><link href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/" rel="alternate"></link><published>2016-02-26T10:03:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-02-26:posts/2016/02/cs224d-notes1-word2vec/</id><summary type="html">&lt;p&gt;假期学习了斯坦福的&lt;a href="http://cs224d.stanford.edu/syllabus.html"&gt;CS224d&lt;/a&gt;课程，该课
 程的主要内容是神经网络在自然语言处理领域的应用。 这里记录相关的学习笔记，大概分
 成以下几个部分：word2vec，窗口分类，神经网络，循环神经网络，递归神经网络，卷积&amp;nbsp;神经网络。&lt;/p&gt;
 &lt;h2&gt;为什么需要深度学习&lt;/h2&gt;
@@ -861,8 +856,7 @@ Co-adaptation的方法是Dropout，顾名思义就是在训练模型的时候随
         "}";
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-&lt;/script&gt;</summary><category term="word2vec"></category><category term="深度学习"></category></entry><entry><title>文本分类</title><link href="https://wugh.github.io/posts/2013/11/text-classification/" rel="alternate"></link><updated>2013-11-25T09:08:37+08:00</updated><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-25:posts/2013/11/text-classification/</id><summary type="html">&lt;hr /&gt;
-&lt;h3&gt;1&amp;nbsp;概述&lt;/h3&gt;
+&lt;/script&gt;</summary><category term="word2vec"></category><category term="深度学习"></category></entry><entry><title>文本分类</title><link href="https://wugh.github.io/posts/2013/11/text-classification/" rel="alternate"></link><published>2013-11-25T09:08:37+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2013-11-25:posts/2013/11/text-classification/</id><summary type="html">&lt;h3&gt;1&amp;nbsp;概述&lt;/h3&gt;
 &lt;p&gt;最近做了一个简单的文本分类程序，在这篇博客里面记录具体的分类流程。一般来说包括&amp;nbsp;以下几个步骤：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;语料获取&lt;/li&gt;
@@ -882,7 +876,7 @@ Tutorial&lt;/a&gt;。如果实在懒得爬
 语料可以用我获取好的数据，对数据做一个简单说明，总共有测试语料10万篇，每种新闻
 各1万篇；测试语料1万篇，每种新闻1千篇，点击&lt;a href="https://drive.google.com/file/d/0BywGHFgHsfRbSGVSbDhGLXVrUzg/edit?usp=sharing" title="新闻语料"&gt;这里
 &lt;/a&gt;下载，语料示例如下，&lt;code&gt;URL::&lt;/code&gt;和&lt;code&gt;END&lt;/code&gt;之间是一篇文章：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;URL::http://politics.people.com.cn/n/2012/1120/c14562-19635416.html 2012-11-20
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;URL::http://politics.people.com.cn/n/2012/1120/c14562-19635416.html 2012-11-20
 贵州毕节5名男孩取暖致死 副区长等8人被免职
 “中国网事”记者获悉，毕节市委19日晚研究决定，对5名男孩意外死亡事件负有领导和管理责任的七星关区分管民政工作的副区长唐兴全、分管教育工作的副区长高守军等8人分别进行停职或免职处理。(记者王丽)
 END::
@@ -902,7 +896,7 @@ END::
 &lt;p&gt;本文使用的是&lt;a href="http://code.google.com/p/fudannlp/" title="FudanNLP"&gt;FudanNLP&lt;/a&gt;中文自然语言处理工具包，如何分词请参考
 &lt;a href="https://code.google.com/p/fudannlp/wiki/QuickStart" title="QuickStart"&gt;QuickStart&lt;/a&gt;和
 &lt;a href="https://fudannlp.googlecode.com/svn/FudanNLP-1.5-API/java-docs/index.html" title="Api Doc"&gt;APIDoc&lt;/a&gt;，由于代码比较多，文章中仅仅贴出部分函数代码：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;    &lt;span class="kd"&gt;public&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;doSeg&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;infile&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;outfile&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="kd"&gt;throws&lt;/span&gt; &lt;span class="n"&gt;IOException&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="kd"&gt;public&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;doSeg&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;infile&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;outfile&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="kd"&gt;throws&lt;/span&gt; &lt;span class="n"&gt;IOException&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
         &lt;span class="c1"&gt;// 切分一个大文件很消耗时间&lt;/span&gt;
         &lt;span class="c1"&gt;// 因此如果输出文件存在就抛出异常&lt;/span&gt;
         &lt;span class="c1"&gt;// 让用户确保不会产生覆盖文件&lt;/span&gt;
@@ -1002,7 +996,7 @@ $$&lt;/div&gt;
 &lt;p&gt;其次我们可以使用&lt;span class="caps"&gt;LDA&lt;/span&gt;把每篇文档表示成主题的一个分布，然后用这个主题分布当作特征向
 量来训练分类器。可以使用&lt;a href="http://jgibblda.sourceforge.net/" title="JGbibbsLDA"&gt;JGibbsLDA&lt;/a&gt;将训练语料转换成关于主题的分布。由于我们再预处理步骤已经把每篇预处
 理好的文档变成一行，接下来我们就可以把训练语料转换成&lt;code&gt;JGibbsLDA&lt;/code&gt;需要的格式。&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;[M]
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;[M]
 [document1]
 [document2]
 ...
@@ -1012,7 +1006,7 @@ $$&lt;/div&gt;
 
 &lt;p&gt;&lt;code&gt;[M]&lt;/code&gt;表示文档总数，没一行是一篇文档，&lt;code&gt;[documenti]&lt;/code&gt;表示语料库里面的第&lt;code&gt;i&lt;/code&gt;篇文档，
 每篇文档总用有&lt;code&gt;Ni&lt;/code&gt;个词：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;[documenti] = [wordi1] [wordi2] ... [wordiNi]
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;[documenti] = [wordi1] [wordi2] ... [wordiNi]
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -1026,7 +1020,7 @@ $$&lt;/div&gt;
 &lt;p&gt;由于训练语料里面我们知道每篇文章的类别，因为我们是分文件存储每个类别的文档，可
 以把10个类别打上标签&lt;code&gt;0~9&lt;/code&gt;，表示用0来表示1类新闻，1来表示另一种新闻，依此类推。
 &lt;a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/" title="LIBSVM"&gt;&lt;span class="caps"&gt;LIBSVM&lt;/span&gt;&lt;/a&gt;的输入格式如下：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&amp;lt;label&amp;gt; &amp;lt;index1&amp;gt;:&amp;lt;value1&amp;gt; &amp;lt;index2&amp;gt;:&amp;lt;value2&amp;gt; …
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&amp;lt;label&amp;gt; &amp;lt;index1&amp;gt;:&amp;lt;value1&amp;gt; &amp;lt;index2&amp;gt;:&amp;lt;value2&amp;gt; …
                       …
 &amp;lt;label&amp;gt; &amp;lt;index1&amp;gt;:&amp;lt;value1&amp;gt; &amp;lt;index2&amp;gt;:&amp;lt;value2&amp;gt; …
 &lt;/pre&gt;&lt;/div&gt;
@@ -1045,16 +1039,16 @@ $$&lt;/div&gt;
 &lt;h4&gt;5.2&amp;nbsp;训练&lt;/h4&gt;
 &lt;p&gt;训练过程直接使用&lt;a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/" title="LIBSVM"&gt;&lt;span class="caps"&gt;LIBSVM&lt;/span&gt;&lt;/a&gt;的&lt;code&gt;C&lt;/code&gt;代码编译好的可执行文件&lt;code&gt;svm-train&lt;/code&gt;，训练之
 前可以用&lt;code&gt;svm-scale&lt;/code&gt;对数据进行归一化，假设整理好的训练语料为&lt;code&gt;train.txt&lt;/code&gt;。&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# 归一化训练语料&lt;/span&gt;
-&lt;span class="c"&gt;# 把特征取值范围保存到train.range文件，方便对测试语料归一化&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# 归一化训练语料&lt;/span&gt;
+&lt;span class="c1"&gt;# 把特征取值范围保存到train.range文件，方便对测试语料归一化&lt;/span&gt;
 ./svm-scale -s train.range train.txt &amp;gt; train.scale
-&lt;span class="c"&gt;# 训练svm模型&lt;/span&gt;
-&lt;span class="c"&gt;# type: C-SVC&lt;/span&gt;
-&lt;span class="c"&gt;# kernel type: radial basis function: exp(-gamma*|u-v|^2)&lt;/span&gt;
-&lt;span class="c"&gt;# gamma: 0.5&lt;/span&gt;
-&lt;span class="c"&gt;# C of C-SVC: 4&lt;/span&gt;
-&lt;span class="c"&gt;# 训练语料: train.scale&lt;/span&gt;
-&lt;span class="c"&gt;# 保存模型: train.scale.model&lt;/span&gt;
+&lt;span class="c1"&gt;# 训练svm模型&lt;/span&gt;
+&lt;span class="c1"&gt;# type: C-SVC&lt;/span&gt;
+&lt;span class="c1"&gt;# kernel type: radial basis function: exp(-gamma*|u-v|^2)&lt;/span&gt;
+&lt;span class="c1"&gt;# gamma: 0.5&lt;/span&gt;
+&lt;span class="c1"&gt;# C of C-SVC: 4&lt;/span&gt;
+&lt;span class="c1"&gt;# 训练语料: train.scale&lt;/span&gt;
+&lt;span class="c1"&gt;# 保存模型: train.scale.model&lt;/span&gt;
 ./svm-train -s &lt;span class="m"&gt;1&lt;/span&gt; -t &lt;span class="m"&gt;2&lt;/span&gt; -g 0.5 -c &lt;span class="m"&gt;4&lt;/span&gt; train.scale train.scale.model
 &lt;/pre&gt;&lt;/div&gt;
 

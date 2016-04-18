@@ -51,21 +51,20 @@
 <header>
       <h1 class="entry-title">Linux 音频格式转换</h1>
     <p class="meta">
-<time datetime="2013-11-09T09:15:30+08:00" pubdate>2013-11-09(Sat)</time>    </p>
+<time datetime="2013-11-09T09:15:30+08:00" pubdate>2013-11-09(六)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<h3>需要的软件</h3>
+  <div class="entry-content"><h3>需要的软件</h3>
 <p>在开始转换之前我们需要两个程序<a href="http://lame.sourceforge.net/download.php"><span class="caps">LAME</span></a>
 和<a href="http://www.audiocoding.com/downloads.html"><span class="caps">FAAD2</span></a>，这两个包应该通过linux自带&nbsp;的软件包管理器就可以安装。Gentoo下面安装方法如下：</p>
-<div class="highlight"><pre>emerge --ask media-sound/lame
+<div class="highlight"><pre><span></span>emerge --ask media-sound/lame
 emerge --ask media-libs/faad2
 </pre></div>
 
 
 <h3>批量转换</h3>
 <h4>m4a转换成mp3</h4>
-<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+<div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
 
 <span class="k">for</span> i in *.m4a<span class="p">;</span> <span class="k">do</span>
     <span class="nb">echo</span> <span class="s2">&quot;Converting: </span><span class="si">${</span><span class="nv">i</span><span class="p">%.m4a</span><span class="si">}</span><span class="s2">.mp3&quot;</span>
@@ -76,7 +75,7 @@ emerge --ask media-libs/faad2
 
 <h4>flac转mp3</h4>
 <p>另外可以使用flac转mp3，需要以下三个命令flac lame&nbsp;id3，然后使用以下脚本</p>
-<div class="highlight"><pre><span class="c">#! /bin/sh</span>
+<div class="highlight"><pre><span></span><span class="ch">#! /bin/sh</span>
 
 <span class="k">for</span> a in *.flac<span class="p">;</span> <span class="k">do</span>
     <span class="nv">OUTF</span><span class="o">=</span><span class="si">${</span><span class="nv">a</span><span class="p">%.flac</span><span class="si">}</span>.mp3
@@ -99,7 +98,7 @@ emerge --ask media-libs/faad2
         Guohua Wu
     </span>
   </span>
-<time datetime="2013-11-09T09:15:30+08:00" pubdate>2013-11-09(Sat)</time>  <span class="categories">
+<time datetime="2013-11-09T09:15:30+08:00" pubdate>2013-11-09(六)</time>  <span class="categories">
     <a class='category' href='https://wugh.github.io/category/linux.html'>Linux</a>
   </span>
   <span class="categories">

@@ -51,14 +51,13 @@
 <header>
       <h1 class="entry-title">Gentoo Portage使用技巧</h1>
     <p class="meta">
-<time datetime="2013-11-09T10:06:01+08:00" pubdate>2013-11-09(Sat)</time>    </p>
+<time datetime="2013-11-09T10:06:01+08:00" pubdate>2013-11-09(六)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<p>本文章记录一些使用Gentoo&nbsp;Portage的技巧。</p>
+  <div class="entry-content"><p>本文章记录一些使用Gentoo&nbsp;Portage的技巧。</p>
 <h3>指定Slot安装软件</h3>
 <p><code>Slot</code>是在<code>Gentoo</code>的包管理的一个重要功能，当一个软件有多个分支的时候Portage能够&nbsp;保证不同的版本并存。例如，Python一般有多个版本</p>
-<div class="highlight"><pre><span class="nv">$ </span>eix dev-lang/python
+<div class="highlight"><pre><span></span>$ eix dev-lang/python
 <span class="o">[</span>I<span class="o">]</span> dev-lang/python
      Available versions:  
         <span class="o">(</span>2.5<span class="o">)</span>   2.5.4-r4 ~2.5.4-r5
@@ -71,14 +70,14 @@
 
 
 <p>上面的搜索出来的记过中括号中的就是slot号码，那么如何根据slot安装不同的软件呢，&nbsp;下面将会解释这一点。</p>
-<div class="highlight"><pre><span class="nv">$ </span>emerge -pv dev-lang/python:3.3
+<div class="highlight"><pre><span></span>$ emerge -pv dev-lang/python:3.3
 </pre></div>
 
 
 <p>通过上面的方式就可以安装Python3.3。</p>
 <h3>emerge特定版本的软件</h3>
 <p>使用<code>emerge</code>搜索<code>gitolite</code>，出现的结果很多，如果我们不想安装默认的版本那么就得&nbsp;用特定的命令。</p>
-<div class="highlight"><pre>tom@nextzone ~ <span class="nv">$ </span>eix dev-vcs/gitolite
+<div class="highlight"><pre><span></span>tom@nextzone ~ $ eix dev-vcs/gitolite
 * dev-vcs/gitolite
      Available versions:  2.3.1 ~3.1 ~3.2 ~3.3 ~3.4 ~3.5 ~3.5.1 ~3.5.2 <span class="o">{</span>contrib tools vim-syntax<span class="o">}</span>
      Homepage:            http://github.com/sitaramc/gitolite
@@ -87,7 +86,7 @@
 
 
 <p>安装<code>3.5.2</code>的方法如下：</p>
-<div class="highlight"><pre>emerge --ask <span class="o">=</span>dev-vcs/gitolite-3.5.2
+<div class="highlight"><pre><span></span>emerge --ask <span class="o">=</span>dev-vcs/gitolite-3.5.2
 </pre></div>
 
 
@@ -96,7 +95,7 @@
 那么代表这个是一个正则表达式。例如，<code>emerge --search "%^kde"</code>会搜索出全部以
 <code>kde</code>开头的包，但是要注意的是，这样子搜索的时候不匹配软件包所在的类别，如果要匹
 配类别，那么就需要加上<code>@</code>：就可以搜索<code>dev-java</code>这个类别下含有<code>jdk</code>关键词的软件&nbsp;包。</p>
-<div class="highlight"><pre>guohuawu@cist-tux ~ <span class="nv">$ </span>emerge --search <span class="s2">&quot;%@^dev-java.*jdk&quot;</span>
+<div class="highlight"><pre><span></span>guohuawu@cist-tux ~ $ emerge --search <span class="s2">&quot;%@^dev-java.*jdk&quot;</span>
 Searching...    
 <span class="o">[</span> Results <span class="k">for</span> search key : ^dev-java.*jdk <span class="o">]</span>
 <span class="o">[</span> Applications found : <span class="m">11</span> <span class="o">]</span>
@@ -122,22 +121,22 @@ Searching...
 <h3>eix</h3>
 <p>上面提到用<code>emerge</code>来搜索软件包，但是这个方法遇到的一个最大问题就是搜索非常慢，
 用<code>eix</code>可以解决这个问题。</p>
-<div class="highlight"><pre>root <span class="c"># emerge --ask eix</span>
+<div class="highlight"><pre><span></span>root <span class="c1"># emerge --ask eix</span>
 </pre></div>
 
 
 <p>这样以来同步Portage就变得非常简单：</p>
-<div class="highlight"><pre>root <span class="c"># eix-sync</span>
+<div class="highlight"><pre><span></span>root <span class="c1"># eix-sync</span>
 </pre></div>
 
 
 <p>通用<code>eix</code>也支持正则搜索，而且搜索速度非常快</p>
-<div class="highlight"><pre>guohuawu@cist-dell ~ <span class="nv">$ </span>eix ^ack<span class="err">$</span>
+<div class="highlight"><pre><span></span>guohuawu@cist-dell ~ $ eix ^ack$
 <span class="o">[</span>I<span class="o">]</span> sys-apps/ack
-     Available versions:  1.96 2.12 <span class="o">{</span><span class="nb">test</span><span class="o">}</span>
+     Available versions:  1.96 2.12 <span class="o">{</span>test<span class="o">}</span>
      Installed versions:  2.12<span class="o">(</span>06:48:04 PM 05/24/2014<span class="o">)(</span>-test<span class="o">)</span>
      Homepage:            http://betterthangrep.com/ http://search.cpan.org/dist/ack/
-     Description:         ack is a tool like grep, aimed at programmers with large trees of heterogeneous <span class="nb">source </span>code
+     Description:         ack is a tool like grep, aimed at programmers with large trees of heterogeneous <span class="nb">source</span> code
 </pre></div>
 
 
@@ -156,7 +155,7 @@ Searching...
         Guohua Wu
     </span>
   </span>
-<time datetime="2013-11-09T10:06:01+08:00" pubdate>2013-11-09(Sat)</time>  <span class="categories">
+<time datetime="2013-11-09T10:06:01+08:00" pubdate>2013-11-09(六)</time>  <span class="categories">
     <a class='category' href='https://wugh.github.io/category/linux.html'>Linux</a>
   </span>
   <span class="categories">

@@ -51,11 +51,10 @@
 <header>
       <h1 class="entry-title">文本分类</h1>
     <p class="meta">
-<time datetime="2013-11-25T09:08:37+08:00" pubdate>2013-11-25(Mon)</time>    </p>
+<time datetime="2013-11-25T09:08:37+08:00" pubdate>2013-11-25(一)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<h3>1&nbsp;概述</h3>
+  <div class="entry-content"><h3>1&nbsp;概述</h3>
 <p>最近做了一个简单的文本分类程序，在这篇博客里面记录具体的分类流程。一般来说包括&nbsp;以下几个步骤：</p>
 <ol>
 <li>语料获取</li>
@@ -75,7 +74,7 @@ Tutorial</a>。如果实在懒得爬
 语料可以用我获取好的数据，对数据做一个简单说明，总共有测试语料10万篇，每种新闻
 各1万篇；测试语料1万篇，每种新闻1千篇，点击<a href="https://drive.google.com/file/d/0BywGHFgHsfRbSGVSbDhGLXVrUzg/edit?usp=sharing" title="新闻语料">这里
 </a>下载，语料示例如下，<code>URL::</code>和<code>END</code>之间是一篇文章：</p>
-<div class="highlight"><pre>URL::http://politics.people.com.cn/n/2012/1120/c14562-19635416.html 2012-11-20
+<div class="highlight"><pre><span></span>URL::http://politics.people.com.cn/n/2012/1120/c14562-19635416.html 2012-11-20
 贵州毕节5名男孩取暖致死 副区长等8人被免职
 “中国网事”记者获悉，毕节市委19日晚研究决定，对5名男孩意外死亡事件负有领导和管理责任的七星关区分管民政工作的副区长唐兴全、分管教育工作的副区长高守军等8人分别进行停职或免职处理。(记者王丽)
 END::
@@ -95,7 +94,7 @@ END::
 <p>本文使用的是<a href="http://code.google.com/p/fudannlp/" title="FudanNLP">FudanNLP</a>中文自然语言处理工具包，如何分词请参考
 <a href="https://code.google.com/p/fudannlp/wiki/QuickStart" title="QuickStart">QuickStart</a>和
 <a href="https://fudannlp.googlecode.com/svn/FudanNLP-1.5-API/java-docs/index.html" title="Api Doc">APIDoc</a>，由于代码比较多，文章中仅仅贴出部分函数代码：</p>
-<div class="highlight"><pre>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">doSeg</span><span class="o">(</span><span class="n">String</span> <span class="n">infile</span><span class="o">,</span> <span class="n">String</span> <span class="n">outfile</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+<div class="highlight"><pre><span></span>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">doSeg</span><span class="o">(</span><span class="n">String</span> <span class="n">infile</span><span class="o">,</span> <span class="n">String</span> <span class="n">outfile</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
         <span class="c1">// 切分一个大文件很消耗时间</span>
         <span class="c1">// 因此如果输出文件存在就抛出异常</span>
         <span class="c1">// 让用户确保不会产生覆盖文件</span>
@@ -195,7 +194,7 @@ $$</div>
 <p>其次我们可以使用<span class="caps">LDA</span>把每篇文档表示成主题的一个分布，然后用这个主题分布当作特征向
 量来训练分类器。可以使用<a href="http://jgibblda.sourceforge.net/" title="JGbibbsLDA">JGibbsLDA</a>将训练语料转换成关于主题的分布。由于我们再预处理步骤已经把每篇预处
 理好的文档变成一行，接下来我们就可以把训练语料转换成<code>JGibbsLDA</code>需要的格式。</p>
-<div class="highlight"><pre>[M]
+<div class="highlight"><pre><span></span>[M]
 [document1]
 [document2]
 ...
@@ -205,7 +204,7 @@ $$</div>
 
 <p><code>[M]</code>表示文档总数，没一行是一篇文档，<code>[documenti]</code>表示语料库里面的第<code>i</code>篇文档，
 每篇文档总用有<code>Ni</code>个词：</p>
-<div class="highlight"><pre>[documenti] = [wordi1] [wordi2] ... [wordiNi]
+<div class="highlight"><pre><span></span>[documenti] = [wordi1] [wordi2] ... [wordiNi]
 </pre></div>
 
 
@@ -219,7 +218,7 @@ $$</div>
 <p>由于训练语料里面我们知道每篇文章的类别，因为我们是分文件存储每个类别的文档，可
 以把10个类别打上标签<code>0~9</code>，表示用0来表示1类新闻，1来表示另一种新闻，依此类推。
 <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/" title="LIBSVM"><span class="caps">LIBSVM</span></a>的输入格式如下：</p>
-<div class="highlight"><pre>&lt;label&gt; &lt;index1&gt;:&lt;value1&gt; &lt;index2&gt;:&lt;value2&gt; …
+<div class="highlight"><pre><span></span>&lt;label&gt; &lt;index1&gt;:&lt;value1&gt; &lt;index2&gt;:&lt;value2&gt; …
                       …
 &lt;label&gt; &lt;index1&gt;:&lt;value1&gt; &lt;index2&gt;:&lt;value2&gt; …
 </pre></div>
@@ -238,16 +237,16 @@ $$</div>
 <h4>5.2&nbsp;训练</h4>
 <p>训练过程直接使用<a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/" title="LIBSVM"><span class="caps">LIBSVM</span></a>的<code>C</code>代码编译好的可执行文件<code>svm-train</code>，训练之
 前可以用<code>svm-scale</code>对数据进行归一化，假设整理好的训练语料为<code>train.txt</code>。</p>
-<div class="highlight"><pre><span class="c"># 归一化训练语料</span>
-<span class="c"># 把特征取值范围保存到train.range文件，方便对测试语料归一化</span>
+<div class="highlight"><pre><span></span><span class="c1"># 归一化训练语料</span>
+<span class="c1"># 把特征取值范围保存到train.range文件，方便对测试语料归一化</span>
 ./svm-scale -s train.range train.txt &gt; train.scale
-<span class="c"># 训练svm模型</span>
-<span class="c"># type: C-SVC</span>
-<span class="c"># kernel type: radial basis function: exp(-gamma*|u-v|^2)</span>
-<span class="c"># gamma: 0.5</span>
-<span class="c"># C of C-SVC: 4</span>
-<span class="c"># 训练语料: train.scale</span>
-<span class="c"># 保存模型: train.scale.model</span>
+<span class="c1"># 训练svm模型</span>
+<span class="c1"># type: C-SVC</span>
+<span class="c1"># kernel type: radial basis function: exp(-gamma*|u-v|^2)</span>
+<span class="c1"># gamma: 0.5</span>
+<span class="c1"># C of C-SVC: 4</span>
+<span class="c1"># 训练语料: train.scale</span>
+<span class="c1"># 保存模型: train.scale.model</span>
 ./svm-train -s <span class="m">1</span> -t <span class="m">2</span> -g 0.5 -c <span class="m">4</span> train.scale train.scale.model
 </pre></div>
 
@@ -321,7 +320,7 @@ $$</div>
         Guohua Wu
     </span>
   </span>
-<time datetime="2013-11-25T09:08:37+08:00" pubdate>2013-11-25(Mon)</time>  <span class="categories">
+<time datetime="2013-11-25T09:08:37+08:00" pubdate>2013-11-25(一)</time>  <span class="categories">
     <a class='category' href='https://wugh.github.io/category/nlp.html'>NLP</a>
   </span>
   <span class="categories">

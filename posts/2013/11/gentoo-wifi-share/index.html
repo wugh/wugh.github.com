@@ -51,17 +51,16 @@
 <header>
       <h1 class="entry-title">gentoo wifi 共享</h1>
     <p class="meta">
-<time datetime="2013-11-09T00:57:27+08:00" pubdate>2013-11-09(Sat)</time>    </p>
+<time datetime="2013-11-09T00:57:27+08:00" pubdate>2013-11-09(六)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<h3>简介</h3>
+  <div class="entry-content"><h3>简介</h3>
 <p>本文主要描述如何在<code>Gentoo</code>下利用无线网卡做一个<code>wifi</code>热点来给手机提供无线网络访
 问。目前在<code>Windows</code>下有<a href="http://www.connectify.me/">connectify</a>来共享网络，同样的在<code>Linux</code>下也有<a href="http://linuxwireless.org/en/users/Documentation/hostapd">hostapd</a>。
 由于在Windows下基本就是一键配置热点，但是Linux配置起来比较麻烦，所以本文在这里&nbsp;记录一下配置过程。</p>
 <h3>软件安装</h3>
 <p>需要安装一些软件</p>
-<div class="highlight"><pre>emerge -a hostapd
+<div class="highlight"><pre><span></span>emerge -a hostapd
 emerge -a dnsmasq
 emerge -a iptables
 </pre></div>
@@ -71,13 +70,13 @@ emerge -a iptables
 <p>以下描述各个软件的配置说明。</p>
 <h4>网卡参数</h4>
 <p>修改文件<code>/etc/conf.d/net</code>：</p>
-<div class="highlight"><pre><span class="nv">modules_wlan0</span><span class="o">=</span><span class="s2">&quot;!iwconfig !wpa_supplicant&quot;</span>
+<div class="highlight"><pre><span></span><span class="nv">modules_wlan0</span><span class="o">=</span><span class="s2">&quot;!iwconfig !wpa_supplicant&quot;</span>
 <span class="nv">config_wlan0</span><span class="o">=</span><span class="s2">&quot;192.168.0.1/24&quot;</span>
 </pre></div>
 
 
 <p>网卡配置好之后，要加入默认启动。</p>
-<div class="highlight"><pre><span class="nb">cd</span> /etc/init.d
+<div class="highlight"><pre><span></span><span class="nb">cd</span> /etc/init.d
 ln -s net.lo net.wlan0
 /etc/init.d/net.wlan0 start
 rc-update add net.wlan0 default
@@ -86,14 +85,14 @@ rc-update add net.wlan0 default
 
 <h4>hostapd配置</h4>
 <p>修改<code>hostapd</code>配置文件<code>/etc/hostapd/hostapd.conf</code>：</p>
-<div class="highlight"><pre><span class="nv">interface</span><span class="o">=</span>wlan0
-<span class="c">#bridge=br0                         (optional, if you want bridging remove the #)</span>
+<div class="highlight"><pre><span></span><span class="nv">interface</span><span class="o">=</span>wlan0
+<span class="c1">#bridge=br0                         (optional, if you want bridging remove the #)</span>
 <span class="nv">driver</span><span class="o">=</span>nl80211
-<span class="nv">ssid</span><span class="o">=</span>MyNetwork     <span class="c">#热点名称</span>
+<span class="nv">ssid</span><span class="o">=</span>MyNetwork     <span class="c1">#热点名称</span>
 <span class="nv">channel</span><span class="o">=</span>1
 <span class="nv">hw_mode</span><span class="o">=</span>g
 <span class="nv">wpa</span><span class="o">=</span>3
-<span class="nv">wpa_passphrase</span><span class="o">=</span>Your passphrase  <span class="c">#热点密码</span>
+<span class="nv">wpa_passphrase</span><span class="o">=</span>Your passphrase  <span class="c1">#热点密码</span>
 <span class="nv">wpa_key_mgmt</span><span class="o">=</span>WPA-PSK
 <span class="nv">wpa_pairwise</span><span class="o">=</span>TKIP
 <span class="nv">rsn_pairwise</span><span class="o">=</span>CCMP
@@ -115,38 +114,38 @@ rc-update add net.wlan0 default
 
 
 <p>把hostapd加入默认启动。</p>
-<div class="highlight"><pre>/etc/init.d/hostapd start
+<div class="highlight"><pre><span></span>/etc/init.d/hostapd start
 rc-update add hostapd default
 </pre></div>
 
 
 <h4>dnsmasq配置</h4>
 <p>修改<code>dnsmasq</code>配置文件<code>/etc/dnsmasq.conf</code>：</p>
-<div class="highlight"><pre><span class="nv">interface</span><span class="o">=</span>wlan0
-<span class="nb">bind</span>-interfaces
+<div class="highlight"><pre><span></span><span class="nv">interface</span><span class="o">=</span>wlan0
+bind-interfaces
 dhcp-range<span class="o">=</span>192.168.0.50,192.168.0.150,12h
 </pre></div>
 
 
 <p>dnsmasq用来分配<span class="caps">IP</span>，所以要启动这个服务。</p>
-<div class="highlight"><pre>/etc/init.d/dnsmasq start
+<div class="highlight"><pre><span></span>/etc/init.d/dnsmasq start
 rc-update add dnsmasq default
 </pre></div>
 
 
 <h4>iptables配置</h4>
 <p>iptables用来设置包的转发规则，以<span class="caps">NAT</span>方式配置<span class="caps">AP</span>。</p>
-<div class="highlight"><pre>iptables -F
+<div class="highlight"><pre><span></span>iptables -F
 iptables -t nat -F
 iptables -A FORWARD -i wlan0 -s 192.168.0.0/255.255.0.0 -j ACCEPT
 iptables -A FORWARD -i eth0 -d 192.168.0.0/255.255.0.0 -j ACCEPT
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-<span class="nb">echo </span><span class="m">1</span> &gt; /proc/sys/net/ipv4/ip_forward
+<span class="nb">echo</span> <span class="m">1</span> &gt; /proc/sys/net/ipv4/ip_forward
 </pre></div>
 
 
 <p>保存规则，并把iptable默认启动</p>
-<div class="highlight"><pre>/etc/init.d/iptables save
+<div class="highlight"><pre><span></span>/etc/init.d/iptables save
 rc-update add iptables default
 </pre></div>
 
@@ -165,7 +164,7 @@ rc-update add iptables default
         Guohua Wu
     </span>
   </span>
-<time datetime="2013-11-09T00:57:27+08:00" pubdate>2013-11-09(Sat)</time>  <span class="categories">
+<time datetime="2013-11-09T00:57:27+08:00" pubdate>2013-11-09(六)</time>  <span class="categories">
     <a class='category' href='https://wugh.github.io/category/linux.html'>Linux</a>
   </span>
   <span class="categories">

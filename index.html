@@ -51,11 +51,10 @@
         <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/">CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</a>
       </h1>
     <p class="meta">
-<time datetime="2016-03-13T21:22:00+08:00" pubdate>2016-03-13(Sun)</time>    </p>
+<time datetime="2016-03-13T21:22:00+08:00" pubdate>2016-03-13(日)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<p>本篇文章主要介绍两种<span class="caps">RNN</span>的隐藏层信息计算方法<span class="caps">GRU</span>（Gated Recurrent Units）和
+  <div class="entry-content"><p>本篇文章主要介绍两种<span class="caps">RNN</span>的隐藏层信息计算方法<span class="caps">GRU</span>（Gated Recurrent Units）和
 <span class="caps">LSTM</span>（Long-Short-Term-Memories）。</p></div>
   		</article>
   		<article>
@@ -64,11 +63,10 @@
         <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/">CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</a>
       </h1>
     <p class="meta">
-<time datetime="2016-03-05T11:13:00+08:00" pubdate>2016-03-05(Sat)</time>    </p>
+<time datetime="2016-03-05T11:13:00+08:00" pubdate>2016-03-05(六)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr/>
-<p>这部分首先介绍语言模型，通过分析传统语言模型的问题引入循环神经网络（Recurrent Neural Network, <span class="caps">RNN</span>）以及
+  <div class="entry-content"><p>这部分首先介绍语言模型，通过分析传统语言模型的问题引入循环神经网络（Recurrent Neural Network, <span class="caps">RNN</span>）以及
 <span class="caps">RNN</span>的扩展（双向<span class="caps">RNN</span>，深度<span class="caps">RNN</span>），最后为了改善<span class="caps">RNN</span>对长距依存信息的捕获引入<span class="caps">GRU</span>（Gated Recurrent Units）和
 <span class="caps">LSTM</span>（Long-Short-Term-Memories）。</p>
 <h2>语言模型</h2>
@@ -78,63 +76,7 @@
 机器翻译需要给各个候选的词序列打分，这个分数可以用这个概率来衡量。
 <span class="math">\(P(w_1,\ldots,w_T)\)</span>的计算可以用链式法则展开：
 </p>
-<div class="math">$$P(w_1,\ldots,w_T)=\Pi_{i=1}^{i=T}P(w_i|w_1,\ldots,w_{i-1})$$ ...</div><script type='text/javascript'>if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width < 768) ? "left" : align;
-        indent = (screen.width < 768) ? "0em" : indent;
-        linebreak = (screen.width < 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    var location_protocol = (false) ? 'https' : document.location.protocol;
-    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
-    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-    mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
-        "MathJax.Hub.Config({" +
-        "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
-        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-        "    displayAlign: '"+ align +"'," +
-        "    displayIndent: '"+ indent +"'," +
-        "    showMathMenu: true," +
-        "    messageStyle: 'normal'," +
-        "    tex2jax: { " +
-        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
-        "        displayMath: [ ['$$','$$'] ]," +
-        "        processEscapes: true," +
-        "        preview: 'TeX'," +
-        "    }, " +
-        "    'HTML-CSS': { " +
-        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
-        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
-        "    }, " +
-        "}); " +
-        "if ('default' !== 'default') {" +
-            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-        "}";
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-}
-</script></div>
+<div class="math">$$P(w_1,\ldots,w_T)=\Pi_ ...</div></div>
   <footer>
     <a rel="full-article" href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/">Read On &crarr;</a>
   </footer>
@@ -145,78 +87,21 @@
         <a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">CS224d笔记3——神经网络</a>
       </h1>
     <p class="meta">
-<time datetime="2016-03-01T09:00:00+08:00" pubdate>2016-03-01(Tue)</time>    </p>
+<time datetime="2016-03-01T09:00:00+08:00" pubdate>2016-03-01(二)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr/>
-<p>这部分首先介绍神经元，接着介绍只有一个隐藏层的神经网络，这个神经网络要解决的
+  <div class="entry-content"><p>这部分首先介绍神经元，接着介绍只有一个隐藏层的神经网络，这个神经网络要解决的
 问题和<a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">上一篇文章</a>类似，这里对窗口分类任务进一步
 简化，我们只需要判断中心词是否为地点。利用这个简单的神经网络说明前向传播和
-后向误差传播算法，然后推出通用的后向误差传播算法。最后介绍一些神经网络在工程 实现中的一些技巧。</p>
+后向误差传播算法，然后推出通用的后向误差传播算法。最后介绍一些神经网络在工程&nbsp;实现中的一些技巧。</p>
 <h2>神经元</h2>
 <p>神经元是组成神经网络的基础单元，神经元通常接受<span class="math">\(n\)</span>个输入产生一个输出，运算过程如下图：
-<img alt="神经元" src="https://wugh.github.io/images/NLP/neural-network-neuron.png" style="display:block;margin:0 auto"/>
+<img alt="神经元" src="https://wugh.github.io/images/NLP/neural-network-neuron.png" style="display:block;margin:0 auto" />
 神经元的参数包括一个<span class="math">\(n\)</span>维的权重向量<span class="math">\(w\)</span>和一个偏置<span class="math">\(b\)</span>（<span class="math">\(b\)</span>为标量），偏置可以看成判断类别的先验，
 神经元的输出为<span class="math">\(h{w,b}(x)=f(w^Tx + b)\)</span>，<span class="math">\(f\)</span>被成为“激活函数”。本文默认使用的激活函数为sigmoid函数
 （用符号<span class="math">\(\sigma\)</span>表示）：
 </p>
-<div class="math">$$f(z)=\sigma(z)=\frac{1}{1+\exp(-z)}$$ ...</div><script type='text/javascript'>if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width < 768) ? "left" : align;
-        indent = (screen.width < 768) ? "0em" : indent;
-        linebreak = (screen.width < 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    var location_protocol = (false) ? 'https' : document.location.protocol;
-    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
-    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-    mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
-        "MathJax.Hub.Config({" +
-        "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
-        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-        "    displayAlign: '"+ align +"'," +
-        "    displayIndent: '"+ indent +"'," +
-        "    showMathMenu: true," +
-        "    messageStyle: 'normal'," +
-        "    tex2jax: { " +
-        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
-        "        displayMath: [ ['$$','$$'] ]," +
-        "        processEscapes: true," +
-        "        preview: 'TeX'," +
-        "    }, " +
-        "    'HTML-CSS': { " +
-        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
-        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
-        "    }, " +
-        "}); " +
-        "if ('default' !== 'default') {" +
-            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-        "}";
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-}
-</script></div>
+<div class="math">$$f(z)=\sigma(z)=\frac ...</div></div>
   <footer>
     <a rel="full-article" href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">Read On &crarr;</a>
   </footer>
@@ -227,76 +112,19 @@
         <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
       </h1>
     <p class="meta">
-<time datetime="2016-02-29T14:18:00+08:00" pubdate>2016-02-29(Mon)</time>    </p>
+<time datetime="2016-02-29T14:18:00+08:00" pubdate>2016-02-29(一)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr/>
-<p>这部分内容主要总结Softmax分类，以及如何以交叉熵作为Softmax分类的损失度量标准来
+  <div class="entry-content"><p>这部分内容主要总结Softmax分类，以及如何以交叉熵作为Softmax分类的损失度量标准来
 训练Softmax的参数，最后将Softmax分类应用在一个简单的窗口分类任务上，窗口分类
-指的是利用中心词向量以及中心词窗口范围内的向量拼接起来对中心词进行简单的分类 （例如把中心词按实体类型分成人名、地名、组织名、其他）。</p>
+指的是利用中心词向量以及中心词窗口范围内的向量拼接起来对中心词进行简单的分类&nbsp;（例如把中心词按实体类型分成人名、地名、组织名、其他）。</p>
 <h2>Softmax分类</h2>
 <p>Softmax分类是Logistic回归的扩展版（Logistic回归用于二分类，Softmax分类用于类别
 数量&gt;2的分类任务），词向量<span class="math">\(x\)</span>（假设词向量维度是<span class="math">\(d\)</span>）属于类别<span class="math">\(j\)</span>的概率如下所示：
 </p>
 <div class="math">$$\hat{y}_j = p(y_j=1|x)=\frac{\exp(W_{j\cdot}x)}{\sum_{c=1}^C\exp(W_{c\cdot}x)}$$</div>
 <p>
-其中<span class="math">\(W\in\mathbb{R}^{C\times d}\) ...</span></p><script type='text/javascript'>if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width < 768) ? "left" : align;
-        indent = (screen.width < 768) ? "0em" : indent;
-        linebreak = (screen.width < 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    var location_protocol = (false) ? 'https' : document.location.protocol;
-    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
-    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-    mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
-        "MathJax.Hub.Config({" +
-        "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
-        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-        "    displayAlign: '"+ align +"'," +
-        "    displayIndent: '"+ indent +"'," +
-        "    showMathMenu: true," +
-        "    messageStyle: 'normal'," +
-        "    tex2jax: { " +
-        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
-        "        displayMath: [ ['$$','$$'] ]," +
-        "        processEscapes: true," +
-        "        preview: 'TeX'," +
-        "    }, " +
-        "    'HTML-CSS': { " +
-        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
-        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
-        "    }, " +
-        "}); " +
-        "if ('default' !== 'default') {" +
-            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-        "}";
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-}
-</script></div>
+其中<span class="math">\(W\in\mathbb{R ...</span></p></div>
   <footer>
     <a rel="full-article" href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">Read On &crarr;</a>
   </footer>
@@ -307,11 +135,10 @@
         <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224d笔记1——word2vec</a>
       </h1>
     <p class="meta">
-<time datetime="2016-02-26T10:03:00+08:00" pubdate>2016-02-26(Fri)</time>    </p>
+<time datetime="2016-02-26T10:03:00+08:00" pubdate>2016-02-26(五)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<p>假期学习了斯坦福的<a href="http://cs224d.stanford.edu/syllabus.html">CS224d</a>课程，该课
+  <div class="entry-content"><p>假期学习了斯坦福的<a href="http://cs224d.stanford.edu/syllabus.html">CS224d</a>课程，该课
 程的主要内容是神经网络在自然语言处理领域的应用。 这里记录相关的学习笔记，大概分
 成以下几个部分：word2vec，窗口分类，神经网络，循环神经网络，递归神经网络，卷积&nbsp;神经网络。</p>
 <h2>为什么需要深度学习</h2>
@@ -340,7 +167,7 @@
         <a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Pelican自定义Jinja过滤器</a>
       </h1>
     <p class="meta">
-<time datetime="2015-09-28T10:18:00+08:00" pubdate>2015-09-28(Mon)</time>    </p>
+<time datetime="2015-09-28T10:18:00+08:00" pubdate>2015-09-28(一)</time>    </p>
 </header>
 
   <div class="entry-content"><p>使用<code>Pelican</code>的时候发现需要在模板中使用<code>Hash</code>函数，但是<code>Jinja</code>并没有提供<code>Hash</code>
@@ -349,11 +176,11 @@
 <h3>Hash函数功能实现</h3>
 <p>通过<code>Python</code>的标准库函数实现一个<code>md5</code>的哈希函数，函数的功能的是传入一个字符串
 返回该字符串的<code>md5</code>串，实现如下：</p>
-<div class="highlight"><pre><span class="c"># (c) 2012-2014, Michael DeHaan &lt;michael.dehaan@gmail.com&gt;</span>
-<span class="c">#</span>
-<span class="c"># This file is part of Ansible</span>
-<span class="c">#</span>
-<span class="c"># Ansible is free software: you can redistribute ...</span></pre></div></div>
+<div class="highlight"><pre><span></span><span class="c1"># (c) 2012-2014, Michael DeHaan &lt;michael.dehaan@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of Ansible</span>
+<span class="c1">#</span>
+<span class="c1"># Ansible is free software: you can redistribute ...</span></pre></div></div>
   <footer>
     <a rel="full-article" href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Read On &crarr;</a>
   </footer>
@@ -364,24 +191,23 @@
         <a href="https://wugh.github.io/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/">Linux通过Pulse混合麦克风和音频输出</a>
       </h1>
     <p class="meta">
-<time datetime="2015-01-08T21:08:00+08:00" pubdate>2015-01-08(Thu)</time>    </p>
+<time datetime="2015-01-08T21:08:00+08:00" pubdate>2015-01-08(四)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<p>由于想在语音识别时候给麦克风加噪声，所以就在思考有没有办法通过混合麦克风输入和
+  <div class="entry-content"><p>由于想在语音识别时候给麦克风加噪声，所以就在思考有没有办法通过混合麦克风输入和
 电脑的音频输出混合起来实现加噪声的效果呢？经过Google找到以下的<a href="https://www.youtube.com/watch?v=8hkCE7ETJRM">解决办法
 </a>，这种方法依赖
 <a href="http://zh.wikipedia.org/wiki/PulseAudio" title="PulseAudio">PulseAudio</a>。</p>
 <h3>安装工具</h3>
 <p>首先需要安装
 <a href="http://freedesktop.org/software/pulseaudio/pavucontrol/">pavucontrol</a>用来管理&nbsp;Pulse。</p>
-<div class="highlight"><pre>emerge -a media-sound/pavucontrol
+<div class="highlight"><pre><span></span>emerge -a media-sound/pavucontrol
 </pre></div>
 
 
 <h3>修改配置文件</h3>
 <p>修改配置文件<code>/etc/pulse/default.pa</code>，添加以下模块</p>
-<div class="highlight"><pre>load-module module-null-sink 
+<div class="highlight"><pre><span></span>load-module module-null-sink 
 load-module module-loopback
 load-module module-loopback
 </pre></div>
@@ -404,11 +230,10 @@ load-module module-loopback
         <a href="https://wugh.github.io/posts/2014/11/maxent/">最大熵</a>
       </h1>
     <p class="meta">
-<time datetime="2014-11-14T00:00:00+08:00" pubdate>2014-11-14(Fri)</time>    </p>
+<time datetime="2014-11-14T00:00:00+08:00" pubdate>2014-11-14(五)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<h3>最大熵原理</h3>
+  <div class="entry-content"><h3>最大熵原理</h3>
 <p>最大熵原理指的是当我们在估计概率分布的时候，这个概率分布符合已知信息的约束并且&nbsp;该分布是最均匀的。从熵的角度考虑就是要让这个分布符合约束并且熵最大。</p>
 <blockquote>
 <p>The principle of maximum entropy states that, subject to precisely stated
@@ -428,76 +253,19 @@ sports、politics和art。因为文本只能被分成4个类别，假设现在�
         <a href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">MDP入门</a>
       </h1>
     <p class="meta">
-<time datetime="2014-04-25T19:19:36+08:00" pubdate>2014-04-25(Fri)</time>    </p>
+<time datetime="2014-04-25T19:19:36+08:00" pubdate>2014-04-25(五)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr/>
-<h3>介绍</h3>
+  <div class="entry-content"><h3>介绍</h3>
 <p><span class="caps">MDP</span>（Markov Decision
-Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</span>，具体的 参数介绍如下：</p>
+Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</span>，具体的&nbsp;参数介绍如下：</p>
 <ul>
 <li><span class="math">\(S\)</span>：状态集合</li>
 <li><span class="math">\(A\)</span>：动作集合</li>
 <li><span class="math">\(P_{sa}\)</span>：状态转移概率分布，<span class="math">\(P_{sa}(s')\)</span>表示在<span class="math">\(s\)</span>状态下采取
   <span class="math">\(s\)</span>动作，转移到<span class="math">\(s'\)</span>的概率，<span class="math">\(P_{sa}(s')\geq0\)</span></li>
 <li><span class="math">\(\gamma\)</span>：折扣系数取值范围<span class="math">\(0\leq\gamma\le1\)</span></li>
-<li><span class="math">\(R\)</span>：回报函数，<span class="math">\(R:S\mapsto \mathbb{R}\) ...</span></li></ul><script type='text/javascript'>if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width < 768) ? "left" : align;
-        indent = (screen.width < 768) ? "0em" : indent;
-        linebreak = (screen.width < 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    var location_protocol = (false) ? 'https' : document.location.protocol;
-    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
-    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-    mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
-        "MathJax.Hub.Config({" +
-        "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
-        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-        "    displayAlign: '"+ align +"'," +
-        "    displayIndent: '"+ indent +"'," +
-        "    showMathMenu: true," +
-        "    messageStyle: 'normal'," +
-        "    tex2jax: { " +
-        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
-        "        displayMath: [ ['$$','$$'] ]," +
-        "        processEscapes: true," +
-        "        preview: 'TeX'," +
-        "    }, " +
-        "    'HTML-CSS': { " +
-        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
-        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
-        "    }, " +
-        "}); " +
-        "if ('default' !== 'default') {" +
-            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-        "}";
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-}
-</script></div>
+<li><span class="math">\(R\)</span>：回报函数，<span class="math">\(R:S\mapsto&nbsp;\mathbb{R ...</span></li></ul></div>
   <footer>
     <a rel="full-article" href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">Read On &crarr;</a>
   </footer>
@@ -508,11 +276,10 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
         <a href="https://wugh.github.io/posts/2013/11/text-classification/">文本分类</a>
       </h1>
     <p class="meta">
-<time datetime="2013-11-25T09:08:37+08:00" pubdate>2013-11-25(Mon)</time>    </p>
+<time datetime="2013-11-25T09:08:37+08:00" pubdate>2013-11-25(一)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<h3>1&nbsp;概述</h3>
+  <div class="entry-content"><h3>1&nbsp;概述</h3>
 <p>最近做了一个简单的文本分类程序，在这篇博客里面记录具体的分类流程。一般来说包括&nbsp;以下几个步骤：</p>
 <ol>
 <li>语料获取</li>

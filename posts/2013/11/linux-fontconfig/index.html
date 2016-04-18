@@ -51,11 +51,10 @@
 <header>
       <h1 class="entry-title">Linux字体配置</h1>
     <p class="meta">
-<time datetime="2013-11-09T09:54:23+08:00" pubdate>2013-11-09(Sat)</time>    </p>
+<time datetime="2013-11-09T09:54:23+08:00" pubdate>2013-11-09(六)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<h3>fontconfig简介</h3>
+  <div class="entry-content"><h3>fontconfig简介</h3>
 <p>Linux字体配置采用
 <a href="http://www.freedesktop.org/wiki/Software/fontconfig/">fontconfig</a>来做字体渲染
 ，中文的<a href="http://codex.wordpress.org.cn/Fontconfig%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C">fontconfig手册
@@ -66,14 +65,14 @@
 <p>dpi的详细设定参考这两篇文章，<a href="http://xxb.is-programmer.com/posts/4260.html">dpi设置及sub-pixel次像素微调
 </a>和<a href="http://www.linuxsir.org/bbs/thread266659.html">Linux 字体微调 - windows 效果
 版</a>两篇文章，Windows 7的默认dpi&nbsp;是96，我的字体设定的dpi也采用96。参考前面两篇文章可以知道dpi的计算公式如下：</p>
-<div class="highlight"><pre>屏幕 width = 287 mm = 28.7 cm，height = 215 mm = 21.5 cm
+<div class="highlight"><pre><span></span>屏幕 width = 287 mm = 28.7 cm，height = 215 mm = 21.5 cm
 水平 dpi = 水平 resolution * 2.54 / width = 1024 * 2.54 / 28.7 = 90.6 
 垂直 dpi = 垂直 resolution * 2.54 / height = 768 * 2.54 / 21.5 = 90.7
 </pre></div>
 
 
 <p>计算得到dpi就可以在fontconfig里面设定：</p>
-<div class="highlight"><pre><span class="nt">&lt;match</span> <span class="na">target=</span><span class="s">&quot;pattern&quot;</span><span class="nt">&gt;</span>
+<div class="highlight"><pre><span></span><span class="nt">&lt;match</span> <span class="na">target=</span><span class="s">&quot;pattern&quot;</span><span class="nt">&gt;</span>
     <span class="nt">&lt;edit</span> <span class="na">name=</span><span class="s">&quot;dpi&quot;</span> <span class="na">mode=</span><span class="s">&quot;assign&quot;</span> <span class="nt">&gt;</span>
         <span class="nt">&lt;double&gt;</span>96<span class="nt">&lt;/double&gt;</span>
     <span class="nt">&lt;/edit&gt;</span>
@@ -83,7 +82,7 @@
 
 <h4>抗锯齿</h4>
 <p>抗锯齿设定可以增加字体边缘的分辨率，配置如下</p>
-<div class="highlight"><pre><span class="nt">&lt;match</span> <span class="na">target=</span><span class="s">&quot;font&quot;</span><span class="nt">&gt;</span>
+<div class="highlight"><pre><span></span><span class="nt">&lt;match</span> <span class="na">target=</span><span class="s">&quot;font&quot;</span><span class="nt">&gt;</span>
     <span class="nt">&lt;edit</span> <span class="na">mode=</span><span class="s">&quot;assign&quot;</span> <span class="na">name=</span><span class="s">&quot;antialias&quot;</span><span class="nt">&gt;</span>
         <span class="nt">&lt;bool&gt;</span>true<span class="nt">&lt;/bool&gt;</span>
     <span class="nt">&lt;/edit&gt;</span>
@@ -94,7 +93,7 @@
 <h4>字体微调</h4>
 <p>使用普通微调，TrueType微调指令会被freetype的字节码解释器所解释，对于那些有好的
 微调指令的字体是一个好选择，然后选择的微调效果是<code>hintslight</code>。</p>
-<div class="highlight"><pre><span class="nt">&lt;match</span> <span class="na">target=</span><span class="s">&quot;font&quot;</span><span class="nt">&gt;</span>
+<div class="highlight"><pre><span></span><span class="nt">&lt;match</span> <span class="na">target=</span><span class="s">&quot;font&quot;</span><span class="nt">&gt;</span>
     <span class="nt">&lt;edit</span> <span class="na">mode=</span><span class="s">&quot;assign&quot;</span> <span class="na">name=</span><span class="s">&quot;hinting&quot;</span><span class="nt">&gt;</span>
         <span class="nt">&lt;bool&gt;</span>true<span class="nt">&lt;/bool&gt;</span>
     <span class="nt">&lt;/edit&gt;</span>
@@ -112,7 +111,7 @@
 <a href="http://www.infinality.net/blog/">Infinality</a>补丁的情况下autohint和subpixel
 rendering不能一起使用。通常情况下现在的显示器使用宏红、绿、蓝（<span class="caps">RGB</span>）标准生产，
 所以大多数情况下把次像素渲染类型设定为<code>RGB</code>。</p>
-<div class="highlight"><pre><span class="nt">&lt;match</span> <span class="na">target=</span><span class="s">&quot;font&quot;</span><span class="nt">&gt;</span>
+<div class="highlight"><pre><span></span><span class="nt">&lt;match</span> <span class="na">target=</span><span class="s">&quot;font&quot;</span><span class="nt">&gt;</span>
 <span class="nt">&lt;edit</span> <span class="na">mode=</span><span class="s">&quot;assign&quot;</span> <span class="na">name=</span><span class="s">&quot;rgba&quot;</span><span class="nt">&gt;</span>
         <span class="nt">&lt;const&gt;</span>rgb<span class="nt">&lt;/const&gt;</span>
     <span class="nt">&lt;/edit&gt;</span>
@@ -123,7 +122,7 @@ rendering不能一起使用。通常情况下现在的显示器使用宏红、�
 <p>当使用次像素渲染的时候需要开启<a href="http://www.freetype.org/freetype2/docs/reference/ft2-lcd_filtering.html"><span class="caps">LCD</span>
 filter</a>
 （液晶过滤），这个选项的取值一般来说选<code>lcddefault</code>就可以，完整取值请参考&nbsp;fontconfig手册。</p>
-<div class="highlight"><pre><span class="nt">&lt;match</span> <span class="na">target=</span><span class="s">&quot;font&quot;</span><span class="nt">&gt;</span>
+<div class="highlight"><pre><span></span><span class="nt">&lt;match</span> <span class="na">target=</span><span class="s">&quot;font&quot;</span><span class="nt">&gt;</span>
 <span class="nt">&lt;edit</span> <span class="na">mode=</span><span class="s">&quot;assign&quot;</span> <span class="na">name=</span><span class="s">&quot;lcdfilter&quot;</span><span class="nt">&gt;</span>
         <span class="nt">&lt;const&gt;</span>lcddefault<span class="nt">&lt;/const&gt;</span>
     <span class="nt">&lt;/edit&gt;</span>
@@ -136,16 +135,16 @@ filter</a>
 好要替换的字体族名字，然后最后那个<code>prefer</code>标签的意思是，在匹配的字体列表前面插
 入一些列的字体名字。需要注意的是这个列表里面的字体应该有一些是你的系统里面有的&nbsp;。</p>
 <p>Gentoo安装一些要用到的字体：</p>
-<div class="highlight"><pre>emerge media-fonts/corefonts <span class="c">#ms core font</span>
-emerge media-fonts/dejavu <span class="c">#DejaVu fonts</span>
-emerge media-fonts/ttf-bitstream-vera <span class="c">#Bitstream Vera font family</span>
-emerge media-fonts/arphicfonts <span class="c">#ukai uming等字体</span>
-emerge wqy-bitmapfont wqy-microhei wqy-zenhei <span class="c">#文泉驿字体</span>
+<div class="highlight"><pre><span></span>emerge media-fonts/corefonts <span class="c1">#ms core font</span>
+emerge media-fonts/dejavu <span class="c1">#DejaVu fonts</span>
+emerge media-fonts/ttf-bitstream-vera <span class="c1">#Bitstream Vera font family</span>
+emerge media-fonts/arphicfonts <span class="c1">#ukai uming等字体</span>
+emerge wqy-bitmapfont wqy-microhei wqy-zenhei <span class="c1">#文泉驿字体</span>
 </pre></div>
 
 
 <p>还需要一些雅黑、宋体一类的字体，就可以自己从windows下复制，最后字体替换顺序如下：</p>
-<div class="highlight"><pre><span class="nt">&lt;alias&gt;</span>
+<div class="highlight"><pre><span></span><span class="nt">&lt;alias&gt;</span>
     <span class="nt">&lt;family&gt;</span>serif<span class="nt">&lt;/family&gt;</span>
     <span class="nt">&lt;prefer&gt;</span>
         <span class="nt">&lt;family&gt;</span>DejaVu Serif<span class="nt">&lt;/family&gt;</span>
@@ -185,7 +184,7 @@ emerge wqy-bitmapfont wqy-microhei wqy-zenhei <span class="c">#文泉驿字体</
 我的<a href="https://gist.github.com/wugh/7386376">gist</a>下载，下载完之后把文件放到<span class="caps">HOME</span>
 目录下，重新命名为<code>.fonts.conf</code>，不过这种方法快要被fontconfig抛弃了，现在建议的
 做法是把文件放到<code>~/.config/fontconfig/conf.d/</code>下命名的时候在前面加个数字，表示&nbsp;一个优先级，操作如下：</p>
-<div class="highlight"><pre>mkdir -p ~/.config/fontconfig/conf.d/
+<div class="highlight"><pre><span></span>mkdir -p ~/.config/fontconfig/conf.d/
 mv fonts.conf ~/.config/fontconfig/conf.d/40-myfonts.conf
 </pre></div>
 
@@ -204,7 +203,7 @@ mv fonts.conf ~/.config/fontconfig/conf.d/40-myfonts.conf
         Guohua Wu
     </span>
   </span>
-<time datetime="2013-11-09T09:54:23+08:00" pubdate>2013-11-09(Sat)</time>  <span class="categories">
+<time datetime="2013-11-09T09:54:23+08:00" pubdate>2013-11-09(六)</time>  <span class="categories">
     <a class='category' href='https://wugh.github.io/category/linux.html'>Linux</a>
   </span>
   <span class="categories">

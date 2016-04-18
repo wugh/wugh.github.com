@@ -51,23 +51,22 @@
 <header>
       <h1 class="entry-title">BCM57780没有网络连接</h1>
     <p class="meta">
-<time datetime="2013-11-10T00:16:36+08:00" pubdate>2013-11-10(Sun)</time>    </p>
+<time datetime="2013-11-10T00:16:36+08:00" pubdate>2013-11-10(日)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<h3>问题描述</h3>
+  <div class="entry-content"><h3>问题描述</h3>
 <p>安装完Gentoo之后发现系统一直没有办法上网，通过<code>lspci</code>找到自己的网卡之后，搜索问&nbsp;题，发现通过下面几条命令之后才能够激活网卡：</p>
-<div class="highlight"><pre><span class="c"># rmmod broadcom </span>
-<span class="c"># rmmod tg3 </span>
-<span class="c"># modprobe broadcom </span>
-<span class="c"># modprobe tg3 </span>
-<span class="c"># dhcpcd eth0</span>
+<div class="highlight"><pre><span></span><span class="c1"># rmmod broadcom </span>
+<span class="c1"># rmmod tg3 </span>
+<span class="c1"># modprobe broadcom </span>
+<span class="c1"># modprobe tg3 </span>
+<span class="c1"># dhcpcd eth0</span>
 </pre></div>
 
 
 <h3>问题解决</h3>
 <p>但是并不能永久解决问题，由上面看来问题应该出在内核那边，需要安装下面的方法重新&nbsp;编译一下模块：</p>
-<div class="highlight"><pre>Device Drivers ---&gt; 
+<div class="highlight"><pre><span></span>Device Drivers ---&gt; 
      Network Device Support ---&gt; 
           Ethernet driver support ---&gt; 
                Broadcom devices 
@@ -88,7 +87,7 @@
         Guohua Wu
     </span>
   </span>
-<time datetime="2013-11-10T00:16:36+08:00" pubdate>2013-11-10(Sun)</time>  <span class="categories">
+<time datetime="2013-11-10T00:16:36+08:00" pubdate>2013-11-10(日)</time>  <span class="categories">
     <a class='category' href='https://wugh.github.io/category/linux.html'>Linux</a>
   </span>
   <span class="categories">

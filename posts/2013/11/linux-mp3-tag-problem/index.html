@@ -51,24 +51,23 @@
 <header>
       <h1 class="entry-title">解决Linux下mp3标签乱码</h1>
     <p class="meta">
-<time datetime="2013-11-09T09:29:46+08:00" pubdate>2013-11-09(Sat)</time>    </p>
+<time datetime="2013-11-09T09:29:46+08:00" pubdate>2013-11-09(六)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<p>在Linux下mp3标签出现乱码的原因主要是下载到的mp3都使用<a href="http://zh.wikipedia.org/wiki/GB_2312"><span class="caps">GB2312</span></a>编码，然而Linux下使用的编码是<a href="http://zh.wikipedia.org/wiki/UTF-8"><span class="caps">UTF</span>-8</a>编码，所以只要对标签编码做一个转换就可以解决问题。</p>
+  <div class="entry-content"><p>在Linux下mp3标签出现乱码的原因主要是下载到的mp3都使用<a href="http://zh.wikipedia.org/wiki/GB_2312"><span class="caps">GB2312</span></a>编码，然而Linux下使用的编码是<a href="http://zh.wikipedia.org/wiki/UTF-8"><span class="caps">UTF</span>-8</a>编码，所以只要对标签编码做一个转换就可以解决问题。</p>
 <h3>安装软件</h3>
 <p>下面以Gentoo为例子安装<a href="https://code.google.com/p/mutagen/">Mutagen</a>，其他的发行&nbsp;版自行Google。</p>
-<div class="highlight"><pre>emerge --ask media-libs/mutagen
+<div class="highlight"><pre><span></span>emerge --ask media-libs/mutagen
 </pre></div>
 
 
 <h3>转换当前目录下的所有mp3文件标签</h3>
-<div class="highlight"><pre>find . -iname <span class="s2">&quot;*.mp3&quot;</span> -exec mid3iconv -e gbk <span class="o">{}</span> <span class="se">\;</span>
+<div class="highlight"><pre><span></span>find . -iname <span class="s2">&quot;*.mp3&quot;</span> -exec mid3iconv -e gbk <span class="o">{}</span> <span class="se">\;</span>
 </pre></div>
 
 
 <h3>转换当前目录下的所有ape文件标签</h3>
-<div class="highlight"><pre>find . -iname <span class="s2">&quot;*.ape&quot;</span> -exec mid3iconv -e gbk <span class="o">{}</span> <span class="se">\;</span>
+<div class="highlight"><pre><span></span>find . -iname <span class="s2">&quot;*.ape&quot;</span> -exec mid3iconv -e gbk <span class="o">{}</span> <span class="se">\;</span>
 </pre></div></div>
     <footer>
 <p class="meta">
@@ -77,7 +76,7 @@
         Guohua Wu
     </span>
   </span>
-<time datetime="2013-11-09T09:29:46+08:00" pubdate>2013-11-09(Sat)</time>  <span class="categories">
+<time datetime="2013-11-09T09:29:46+08:00" pubdate>2013-11-09(六)</time>  <span class="categories">
     <a class='category' href='https://wugh.github.io/category/linux.html'>Linux</a>
   </span>
   <span class="categories">

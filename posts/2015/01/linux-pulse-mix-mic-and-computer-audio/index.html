@@ -51,24 +51,23 @@
 <header>
       <h1 class="entry-title">Linux通过Pulse混合麦克风和音频输出</h1>
     <p class="meta">
-<time datetime="2015-01-08T21:08:00+08:00" pubdate>2015-01-08(Thu)</time>    </p>
+<time datetime="2015-01-08T21:08:00+08:00" pubdate>2015-01-08(四)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<p>由于想在语音识别时候给麦克风加噪声，所以就在思考有没有办法通过混合麦克风输入和
+  <div class="entry-content"><p>由于想在语音识别时候给麦克风加噪声，所以就在思考有没有办法通过混合麦克风输入和
 电脑的音频输出混合起来实现加噪声的效果呢？经过Google找到以下的<a href="https://www.youtube.com/watch?v=8hkCE7ETJRM">解决办法
 </a>，这种方法依赖
 <a href="http://zh.wikipedia.org/wiki/PulseAudio" title="PulseAudio">PulseAudio</a>。</p>
 <h3>安装工具</h3>
 <p>首先需要安装
 <a href="http://freedesktop.org/software/pulseaudio/pavucontrol/">pavucontrol</a>用来管理&nbsp;Pulse。</p>
-<div class="highlight"><pre>emerge -a media-sound/pavucontrol
+<div class="highlight"><pre><span></span>emerge -a media-sound/pavucontrol
 </pre></div>
 
 
 <h3>修改配置文件</h3>
 <p>修改配置文件<code>/etc/pulse/default.pa</code>，添加以下模块</p>
-<div class="highlight"><pre>load-module module-null-sink 
+<div class="highlight"><pre><span></span>load-module module-null-sink 
 load-module module-loopback
 load-module module-loopback
 </pre></div>
@@ -94,7 +93,7 @@ load-module module-loopback
         Guohua Wu
     </span>
   </span>
-<time datetime="2015-01-08T21:08:00+08:00" pubdate>2015-01-08(Thu)</time>  <span class="categories">
+<time datetime="2015-01-08T21:08:00+08:00" pubdate>2015-01-08(四)</time>  <span class="categories">
     <a class='category' href='https://wugh.github.io/category/linux.html'>Linux</a>
   </span>
   <span class="categories">

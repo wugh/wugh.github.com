@@ -51,11 +51,10 @@
 <header>
       <h1 class="entry-title">最大熵</h1>
     <p class="meta">
-<time datetime="2014-11-14T00:00:00+08:00" pubdate>2014-11-14(Fri)</time>    </p>
+<time datetime="2014-11-14T00:00:00+08:00" pubdate>2014-11-14(五)</time>    </p>
 </header>
 
-  <div class="entry-content"><hr />
-<h3>最大熵原理</h3>
+  <div class="entry-content"><h3>最大熵原理</h3>
 <p>最大熵原理指的是当我们在估计概率分布的时候，这个概率分布符合已知信息的约束并且&nbsp;该分布是最均匀的。从熵的角度考虑就是要让这个分布符合约束并且熵最大。</p>
 <blockquote>
 <p>The principle of maximum entropy states that, subject to precisely stated
@@ -97,13 +96,13 @@ $$</div>
 思路就是选择一个与给定事实一致的模型（满足约束），并且要使得模型对未知事实不做&nbsp;假设（使得分布尽量均匀）。</p>
 <h3>最大熵建模</h3>
 <p>我们继续考虑上面提到的文本分类的例子，假设用最简单的<a href="http://en.wikipedia.org/wiki/Bag-of-words_model" title="Bag-of-words model">词袋模型</a>来表示文档，&nbsp;每个文档都可以表示成一个词频向量，例如下面的简单的例子</p>
-<div class="highlight"><pre><span class="n">Doc1</span><span class="o">:</span> <span class="n">John</span> <span class="n">likes</span> <span class="n">to</span> <span class="n">watch</span> <span class="n">movies</span><span class="o">.</span> <span class="n">Mary</span> <span class="n">likes</span> <span class="n">movies</span> <span class="n">too</span><span class="o">.</span>
+<div class="highlight"><pre><span></span><span class="n">Doc1</span><span class="o">:</span> <span class="n">John</span> <span class="n">likes</span> <span class="n">to</span> <span class="n">watch</span> <span class="n">movies</span><span class="o">.</span> <span class="n">Mary</span> <span class="n">likes</span> <span class="n">movies</span> <span class="n">too</span><span class="o">.</span>
 <span class="n">Doc2</span><span class="o">:</span> <span class="n">John</span> <span class="n">also</span> <span class="n">likes</span> <span class="n">to</span> <span class="n">watch</span> <span class="n">football</span> <span class="n">games</span><span class="o">.</span>
 </pre></div>
 
 
 <p>得到词表如下:</p>
-<div class="highlight"><pre>{
+<div class="highlight"><pre><span></span>{
     &quot;John&quot;: 1,
     &quot;likes&quot;: 2,
     &quot;to&quot;: 3,
@@ -119,7 +118,7 @@ $$</div>
 
 
 <p>所以可以把Doc1和Doc2表示成两个10维的向量，如下:</p>
-<div class="highlight"><pre>Doc1: [1, 2, 1, 1, 2, 0, 0, 0, 1, 1]
+<div class="highlight"><pre><span></span>Doc1: [1, 2, 1, 1, 2, 0, 0, 0, 1, 1]
 Doc2: [1, 1, 1, 1, 0, 1, 1, 1, 0, 0]
 </pre></div>
 
@@ -442,7 +441,7 @@ $$</div>
         Guohua Wu
     </span>
   </span>
-<time datetime="2014-11-14T00:00:00+08:00" pubdate>2014-11-14(Fri)</time>  <span class="categories">
+<time datetime="2014-11-14T00:00:00+08:00" pubdate>2014-11-14(五)</time>  <span class="categories">
     <a class='category' href='https://wugh.github.io/category/machine-learning.html'>Machine Learning</a>
   </span>
   <span class="categories">
