@@ -1,6 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/nlp.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2016-03-13T21:22:00+08:00</updated><entry><title>CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</title><link href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/" rel="alternate"></link><published>2016-03-13T21:22:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-03-13:posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/</id><summary type="html">&lt;p&gt;本篇文章主要介绍两种&lt;span class="caps"&gt;RNN&lt;/span&gt;的隐藏层信息计算方法&lt;span class="caps"&gt;GRU&lt;/span&gt;（Gated Recurrent Units）和
-&lt;span class="caps"&gt;LSTM&lt;/span&gt;（Long-Short-Term-Memories）。&lt;/p&gt;</summary><category term="神经网络"></category><category term="RNN"></category><category term="循环神经网络"></category><category term="深度学习"></category><category term="GRU"></category><category term="LSTM"></category></entry><entry><title>CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</title><link href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/" rel="alternate"></link><published>2016-03-05T11:13:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-03-05:posts/2016/03/cs224d-notes4-recurrent-neural-networks/</id><summary type="html">&lt;p&gt;这部分首先介绍语言模型，通过分析传统语言模型的问题引入循环神经网络（Recurrent Neural Network, &lt;span class="caps"&gt;RNN&lt;/span&gt;）以及
+&lt;span class="caps"&gt;LSTM&lt;/span&gt;（Long-Short-Term-Memories），这两种隐藏层的计算方法通过引入门（Gate）
+的机制来解决&lt;span class="caps"&gt;RNN&lt;/span&gt;的梯度消失问题，从而学习到长距离依赖。&lt;/p&gt;
+&lt;p&gt;这里说的隐藏层计算方法指的是如何计算下个时刻的隐藏层信息，标准&lt;span class="caps"&gt;RNN&lt;/span&gt;中计算&amp;nbsp;方法是：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$h_t=f(W^{(hh)}h_{t-1}+W^{(hx)}x_t)$$&lt;/div&gt;
+&lt;p&gt;
+而&lt;span class="caps"&gt;LSTM&lt;/span&gt;和&lt;span class="caps"&gt;GRU&lt;/span&gt;可以理解为计算&lt;span class="math"&gt;\(h_t\)&lt;/span&gt;的另一种方法。&lt;/p&gt;
+&lt;h2&gt;&lt;span class="caps"&gt;LSTM&lt;/span&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/"&gt;这篇文章&lt;/a&gt;详细 地解释了&lt;span class="caps"&gt;LSTM&lt;/span&gt;各个门的物理含义，
+以及&lt;span class="caps"&gt;LSTM&lt;/span&gt;计算隐藏层的方法，这里简要的进行总结，
+下图是&lt;span class="caps"&gt;LSTM&lt;/span&gt;网络的示意图，图中各个符号的含义参考&lt;a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/"&gt;原文&lt;/a&gt;：
+&lt;img alt="LSTM RNN" src="https://wugh.github.io/images/NLP/rnn-lstm-chain.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;p&gt;某个时刻&lt;span class="caps"&gt;LSTM&lt;/span&gt;计算隐藏层的方法参考下图：
+&lt;img alt="LSTM 单元" src="https://wugh.github.io/images/NLP/rnn-lstm-unit-detail.png" style="display:block;margin:0 auto" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="caps"&gt;LSTM&lt;/span&gt;最核心的部分是&lt;code&gt;cell state&lt;/code&gt;，即图中的&lt;span class="math"&gt;\(c_t\)&lt;/span&gt;。&lt;span class="math"&gt;\(c_t\)&lt;/span&gt;的信息贯穿整个&lt;span class="caps"&gt;LSTM&lt;/span&gt;，
+在整个前向传播的过程中只在&lt;span class="math"&gt;\(c_t\)&lt;/span&gt;上进行一些简单的线性操作，通过门来控制
+&lt;span class="math"&gt;\(c_t\)&lt;/span&gt;中信息的增减。&lt;span class="caps"&gt;LSTM&lt;/span&gt;中的门是通过一个sigmoid层来实现的，门输出的数值在
+0~1之间，然后把门的取值向量和目标数据对应维相乘就可以达到控制数据流通的
+效果。&lt;span class="caps"&gt;LSTM&lt;/span&gt;中有三个门，分别是&lt;code&gt;forget gate&lt;/code&gt;、&lt;code&gt;input gate&lt;/code&gt;和&lt;code&gt;output gate&lt;/code&gt;，
+这三个门的计算方法公式一样，都是根据&lt;span class="math"&gt;\(x_t\)&lt;/span&gt;和&lt;span class="math"&gt;\(h_{t-1}\)&lt;/span&gt;来计算，&amp;nbsp;区别在于权重矩阵和偏置不同。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;首先是&lt;code&gt;forget gate&lt;/code&gt;&lt;span class="math"&gt;\(f_t\)&lt;/span&gt;，这个门主要控制要从&lt;code&gt;cell state&lt;/code&gt;中忘记哪些信息，计算方法如下:
+&lt;div class="math"&gt;$$f_t=\sigma(W^fx_t+U^fh_{t-1})$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;其次是&lt;code&gt;input gate&lt;/code&gt;&lt;span class="math"&gt;\(i_t\)&lt;/span&gt;，这个门控制当前时刻的新信息（candidate hidden layer）有哪些需要添加进&lt;code&gt;cell state&lt;/code&gt;中，计算方法如下:
+&lt;div class="math"&gt;$$i_t=\sigma(W^ix_t+U^ih_{t-1})$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;上一步提到的当前时刻新信息的计算方法如下：
+&lt;div class="math"&gt;$$\tilde{c}_t=\tanh(W^cx_t+U^ch_{t-1})$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;然后&lt;span class="math"&gt;\(t\)&lt;/span&gt;时刻&lt;code&gt;cell state&lt;/code&gt;中的信息就变成&lt;span class="math"&gt;\(c_{t-1}\)&lt;/span&gt;中的部分信息再叠加上&lt;span class="math"&gt;\(\tilde{c}_t\)&lt;/span&gt;中的部分信息，计算方法如下：
+&lt;div class="math"&gt;$$c_t=f_t\circ c_{t-1} + i_t\circ\tilde{c}_t$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;最后还需要根据&lt;span class="math"&gt;\(t\)&lt;/span&gt;时刻的&lt;code&gt;cell state&lt;/code&gt;输出&lt;span class="math"&gt;\(h_t\)&lt;/span&gt;，通过&lt;code&gt;output gate&lt;/code&gt;来控制&lt;code&gt;cell state&lt;/code&gt;中的哪些信息需要
+输出，&lt;code&gt;output gate&lt;/code&gt;的计算方法如下：
+&lt;div class="math"&gt;$$o_t=\sigma(W^ox_t+U^oh_{t-1})$$&lt;/div&gt;
+将&lt;code&gt;cell state&lt;/code&gt;中的信息经过一个&lt;span class="math"&gt;\(\tanh\)&lt;/span&gt;层之后然后经过&lt;code&gt;output gate&lt;/code&gt;过滤得到&lt;span class="math"&gt;\(h_t\)&lt;/span&gt;：
+&lt;div class="math"&gt;$$h_t=o_t\circ\tanh(c_t)$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;如果我们把&lt;span class="caps"&gt;LSTM&lt;/span&gt;的&lt;code&gt;forget gate&lt;/code&gt;全部置0（总是忘记之前的信息），&lt;code&gt;input gate&lt;/code&gt;全部
+置1，&lt;code&gt;output gate&lt;/code&gt;全部置1（把&lt;code&gt;cell state&lt;/code&gt;中的信息全部输出），这样&lt;span class="caps"&gt;LSTM&lt;/span&gt;就变成一个标准的&lt;span class="caps"&gt;RNN&lt;/span&gt;。
+&lt;a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/"&gt;上文提到的文章&lt;/a&gt;中还提到一些&lt;span class="caps"&gt;LSTM&lt;/span&gt;的变种，比如根据&lt;span class="math"&gt;\(h_{t-1}\)&lt;/span&gt;、&lt;span class="math"&gt;\(x_t\)&lt;/span&gt;和&lt;span class="math"&gt;\(c_t\)&lt;/span&gt;来计算门信息。&lt;/p&gt;
+&lt;h2&gt;&lt;span class="caps"&gt;GRU&lt;/span&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;span class="caps"&gt;GRU&lt;/span&gt;可以看成是&lt;span class="caps"&gt;LSTM&lt;/span&gt;的变种，&lt;span class="caps"&gt;GRU&lt;/span&gt;把&lt;span class="caps"&gt;LSTM&lt;/span&gt;中的&lt;code&gt;forget gate&lt;/code&gt;和&lt;code&gt;input gate&lt;/code&gt;用&lt;code&gt;update gate&lt;/code&gt;来替代。
+把&lt;code&gt;cell state&lt;/code&gt;和隐状态&lt;span class="math"&gt;\(h_t\)&lt;/span&gt;进行合并，在计算当前时刻新信息的方法和&lt;span class="caps"&gt;LSTM&lt;/span&gt;有所不同。
+下图是&lt;span class="caps"&gt;GRU&lt;/span&gt;更新&lt;span class="math"&gt;\(h_t\)&lt;/span&gt;的过程：
+&lt;img alt="GRU" src="https://wugh.github.io/images/NLP/rnn-gru-unit.png" style="display:block;margin:0 auto" /&gt;&amp;nbsp;具体更新过程如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;首先介绍&lt;span class="caps"&gt;GRU&lt;/span&gt;的两个门，分别是&lt;code&gt;reset gate&lt;/code&gt;&lt;span class="math"&gt;\(r_t\)&lt;/span&gt;和&lt;code&gt;update gate&lt;/code&gt;&lt;span class="math"&gt;\(z_t\)&lt;/span&gt;，计算方法和&lt;span class="caps"&gt;LSTM&lt;/span&gt;中
+门的计算方法一致：
+&lt;div class="math"&gt;$$\begin{align*}
+r_t&amp;amp;=\sigma(W^rx_t+U^rh_{t-1})\\
+z_t&amp;amp;=\sigma(W^zx_t+U^zh_{t-1})
+\end{align*}$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;其次是计算候选隐藏层（candidate hidden layer）&lt;span class="math"&gt;\(\tilde{h}_t\)&lt;/span&gt;，这个候选隐藏层
+和&lt;span class="caps"&gt;LSTM&lt;/span&gt;中的&lt;span class="math"&gt;\(\tilde{c}_t\)&lt;/span&gt;是类似，可以看成是当前时刻的新信息，其中&lt;span class="math"&gt;\(r_t\)&lt;/span&gt;用来控制需要
+保留多少之前的记忆，如果&lt;span class="math"&gt;\(r_t\)&lt;/span&gt;为0，那么&lt;span class="math"&gt;\(\tilde{h}_t\)&lt;/span&gt;只包含当前词的信息：
+&lt;div class="math"&gt;$$\tilde{h}_t=\tanh(Wx_t+r_tUh_{t-1})$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;最后&lt;span class="math"&gt;\(z_t\)&lt;/span&gt;控制需要从前一时刻的隐藏层&lt;span class="math"&gt;\(h_{t-1}\)&lt;/span&gt;中遗忘多少信息，需要加入多少当前
+时刻的隐藏层信息&lt;span class="math"&gt;\(\tilde{h}_t\)&lt;/span&gt;，最后得到&lt;span class="math"&gt;\(h_t\)&lt;/span&gt;，直接得到最后输出的隐藏层信息，
+这里与&lt;span class="caps"&gt;LSTM&lt;/span&gt;的区别是&lt;span class="caps"&gt;GRU&lt;/span&gt;中没有&lt;code&gt;output gate&lt;/code&gt;：
+&lt;div class="math"&gt;$$h_t=z_t\circ h_{t-1} + (1-z_t)\circ \tilde{h}_t$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;如果&lt;code&gt;reset gate&lt;/code&gt;接近0，那么之前的隐藏层信息就会丢弃，允许模型丢弃一些和未来无关
+的信息；&lt;code&gt;update gate&lt;/code&gt;控制当前时刻的隐藏层输出&lt;span class="math"&gt;\(h_t\)&lt;/span&gt;需要保留多少之前的隐藏层信息，
+若&lt;span class="math"&gt;\(z_t\)&lt;/span&gt;接近1相当于我们之前把之前的隐藏层信息拷贝到当前时刻，可以学习长距离依赖。
+一般来说那些具有短距离依赖的单元&lt;code&gt;reset gate&lt;/code&gt;比较活跃（如果&lt;span class="math"&gt;\(r_t\)&lt;/span&gt;为1，而&lt;span class="math"&gt;\(z_t\)&lt;/span&gt;为0
+那么相当于变成了一个标准的&lt;span class="caps"&gt;RNN&lt;/span&gt;，能处理短距离依赖），具有长距离依赖的单元&lt;code&gt;update gate&lt;/code&gt;比较活跃。&lt;/p&gt;
+&lt;p&gt;&lt;span class="caps"&gt;LSTM&lt;/span&gt;和&lt;span class="caps"&gt;RNN&lt;/span&gt;的&lt;code&gt;thenao&lt;/code&gt;实现可以参考&lt;a href="http://www.wildml.com/2015/10/recurrent-neural-network-tutorial-part-4-implementing-a-grulstm-rnn-with-python-and-theano/"&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="神经网络"></category><category term="RNN"></category><category term="循环神经网络"></category><category term="深度学习"></category><category term="GRU"></category><category term="LSTM"></category></entry><entry><title>CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</title><link href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/" rel="alternate"></link><published>2016-03-05T11:13:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-03-05:posts/2016/03/cs224d-notes4-recurrent-neural-networks/</id><summary type="html">&lt;p&gt;这部分首先介绍语言模型，通过分析传统语言模型的问题引入循环神经网络（Recurrent Neural Network, &lt;span class="caps"&gt;RNN&lt;/span&gt;）以及
 &lt;span class="caps"&gt;RNN&lt;/span&gt;的扩展（双向&lt;span class="caps"&gt;RNN&lt;/span&gt;，深度&lt;span class="caps"&gt;RNN&lt;/span&gt;），最后为了改善&lt;span class="caps"&gt;RNN&lt;/span&gt;对长距依存信息的捕获引入&lt;span class="caps"&gt;GRU&lt;/span&gt;（Gated Recurrent Units）和
 &lt;span class="caps"&gt;LSTM&lt;/span&gt;（Long-Short-Term-Memories）。&lt;/p&gt;
 &lt;h2&gt;语言模型&lt;/h2&gt;

@@ -51,11 +51,140 @@
 <header>
       <h1 class="entry-title">CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</h1>
     <p class="meta">
-<time datetime="2016-03-13T21:22:00+08:00" pubdate>2016-03-13(日)</time>    </p>
+<time datetime="2016-03-13T21:22:00+08:00" pubdate>2016-03-13(Sun)</time>    </p>
 </header>
 
   <div class="entry-content"><p>本篇文章主要介绍两种<span class="caps">RNN</span>的隐藏层信息计算方法<span class="caps">GRU</span>（Gated Recurrent Units）和
-<span class="caps">LSTM</span>（Long-Short-Term-Memories）。</p></div>
+<span class="caps">LSTM</span>（Long-Short-Term-Memories），这两种隐藏层的计算方法通过引入门（Gate）
+的机制来解决<span class="caps">RNN</span>的梯度消失问题，从而学习到长距离依赖。</p>
+<p>这里说的隐藏层计算方法指的是如何计算下个时刻的隐藏层信息，标准<span class="caps">RNN</span>中计算&nbsp;方法是：
+</p>
+<div class="math">$$h_t=f(W^{(hh)}h_{t-1}+W^{(hx)}x_t)$$</div>
+<p>
+而<span class="caps">LSTM</span>和<span class="caps">GRU</span>可以理解为计算<span class="math">\(h_t\)</span>的另一种方法。</p>
+<h2><span class="caps">LSTM</span></h2>
+<p><a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">这篇文章</a>详细 地解释了<span class="caps">LSTM</span>各个门的物理含义，
+以及<span class="caps">LSTM</span>计算隐藏层的方法，这里简要的进行总结，
+下图是<span class="caps">LSTM</span>网络的示意图，图中各个符号的含义参考<a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">原文</a>：
+<img alt="LSTM RNN" src="https://wugh.github.io/images/NLP/rnn-lstm-chain.png" style="display:block;margin:0 auto" /></p>
+<p>某个时刻<span class="caps">LSTM</span>计算隐藏层的方法参考下图：
+<img alt="LSTM 单元" src="https://wugh.github.io/images/NLP/rnn-lstm-unit-detail.png" style="display:block;margin:0 auto" /></p>
+<p><span class="caps">LSTM</span>最核心的部分是<code>cell state</code>，即图中的<span class="math">\(c_t\)</span>。<span class="math">\(c_t\)</span>的信息贯穿整个<span class="caps">LSTM</span>，
+在整个前向传播的过程中只在<span class="math">\(c_t\)</span>上进行一些简单的线性操作，通过门来控制
+<span class="math">\(c_t\)</span>中信息的增减。<span class="caps">LSTM</span>中的门是通过一个sigmoid层来实现的，门输出的数值在
+0~1之间，然后把门的取值向量和目标数据对应维相乘就可以达到控制数据流通的
+效果。<span class="caps">LSTM</span>中有三个门，分别是<code>forget gate</code>、<code>input gate</code>和<code>output gate</code>，
+这三个门的计算方法公式一样，都是根据<span class="math">\(x_t\)</span>和<span class="math">\(h_{t-1}\)</span>来计算，&nbsp;区别在于权重矩阵和偏置不同。</p>
+<ol>
+<li>首先是<code>forget gate</code><span class="math">\(f_t\)</span>，这个门主要控制要从<code>cell state</code>中忘记哪些信息，计算方法如下:
+<div class="math">$$f_t=\sigma(W^fx_t+U^fh_{t-1})$$</div>
+</li>
+<li>其次是<code>input gate</code><span class="math">\(i_t\)</span>，这个门控制当前时刻的新信息（candidate hidden layer）有哪些需要添加进<code>cell state</code>中，计算方法如下:
+<div class="math">$$i_t=\sigma(W^ix_t+U^ih_{t-1})$$</div>
+</li>
+<li>上一步提到的当前时刻新信息的计算方法如下：
+<div class="math">$$\tilde{c}_t=\tanh(W^cx_t+U^ch_{t-1})$$</div>
+</li>
+<li>然后<span class="math">\(t\)</span>时刻<code>cell state</code>中的信息就变成<span class="math">\(c_{t-1}\)</span>中的部分信息再叠加上<span class="math">\(\tilde{c}_t\)</span>中的部分信息，计算方法如下：
+<div class="math">$$c_t=f_t\circ c_{t-1} + i_t\circ\tilde{c}_t$$</div>
+</li>
+<li>最后还需要根据<span class="math">\(t\)</span>时刻的<code>cell state</code>输出<span class="math">\(h_t\)</span>，通过<code>output gate</code>来控制<code>cell state</code>中的哪些信息需要
+输出，<code>output gate</code>的计算方法如下：
+<div class="math">$$o_t=\sigma(W^ox_t+U^oh_{t-1})$$</div>
+将<code>cell state</code>中的信息经过一个<span class="math">\(\tanh\)</span>层之后然后经过<code>output gate</code>过滤得到<span class="math">\(h_t\)</span>：
+<div class="math">$$h_t=o_t\circ\tanh(c_t)$$</div>
+</li>
+</ol>
+<p>如果我们把<span class="caps">LSTM</span>的<code>forget gate</code>全部置0（总是忘记之前的信息），<code>input gate</code>全部
+置1，<code>output gate</code>全部置1（把<code>cell state</code>中的信息全部输出），这样<span class="caps">LSTM</span>就变成一个标准的<span class="caps">RNN</span>。
+<a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">上文提到的文章</a>中还提到一些<span class="caps">LSTM</span>的变种，比如根据<span class="math">\(h_{t-1}\)</span>、<span class="math">\(x_t\)</span>和<span class="math">\(c_t\)</span>来计算门信息。</p>
+<h2><span class="caps">GRU</span></h2>
+<p><span class="caps">GRU</span>可以看成是<span class="caps">LSTM</span>的变种，<span class="caps">GRU</span>把<span class="caps">LSTM</span>中的<code>forget gate</code>和<code>input gate</code>用<code>update gate</code>来替代。
+把<code>cell state</code>和隐状态<span class="math">\(h_t\)</span>进行合并，在计算当前时刻新信息的方法和<span class="caps">LSTM</span>有所不同。
+下图是<span class="caps">GRU</span>更新<span class="math">\(h_t\)</span>的过程：
+<img alt="GRU" src="https://wugh.github.io/images/NLP/rnn-gru-unit.png" style="display:block;margin:0 auto" />&nbsp;具体更新过程如下：</p>
+<ol>
+<li>首先介绍<span class="caps">GRU</span>的两个门，分别是<code>reset gate</code><span class="math">\(r_t\)</span>和<code>update gate</code><span class="math">\(z_t\)</span>，计算方法和<span class="caps">LSTM</span>中
+门的计算方法一致：
+<div class="math">$$\begin{align*}
+r_t&amp;=\sigma(W^rx_t+U^rh_{t-1})\\
+z_t&amp;=\sigma(W^zx_t+U^zh_{t-1})
+\end{align*}$$</div>
+</li>
+<li>其次是计算候选隐藏层（candidate hidden layer）<span class="math">\(\tilde{h}_t\)</span>，这个候选隐藏层
+和<span class="caps">LSTM</span>中的<span class="math">\(\tilde{c}_t\)</span>是类似，可以看成是当前时刻的新信息，其中<span class="math">\(r_t\)</span>用来控制需要
+保留多少之前的记忆，如果<span class="math">\(r_t\)</span>为0，那么<span class="math">\(\tilde{h}_t\)</span>只包含当前词的信息：
+<div class="math">$$\tilde{h}_t=\tanh(Wx_t+r_tUh_{t-1})$$</div>
+</li>
+<li>最后<span class="math">\(z_t\)</span>控制需要从前一时刻的隐藏层<span class="math">\(h_{t-1}\)</span>中遗忘多少信息，需要加入多少当前
+时刻的隐藏层信息<span class="math">\(\tilde{h}_t\)</span>，最后得到<span class="math">\(h_t\)</span>，直接得到最后输出的隐藏层信息，
+这里与<span class="caps">LSTM</span>的区别是<span class="caps">GRU</span>中没有<code>output gate</code>：
+<div class="math">$$h_t=z_t\circ h_{t-1} + (1-z_t)\circ \tilde{h}_t$$</div>
+</li>
+</ol>
+<p>如果<code>reset gate</code>接近0，那么之前的隐藏层信息就会丢弃，允许模型丢弃一些和未来无关
+的信息；<code>update gate</code>控制当前时刻的隐藏层输出<span class="math">\(h_t\)</span>需要保留多少之前的隐藏层信息，
+若<span class="math">\(z_t\)</span>接近1相当于我们之前把之前的隐藏层信息拷贝到当前时刻，可以学习长距离依赖。
+一般来说那些具有短距离依赖的单元<code>reset gate</code>比较活跃（如果<span class="math">\(r_t\)</span>为1，而<span class="math">\(z_t\)</span>为0
+那么相当于变成了一个标准的<span class="caps">RNN</span>，能处理短距离依赖），具有长距离依赖的单元<code>update gate</code>比较活跃。</p>
+<p><span class="caps">LSTM</span>和<span class="caps">RNN</span>的<code>thenao</code>实现可以参考<a href="http://www.wildml.com/2015/10/recurrent-neural-network-tutorial-part-4-implementing-a-grulstm-rnn-with-python-and-theano/">这篇文章</a>。</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
     <footer>
 <p class="meta">
   <span class="byline author vcard">
@@ -63,7 +192,7 @@
         Guohua Wu
     </span>
   </span>
-<time datetime="2016-03-13T21:22:00+08:00" pubdate>2016-03-13(日)</time>  <span class="categories">
+<time datetime="2016-03-13T21:22:00+08:00" pubdate>2016-03-13(Sun)</time>  <span class="categories">
     <a class='category' href='https://wugh.github.io/category/nlp.html'>NLP</a>
   </span>
   <span class="categories">

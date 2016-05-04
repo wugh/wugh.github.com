@@ -51,11 +51,24 @@
         <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/">CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</a>
       </h1>
     <p class="meta">
-<time datetime="2016-03-13T21:22:00+08:00" pubdate>2016-03-13(日)</time>    </p>
+<time datetime="2016-03-13T21:22:00+08:00" pubdate>2016-03-13(Sun)</time>    </p>
 </header>
 
   <div class="entry-content"><p>本篇文章主要介绍两种<span class="caps">RNN</span>的隐藏层信息计算方法<span class="caps">GRU</span>（Gated Recurrent Units）和
-<span class="caps">LSTM</span>（Long-Short-Term-Memories）。</p></div>
+<span class="caps">LSTM</span>（Long-Short-Term-Memories），这两种隐藏层的计算方法通过引入门（Gate）
+的机制来解决<span class="caps">RNN</span>的梯度消失问题，从而学习到长距离依赖。</p>
+<p>这里说的隐藏层计算方法指的是如何计算下个时刻的隐藏层信息，标准<span class="caps">RNN</span>中计算&nbsp;方法是：
+</p>
+<div class="math">$$h_t=f(W^{(hh)}h_{t-1}+W^{(hx)}x_t)$$</div>
+<p>
+而<span class="caps">LSTM</span>和<span class="caps">GRU</span>可以理解为计算<span class="math">\(h_t\)</span>的另一种方法。</p>
+<h2><span class="caps">LSTM</span></h2>
+<p><a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">这篇文章</a>详细 地解释了<span class="caps">LSTM</span>各个门的物理含义，
+以及<span class="caps">LSTM</span>计算隐藏层的方法，这里简要的进行总结，
+下图是<span class="caps">LSTM</span>网络的示意图 ...</p></div>
+  <footer>
+    <a rel="full-article" href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/">Read On &crarr;</a>
+  </footer>
   		</article>
   		<article>
 <header>
@@ -63,7 +76,7 @@
         <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/">CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</a>
       </h1>
     <p class="meta">
-<time datetime="2016-03-05T11:13:00+08:00" pubdate>2016-03-05(六)</time>    </p>
+<time datetime="2016-03-05T11:13:00+08:00" pubdate>2016-03-05(Sat)</time>    </p>
 </header>
 
   <div class="entry-content"><p>这部分首先介绍语言模型，通过分析传统语言模型的问题引入循环神经网络（Recurrent Neural Network, <span class="caps">RNN</span>）以及
@@ -87,7 +100,7 @@
         <a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">CS224d笔记3——神经网络</a>
       </h1>
     <p class="meta">
-<time datetime="2016-03-01T09:00:00+08:00" pubdate>2016-03-01(二)</time>    </p>
+<time datetime="2016-03-01T09:00:00+08:00" pubdate>2016-03-01(Tue)</time>    </p>
 </header>
 
   <div class="entry-content"><p>这部分首先介绍神经元，接着介绍只有一个隐藏层的神经网络，这个神经网络要解决的
@@ -112,7 +125,7 @@
         <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
       </h1>
     <p class="meta">
-<time datetime="2016-02-29T14:18:00+08:00" pubdate>2016-02-29(一)</time>    </p>
+<time datetime="2016-02-29T14:18:00+08:00" pubdate>2016-02-29(Mon)</time>    </p>
 </header>
 
   <div class="entry-content"><p>这部分内容主要总结Softmax分类，以及如何以交叉熵作为Softmax分类的损失度量标准来
@@ -135,7 +148,7 @@
         <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224d笔记1——word2vec</a>
       </h1>
     <p class="meta">
-<time datetime="2016-02-26T10:03:00+08:00" pubdate>2016-02-26(五)</time>    </p>
+<time datetime="2016-02-26T10:03:00+08:00" pubdate>2016-02-26(Fri)</time>    </p>
 </header>
 
   <div class="entry-content"><p>假期学习了斯坦福的<a href="http://cs224d.stanford.edu/syllabus.html">CS224d</a>课程，该课
@@ -167,7 +180,7 @@
         <a href="https://wugh.github.io/posts/2015/09/pelican-custom-jinja-filter/">Pelican自定义Jinja过滤器</a>
       </h1>
     <p class="meta">
-<time datetime="2015-09-28T10:18:00+08:00" pubdate>2015-09-28(一)</time>    </p>
+<time datetime="2015-09-28T10:18:00+08:00" pubdate>2015-09-28(Mon)</time>    </p>
 </header>
 
   <div class="entry-content"><p>使用<code>Pelican</code>的时候发现需要在模板中使用<code>Hash</code>函数，但是<code>Jinja</code>并没有提供<code>Hash</code>
@@ -191,7 +204,7 @@
         <a href="https://wugh.github.io/posts/2015/01/linux-pulse-mix-mic-and-computer-audio/">Linux通过Pulse混合麦克风和音频输出</a>
       </h1>
     <p class="meta">
-<time datetime="2015-01-08T21:08:00+08:00" pubdate>2015-01-08(四)</time>    </p>
+<time datetime="2015-01-08T21:08:00+08:00" pubdate>2015-01-08(Thu)</time>    </p>
 </header>
 
   <div class="entry-content"><p>由于想在语音识别时候给麦克风加噪声，所以就在思考有没有办法通过混合麦克风输入和
@@ -230,7 +243,7 @@ load-module module-loopback
         <a href="https://wugh.github.io/posts/2014/11/maxent/">最大熵</a>
       </h1>
     <p class="meta">
-<time datetime="2014-11-14T00:00:00+08:00" pubdate>2014-11-14(五)</time>    </p>
+<time datetime="2014-11-14T00:00:00+08:00" pubdate>2014-11-14(Fri)</time>    </p>
 </header>
 
   <div class="entry-content"><h3>最大熵原理</h3>
@@ -253,7 +266,7 @@ sports、politics和art。因为文本只能被分成4个类别，假设现在�
         <a href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">MDP入门</a>
       </h1>
     <p class="meta">
-<time datetime="2014-04-25T19:19:36+08:00" pubdate>2014-04-25(五)</time>    </p>
+<time datetime="2014-04-25T19:19:36+08:00" pubdate>2014-04-25(Fri)</time>    </p>
 </header>
 
   <div class="entry-content"><h3>介绍</h3>
@@ -276,7 +289,7 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
         <a href="https://wugh.github.io/posts/2013/11/text-classification/">文本分类</a>
       </h1>
     <p class="meta">
-<time datetime="2013-11-25T09:08:37+08:00" pubdate>2013-11-25(一)</time>    </p>
+<time datetime="2013-11-25T09:08:37+08:00" pubdate>2013-11-25(Mon)</time>    </p>
 </header>
 
   <div class="entry-content"><h3>1&nbsp;概述</h3>
