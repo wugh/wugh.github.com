@@ -80,7 +80,7 @@ $$h_t=z_t\circ h_{t-1} + (1-z_t)\circ \tilde{h}_t$$
 一般来说那些具有短距离依赖的单元`reset gate`比较活跃（如果$r_t$为1，而$z_t$为0
 那么相当于变成了一个标准的RNN，能处理短距离依赖），具有长距离依赖的单元`update gate`比较活跃。
 
-LSTM和RNN的`thenao`实现可以参考[这篇文章][grulstm]。
+LSTM和RNN的`theano`实现可以参考[这篇文章][grulstm]。
 
 [lstm]: https://colah.github.io/posts/2015-08-Understanding-LSTMs/
 [grulstm]: http://www.wildml.com/2015/10/recurrent-neural-network-tutorial-part-4-implementing-a-grulstm-rnn-with-python-and-theano/
