@@ -127,7 +127,7 @@ z_t&amp;=\sigma(W^zx_t+U^zh_{t-1})
 若<span class="math">\(z_t\)</span>接近1相当于我们之前把之前的隐藏层信息拷贝到当前时刻，可以学习长距离依赖。
 一般来说那些具有短距离依赖的单元<code>reset gate</code>比较活跃（如果<span class="math">\(r_t\)</span>为1，而<span class="math">\(z_t\)</span>为0
 那么相当于变成了一个标准的<span class="caps">RNN</span>，能处理短距离依赖），具有长距离依赖的单元<code>update gate</code>比较活跃。</p>
-<p><span class="caps">LSTM</span>和<span class="caps">RNN</span>的<code>thenao</code>实现可以参考<a href="http://www.wildml.com/2015/10/recurrent-neural-network-tutorial-part-4-implementing-a-grulstm-rnn-with-python-and-theano/">这篇文章</a>。</p>
+<p><span class="caps">LSTM</span>和<span class="caps">RNN</span>的<code>theano</code>实现可以参考<a href="http://www.wildml.com/2015/10/recurrent-neural-network-tutorial-part-4-implementing-a-grulstm-rnn-with-python-and-theano/">这篇文章</a>。</p>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",

@@ -72,7 +72,7 @@ z_t&amp;amp;=\sigma(W^zx_t+U^zh_{t-1})
 若&lt;span class="math"&gt;\(z_t\)&lt;/span&gt;接近1相当于我们之前把之前的隐藏层信息拷贝到当前时刻，可以学习长距离依赖。
 一般来说那些具有短距离依赖的单元&lt;code&gt;reset gate&lt;/code&gt;比较活跃（如果&lt;span class="math"&gt;\(r_t\)&lt;/span&gt;为1，而&lt;span class="math"&gt;\(z_t\)&lt;/span&gt;为0
 那么相当于变成了一个标准的&lt;span class="caps"&gt;RNN&lt;/span&gt;，能处理短距离依赖），具有长距离依赖的单元&lt;code&gt;update gate&lt;/code&gt;比较活跃。&lt;/p&gt;
-&lt;p&gt;&lt;span class="caps"&gt;LSTM&lt;/span&gt;和&lt;span class="caps"&gt;RNN&lt;/span&gt;的&lt;code&gt;thenao&lt;/code&gt;实现可以参考&lt;a href="http://www.wildml.com/2015/10/recurrent-neural-network-tutorial-part-4-implementing-a-grulstm-rnn-with-python-and-theano/"&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;span class="caps"&gt;LSTM&lt;/span&gt;和&lt;span class="caps"&gt;RNN&lt;/span&gt;的&lt;code&gt;theano&lt;/code&gt;实现可以参考&lt;a href="http://www.wildml.com/2015/10/recurrent-neural-network-tutorial-part-4-implementing-a-grulstm-rnn-with-python-and-theano/"&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
