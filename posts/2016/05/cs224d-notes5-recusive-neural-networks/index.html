@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CS224d笔记5——递归神经网络（Recusive Neural Network, RNN） &mdash; Life in a Nutshell</title>
+  <meta name="author" content="Guohua Wu">
+
+  <link href="https://wugh.github.io/feeds/main.atom.xml" type="application/atom+xml" rel="alternate"
+        title="Life in a Nutshell Atom Feed" />
+
+
+
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link href="https://wugh.github.io/favicon.png" rel="icon">
+
+  <link href="https://wugh.github.io/theme/css/main.css" media="screen, projection"
+        rel="stylesheet" type="text/css">
+
+  <link href="//fonts.useso.com/css?family=PT+Serif:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+  <link href="//fonts.useso.com/css?family=PT+Sans:regular,italic,bold,bolditalic"
+        rel="stylesheet" type="text/css">
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="https://wugh.github.io/">Life in a Nutshell</a></h1>
+</hgroup></header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="https://wugh.github.io/feeds/main.atom.xml" rel="subscribe-atom">Atom</a></li>
+</ul>
+
+
+<ul class="main-navigation">
+    <li><a href="/archives.html">Archives</a></li>
+      <li><a href="https://wugh.github.io/pages/about-me.html">About&nbsp;Me</a></li>
+</ul></nav>
+  <div id="main">
+    <div id="content">
+<div>
+  <article class="hentry" role="article">
+<header>
+      <h1 class="entry-title">CS224d笔记5——递归神经网络（Recusive Neural Network, RNN）</h1>
+    <p class="meta">
+<time datetime="2016-05-13T08:09:00+08:00" pubdate>2016-05-13(Fri)</time>    </p>
+</header>
+
+  <div class="entry-content"><p>这部分介绍递归神经网络（<span class="caps">RNN</span>），
+<a href="https://en.wikipedia.org/wiki/Recursive_neural_network">递归神经网络</a>通过在一个结构上递归地应用同一组参数来预测任意输入的结构，
+或者通过遍历输入的拓扑结构产生一个标量输出来创建网络。
+<a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/">上篇文章</a>介绍的循环神经网络可以看成时间上的递归，&nbsp;可以看成是结构递归的一种简化版递归神经网络。</p>
+<p><span class="caps">RNN</span>适用于有嵌套层次和内在递归结构的任务。目前<span class="caps">RNN</span>在<span class="caps">NLP</span>领域的应用主要有句法分析和
+句子表示。假设一个句子的含义是由句子中词的含义和词的组合方式决定的
+，word2vec已经一定程度上说明可以用向量来表示词的含义，词的组合规则从句法的角度
+来看可以理解成句法树，我们可以通过遍历句法树来构建<span class="caps">RNN</span>（递归的时候使用同一组参数
+）来生成句子的表示。这样生成句子、短语的表示考虑了词的顺序、词的组合和词的含义。
+其实我们可以利用<span class="caps">RNN</span>来同时学习句子的句法结构和句子的向量表示。</p>
+<p><span class="caps">RNN</span>用于结构预测的时候需要用到一个<code>max-margin</code>目标函数，暂时没有看懂这个目标函数。
+所以本文仅介绍在有一个句法树的前提下来生成句子表示的过程，同时结合一个简单的情感
+分析任务来解释<span class="caps">RNN</span>的前向传播和反向传播过程。</p>
+<h2>单层<span class="caps">RNN</span>建模情感分析</h2>
+<p>现在用一个简单的<span class="caps">RNN</span>来建模情感分析任务，学习句子的表示。假设我们现在已经有了句子
+的句子分析树和词表示，如下图所示：
+<img alt="LSTM RNN" src="https://wugh.github.io/images/NLP/rnn-single-layer-sentiment-analysis.png" style="display:block;margin:0 auto" />
+假设词表示的维度<span class="math">\(L_i\in \mathbb{R}^d\)</span>，为了得到<code>Node3</code>节点的表示，我们将这个节点
+的两个孩子节点的表示<span class="math">\(L_{29}\)</span>和<span class="math">\(L_{430}\)</span>拼接起来，输入一个只有一个隐藏层的神经网络，
+得到<code>Node3</code>节点的表示：
+</p>
+<div class="math">$$h^{(1)}=\tanh(W^{(1)}
+\begin{bmatrix}
+L_{29}\\
+L_{430}
+\end{bmatrix}
++ b^{(1)})
+$$</div>
+<p>
+其中<span class="math">\(W^{(1)}\in \mathbb{R}^{d\times 2d}\)</span>，<span class="math">\(b^{(1)}\in \mathbb{R}^d\)</span>，<span class="math">\(h^{(1)}\in \mathbb{R}^d\)</span>。
+可以把<span class="math">\(h^{(1)}\)</span>看作是<code>the assignment</code>的表示，<span class="caps">RNN</span>的优势在于不需要直接学习Bigram的表示，
+通过现有的词表示和词组合方式就可以推导出短语的表示。得到<span class="math">\(h^{(1)}\)</span>之后可以接一个softmax
+进行分类，以情感分类的例子为例，可以分5类：<code>Really Negative, Negative, Neutral, Positive, Really Positive</code>。</p>
+<p>同样的方式可以得到<code>I love</code>的短语表示。接着根据<code>I love</code>和<code>the assignment</code>的短语表示&nbsp;就可以得到整个句子的短语表示，计算方式如下：
+</p>
+<div class="math">$$h^{(1)}=\tanh(W^{(1)}
+\begin{bmatrix}
+h_{left}^{(1)}\\
+h_{right}^{(1)}
+\end{bmatrix}
++ b^{(1)})
+$$</div>
+<div class="math">$$\hat{y}=\text{softmax}(Uh^{(1)}+b^{(s)}) $$</div>
+<p>
+<span class="math">\(h_{left}^{(1)}\)</span>是左孩子的输出向量，<span class="math">\(h_{left}^{(1)}\)</span>是右孩子的输出向量
+（这两个向量都可能是词向量）。最后经过一个softmax得到整个句子的分类，在情感分类任务中
+<span class="math">\(U\in \mathbb{R}^{5\times d}\)</span>，<span class="math">\(b^{(s)}\in\mathbb{R}^5\)</span>。</p>
+<p>前向传播过程实际上就是用一个深度优先遍历就可以完成，步骤如下：</p>
+<ol>
+<li>得到左孩子的表示</li>
+<li>得到右孩子的表示</li>
+<li>得到根节点的表示</li>
+</ol>
+<h2>后向传播</h2>
+<p>需要注意的是在<span class="caps">RNN</span>中我们在每个节点用的参数都是一样的，求导的时候和普通神经网络的区别&nbsp;在于我们只需要把每个节点的参数的梯度累加起来就可以了。</p>
+<p>此外还有两点需要注意，一是父节点的输入时由两个子节点的输出拼接而成的，当父节点
+的误差往子节点传播的时候需要切成两份：
+<img alt="LSTM RNN" src="https://wugh.github.io/images/NLP/rnn-single-layer-sentiment-analysis-bp1.png" style="display:block;margin:0 auto" />
+二是每个节点的<span class="math">\(h^{(1)}\)</span>处的误差来源有两个部分，一个是softmax传回来的，一个是父节点传回来的：
+<img alt="LSTM RNN" src="https://wugh.github.io/images/NLP/rnn-single-layer-sentiment-analysis-bp2.png" style="display:block;margin:0 auto" /></p>
+<p>整个后向传播过程也是一个深度优先遍历，步骤如下：</p>
+<ol>
+<li>计算根节点的误差</li>
+<li>计算左孩子的误差</li>
+<li>计算右孩子的误差</li>
+</ol>
+<p>下面以上节提到的情感分析的例子来描述一下整个后向传播过程。前文可知，<span class="caps">RNN</span>中每个节点&nbsp;都进行了一次softmax分类，每个节点输出的情感分类的损失可以用交叉熵度量：
+</p>
+<div class="math">$$\text{CE}(y,\hat{y})=-\sum_i y_i\log(\hat{y}_i)$$</div>
+<p>根据上文的句法结构，<span class="caps">RNN</span>在后向传播的时候，先计算<code>Node1</code>的误差，然后<code>Node2</code>，最后
+<code>Node3</code>，得到<span class="math">\(W^{(1)}\)</span>、<span class="math">\(b^{(1)}\)</span>、<span class="math">\(U\)</span>、<span class="math">\(b^{(s)}\)</span>和<span class="math">\(L\)</span>的更新公式。</p>
+<p>对于内部节点<code>Node1~3</code>无法直接和词表中的向量<span class="math">\(L\)</span>交互，所以<code>Node1~3</code>只需要对
+<span class="math">\(W^{(1)}\)</span>、<span class="math">\(b^{(1)}\)</span>、<span class="math">\(U\)</span>、<span class="math">\(b^{(s)}\)</span>求误差。<span class="math">\(\delta_{above}\)</span>是父节点传给当前的误差，
+<span class="math">\(\delta_{below}\)</span>是当前节点传递给子节点的误差，拆成两个部分分别传递给左右孩子。
+<img alt="RNN后向传播" src="https://wugh.github.io/images/NLP/rnn-single-layer-sentiment-analysis-bp-detail.jpg" style="display:block;margin:0 auto" /></p>
+<p>对于叶子节点求误差就比较简单，只需要对<span class="math">\(U\)</span>、<span class="math">\(b^{(s)}\)</span>和叶子节点对应的词<span class="math">\(L_i\)</span>求误差就行。
+<img alt="RNN叶子后向传播" src="https://wugh.github.io/images/NLP/rnn-single-layer-sentiment-analysis-bp-detail-leaf.jpg" style="display:block;margin:0 auto" /></p>
+<p>最后要做的就是把各个节点中求得的各个参数的误差累加起来，得到所有参数的梯度，进行参数更新。</p>
+<h2><span class="caps">RNN</span>改进</h2>
+<p>上面描述的<span class="caps">RNN</span>有一个很严重的问题是，在每个节点计算<span class="math">\(h^{(1)}\)</span>的时候都使用相同的<span class="math">\(W^{(1)}\)</span>
+把两个孩子的表示拼接起来，很明显的是我们在拼接冠词和名词的时候用的<span class="math">\(W\)</span>应该和拼接名词和动词
+用的<span class="math">\(W\)</span>应该不一样。</p>
+<h3>Syntactically Untied <span class="caps">SU</span>-<span class="caps">RNN</span></h3>
+<p><span class="caps">SU</span>-<span class="caps">RNN</span>的主要思想是用<a href="https://www.quora.com/Natural-Language-Processing-What-is-Probabilistic-Context-Free-Grammar-PCFG"><span class="caps">PCFG</span></a>先给句法树种的每个节点和词打上标签。
+然后<span class="caps">DT</span>-<span class="caps">NP</span>拼接的时候用一种<span class="math">\(W\)</span>，<span class="caps">VP</span>-<span class="caps">NP</span>拼接的时候用另一个<span class="math">\(W\)</span>，这样可以提高模型的描述能力。
+<img alt="SU-RNN" src="https://wugh.github.io/images/NLP/su-rnn.png" style="display:block;margin:0 auto" /></p>
+<p>这个模型在训练的时候要把<span class="math">\(W\in \mathbb{R}^{2d}\)</span>初始化成单位矩阵，相当于初始的时候两个子节点的向量拼接
+就是把两个向量对应维度相加。最后通过模型能够学习出来两种类型的子节点拼接哪个更重要一点，
+例如<span class="caps">DT</span>-<span class="caps">NP</span>拼接（The cat或者A man）的时候<span class="caps">NP</span>会更重要一点，下图是一个真实学习到的矩阵：
+<img alt="SU-RNN" src="https://wugh.github.io/images/NLP/su-rnn-dt-np.png" style="display:block;margin:0 auto" /></p>
+<p><span class="caps">SU</span>-<span class="caps">RNN</span>比之前的同一个<span class="math">\(W\)</span>的模型有了一定的改进，但是还解决不了修饰词的问题，例如<code>very</code>
+这个词会本身就会使得另一个词的词意变强，通过<span class="caps">SU</span>-<span class="caps">RNN</span>的这种线性插值的方法无法让某个向量
+去放大另一个向量。界面介绍两个可以描述这类问题的模型<span class="caps">MV</span>-<span class="caps">RNN</span>和<span class="caps">RNTN</span>。</p>
+<h3><span class="caps">MV</span>-<span class="caps">RNN</span>’s (Matrix-Vector Recursive Neural&nbsp;Networks)</h3>
+<p><span class="caps">MV</span>-<span class="caps">RNN</span>中每个词不仅有一个词向量，还有一个矩阵，例如下图中的词<code>very</code>有一个向量a
+还有一个矩阵A。当<code>very</code>和<code>good</code>组合的时候首先需要把当前词的向量和另一个词的矩阵相乘，
+例如<code>very</code>的向量<code>a</code>需要和<code>good</code>的矩阵B相乘，然后再通过普通<span class="caps">RNN</span>的计算公式得到新节点的
+隐藏层表示。<code>very</code>这个词的矩阵可以初始化成单位矩阵乘上某个正数，这样和对方的向量相乘&nbsp;的时候就可以放大对方的向量。</p>
+<p><img alt="MV-RNN" src="https://wugh.github.io/images/NLP/mv-rnn.png" style="display:block;margin:0 auto" /></p>
+<h3>RNTNs (Recursive Neural Tensor&nbsp;Network)</h3>
+<p><span class="caps">RNTN</span>首先对左右孩子的<span class="math">\(h^(1)\)</span>进行拼接得到<span class="math">\(x\in\mathbb{R}^{2d}\)</span>，在普通的<span class="caps">RNN</span>中也这么做
+但是普通的<span class="caps">RNN</span>直接把<span class="math">\(x\)</span>进行线性变化之后就经过非线性神经单元，而在<span class="caps">RNTN</span>中首先对<span class="math">\(x\)</span>进行&nbsp;一次二次变换，然后加上线性变换，最后通过非线性单元：
+</p>
+<div class="math">$$h^{(1)}=\tanh(x^TVx + W^{(1)}x)$$</div>
+<p>
+其中<span class="math">\(V\in\mathbb{R}^{2d\times 2d\times d}\)</span>是一个三阶的张量（Tensor）。
+<span class="math">\(x^TVx\)</span>的计算方式是把张量的每一个分片（张量的一个分片维度是<span class="math">\(\mathbb{R}^{2d\times 2d}\)</span>）
+<span class="math">\(V[i],i\in[1,2,\ldots,d]\)</span>对<span class="math">\(x\)</span>计算<span class="math">\(x^TV[i]x\)</span>，最后输出一个<span class="math">\(\mathbb{R}^{d}\)</span>的向量。
+然后加上一个<span class="math">\(W^{(1)}x\)</span>，然后通过一个非线性变换。通过二次变换实际上两个向量之间
+进行了乘法类型的交互，而且不需要像<span class="caps">MV</span>-<span class="caps">RNN</span>一样对每个词保持一个矩阵，参数空间小了很多。</p>
+<p><img alt="MV-RNN" src="https://wugh.github.io/images/NLP/rntn.png" style="display:block;margin:0 auto" /></p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+    <footer>
+<p class="meta">
+  <span class="byline author vcard">
+    Posted by <span class="fn">
+        Guohua Wu
+    </span>
+  </span>
+<time datetime="2016-05-13T08:09:00+08:00" pubdate>2016-05-13(Fri)</time>  <span class="categories">
+    <a class='category' href='https://wugh.github.io/category/nlp.html'>NLP</a>
+  </span>
+  <span class="categories">
+    <a class="category" href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a class="category" href="https://wugh.github.io/tag/rnn.html">RNN</a>,    <a class="category" href="https://wugh.github.io/tag/di-gui-shen-jing-wang-luo.html">递归神经网络</a>,    <a class="category" href="https://wugh.github.io/tag/ju-fa-fen-xi.html">句法分析</a>,    <a class="category" href="https://wugh.github.io/tag/qing-gan-fen-xi.html">情感分析</a>  </span>
+</p><div class="sharing">
+</div>    </footer>
+  </article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></div>
+  </section>
+</div>
+<aside class="sidebar">
+  <section>
+    <h1>Recent Posts</h1>
+    <ul id="recent_posts">
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/05/cs224d-notes5-recusive-neural-networks/">CS224d笔记5——递归神经网络（Recusive Neural Network, RNN）</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/">CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/">CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">CS224d笔记3——神经网络</a>
+      </li>
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
+      </li>
+    </ul>
+  </section>
+  <section>
+      
+    <h1>Categories</h1>
+    <ul id="recent_posts">
+        <li><a href="https://wugh.github.io/category/linux.html">Linux</a></li>
+        <li><a href="https://wugh.github.io/category/machine-learning.html">Machine Learning</a></li>
+        <li><a href="https://wugh.github.io/category/nlp.html">NLP</a></li>
+        <li><a href="https://wugh.github.io/category/web.html">Web</a></li>
+    </ul>
+  </section>
+ 
+
+  <section>
+  <h1>Tags</h1>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/lstm.html">LSTM</a>,    <a href="https://wugh.github.io/tag/gru.html">GRU</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/di-gui-shen-jing-wang-luo.html">递归神经网络</a>,    <a href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/rnn.html">RNN</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/xun-huan-shen-jing-wang-luo.html">循环神经网络</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/yu-yan-mo-xing.html">语言模型</a>,    <a href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/qing-gan-fen-xi.html">情感分析</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/ju-fa-fen-xi.html">句法分析</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
+
+
+    <section>
+        <h1>Social</h1>
+        <ul>
+            <li><a href="https://wugh.github.io/feeds/main.atom.xml" type="application/atom+xml" rel="alternate">Atom</a></li>
+            <li><a href="https://github.com/wugh" target="_blank">GitHub</a></li>
+        </ul>
+    </section>
+
+</aside>    </div>
+  </div>
+  <footer role="contentinfo"><p>
+    Copyright &copy;  2013&ndash;2016  Guohua Wu &mdash;
+  <span class="credit">Powered by <a href="http://getpelican.com">Pelican</a></span>
+</p></footer>
+  <script src="https://wugh.github.io/theme/js/modernizr-2.0.js"></script>
+  <script src="https://wugh.github.io/theme/js/ender.js"></script>
+  <script src="https://wugh.github.io/theme/js/octopress.js" type="text/javascript"></script>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-52495737-1', 'auto');
+
+    ga('send', 'pageview');
+    </script>
+  <script type="text/javascript">
+    var disqus_shortname = 'guohuasblog';
+    var disqus_identifier = '/posts/2016/05/cs224d-notes5-recusive-neural-networks/';
+    var disqus_url = 'https://wugh.github.io/posts/2016/05/cs224d-notes5-recusive-neural-networks/';
+    var disqus_title = 'CS224d笔记5——递归神经网络（Recusive Neural Network, <span class="caps">RNN</span>）';
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = "//" + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+  </script>
+</body>
+</html>

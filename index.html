@@ -48,6 +48,35 @@
   		<article>
 <header>
       <h1 class="entry-title">
+        <a href="https://wugh.github.io/posts/2016/05/cs224d-notes5-recusive-neural-networks/">CS224d笔记5——递归神经网络（Recusive Neural Network, RNN）</a>
+      </h1>
+    <p class="meta">
+<time datetime="2016-05-13T08:09:00+08:00" pubdate>2016-05-13(Fri)</time>    </p>
+</header>
+
+  <div class="entry-content"><p>这部分介绍递归神经网络（<span class="caps">RNN</span>），
+<a href="https://en.wikipedia.org/wiki/Recursive_neural_network">递归神经网络</a>通过在一个结构上递归地应用同一组参数来预测任意输入的结构，
+或者通过遍历输入的拓扑结构产生一个标量输出来创建网络。
+<a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/">上篇文章</a>介绍的循环神经网络可以看成时间上的递归，&nbsp;可以看成是结构递归的一种简化版递归神经网络。</p>
+<p><span class="caps">RNN</span>适用于有嵌套层次和内在递归结构的任务。目前<span class="caps">RNN</span>在<span class="caps">NLP</span>领域的应用主要有句法分析和
+句子表示。假设一个句子的含义是由句子中词的含义和词的组合方式决定的
+，word2vec已经一定程度上说明可以用向量来表示词的含义，词的组合规则从句法的角度
+来看可以理解成句法树，我们可以通过遍历句法树来构建<span class="caps">RNN</span>（递归的时候使用同一组参数
+）来生成句子的表示。这样生成句子、短语的表示考虑了词的顺序、词的组合和词的含义。
+其实我们可以利用<span class="caps">RNN</span>来同时学习句子的句法结构和句子的向量表示。</p>
+<p><span class="caps">RNN</span>用于结构预测的时候需要用到一个<code>max-margin</code>目标函数，暂时没有看懂这个目标函数。
+所以本文仅介绍在有一个句法树的前提下来生成句子表示的过程，同时结合一个简单的情感
+分析任务来解释<span class="caps">RNN</span>的前向传播和反向传播过程。</p>
+<h2>单层<span class="caps">RNN</span>建模情感分析</h2>
+<p>现在用一个简单的<span class="caps">RNN</span>来建模情感分析任务，学习句子的表示。假设我们现在已经有了句子
+的句子分析树和词表示，如下图所示 ...</p></div>
+  <footer>
+    <a rel="full-article" href="https://wugh.github.io/posts/2016/05/cs224d-notes5-recusive-neural-networks/">Read On &crarr;</a>
+  </footer>
+  		</article>
+  		<article>
+<header>
+      <h1 class="entry-title">
         <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/">CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</a>
       </h1>
     <p class="meta">
@@ -283,35 +312,6 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
     <a rel="full-article" href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">Read On &crarr;</a>
   </footer>
   		</article>
-  		<article>
-<header>
-      <h1 class="entry-title">
-        <a href="https://wugh.github.io/posts/2013/11/text-classification/">文本分类</a>
-      </h1>
-    <p class="meta">
-<time datetime="2013-11-25T09:08:37+08:00" pubdate>2013-11-25(Mon)</time>    </p>
-</header>
-
-  <div class="entry-content"><h3>1&nbsp;概述</h3>
-<p>最近做了一个简单的文本分类程序，在这篇博客里面记录具体的分类流程。一般来说包括&nbsp;以下几个步骤：</p>
-<ol>
-<li>语料获取</li>
-<li>文本预处理</li>
-<li>特征值提取</li>
-<li>训练分类器</li>
-<li>评估分类性能</li>
-</ol>
-<p>下文将分析上面每个步骤的具体实现过程。</p>
-<h3>2&nbsp;语料获取</h3>
-<p>语料获取可以采用爬虫来获得，在实现的过程中从网易上获取了十个类别的新闻语料，分
-别是：时政、军事、教育、娱乐、房产、女人、财经、体育、科技和旅游。关于爬虫怎么
-写可以参考<a href="http://blog.pluskid.org/?p=366" title="Scrapy 轻松
-定制网络爬虫">Scrapy 轻松定制网络爬虫</a>，这篇文章对于学习<a href="http://scrapy.org" title="scrapy">Scrapy</a>框架非常有
-用，但是文章较老，很多接口可能很多都被丢弃，新的接口参考 ...</p></div>
-  <footer>
-    <a rel="full-article" href="https://wugh.github.io/posts/2013/11/text-classification/">Read On &crarr;</a>
-  </footer>
-  		</article>
 <div class="pagination">
     <a class="prev" href="https://wugh.github.io/index2.html">&larr; Older</a>
 
@@ -321,6 +321,9 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
   <section>
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/05/cs224d-notes5-recusive-neural-networks/">CS224d笔记5——递归神经网络（Recusive Neural Network, RNN）</a>
+      </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks-continue/">CS224d笔记4续——RNN隐藏层计算之GRU和LSTM</a>
       </li>
@@ -332,9 +335,6 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
       </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
-      </li>
-      <li class="post">
-          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes1-word2vec/">CS224d笔记1——word2vec</a>
       </li>
     </ul>
   </section>
@@ -352,7 +352,7 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
 
   <section>
   <h1>Tags</h1>
-    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/lstm.html">LSTM</a>,    <a href="https://wugh.github.io/tag/gru.html">GRU</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/rnn.html">RNN</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/xun-huan-shen-jing-wang-luo.html">循环神经网络</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/yu-yan-mo-xing.html">语言模型</a>,    <a href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/lstm.html">LSTM</a>,    <a href="https://wugh.github.io/tag/gru.html">GRU</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/di-gui-shen-jing-wang-luo.html">递归神经网络</a>,    <a href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/rnn.html">RNN</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/xun-huan-shen-jing-wang-luo.html">循环神经网络</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/yu-yan-mo-xing.html">语言模型</a>,    <a href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/qing-gan-fen-xi.html">情感分析</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/ju-fa-fen-xi.html">句法分析</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
 
 
     <section>
