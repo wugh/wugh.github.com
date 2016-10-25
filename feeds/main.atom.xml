@@ -1,5 +1,194 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/main.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2016-05-13T08:09:00+08:00</updated><entry><title>CS224d笔记5——递归神经网络（Recusive Neural Network, RNN）</title><link href="https://wugh.github.io/posts/2016/05/cs224d-notes5-recusive-neural-networks/" rel="alternate"></link><published>2016-05-13T08:09:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-05-13:posts/2016/05/cs224d-notes5-recusive-neural-networks/</id><summary type="html">&lt;p&gt;这部分介绍递归神经网络（&lt;span class="caps"&gt;RNN&lt;/span&gt;），
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Life in a Nutshell</title><link href="https://wugh.github.io/" rel="alternate"></link><link href="https://wugh.github.io/feeds/main.atom.xml" rel="self"></link><id>https://wugh.github.io/</id><updated>2016-10-20T09:37:00+08:00</updated><entry><title>Learning to Rank入门</title><link href="https://wugh.github.io/posts/2016/10/learning-to-rank-an-introduction/" rel="alternate"></link><published>2016-10-20T09:37:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-10-20:posts/2016/10/learning-to-rank-an-introduction/</id><summary type="html">&lt;p&gt;下面主要是阅读刘铁岩老师的《Learning to Rank for Information Retrieval》的一些
+学习笔记。Learning to Ranking指的是根据训练数据用机器学习模型来解决排序问题。很
+多&lt;span class="caps"&gt;IR&lt;/span&gt;问题都可以看成是排序问题，例如文档检索、协同过滤、关键词抽取、定义查找，本
+文主要以文档检索为例子来描述Learning to&amp;nbsp;Rank。&lt;/p&gt;
+&lt;h2&gt;传统&lt;span class="caps"&gt;IR&lt;/span&gt;模型&lt;/h2&gt;
+&lt;p&gt;传统的&lt;span class="caps"&gt;IR&lt;/span&gt;模型可以分成两类，一类是query-dependent，另一类是query-independent。&lt;/p&gt;
+&lt;p&gt;query-dependent指的是检索的时候考虑query和doc之间的关心，衡量这个关系的不同方法
+产生了不同的模型,&amp;nbsp;考虑doc和query的相关性:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Boolean model: 对doc中的term做倒排，然后query是一个boolean表达式，对取回来的&amp;nbsp;文档集合做交集并集等等&lt;/li&gt;
+&lt;li&gt;Vector space model: 把doc和query都表示在一个统一的欧拉空间（每个term一个维度
+   ），每一个维度的值一般可以是&lt;span class="caps"&gt;TF&lt;/span&gt;-&lt;span class="caps"&gt;IDF&lt;/span&gt;，然后计算cosine距离&lt;/li&gt;
+&lt;li&gt;&lt;span class="caps"&gt;LSI&lt;/span&gt;: 根据term和doc构建一个矩阵，矩阵里面的值可以是&lt;span class="caps"&gt;TF&lt;/span&gt;-&lt;span class="caps"&gt;IDF&lt;/span&gt;，然后进行矩阵分解，
+   得到term和doc的向量表示，新来一个query之后转换成低维空间的向量计算和doc的&amp;nbsp;cosine相似度&lt;/li&gt;
+&lt;li&gt;&lt;span class="caps"&gt;BM25&lt;/span&gt;:&amp;nbsp;计算query和doc相关性分的经典方法&lt;/li&gt;
+&lt;li&gt;基于语言模型的方法:&amp;nbsp;利用语言模型预估P(q|d)的概率&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;不考虑doc和query的相关性的时候，更重要的是如何考虑一个文档的质量，可以用PageRank&amp;nbsp;衡量
+&lt;/p&gt;
+&lt;div class="math"&gt;$$PR(d_u)=\sum_{d_v\in B_u}\frac{PR(d_v)}{U(d_v)}$$&lt;/div&gt;
+&lt;h2&gt;&lt;span class="caps"&gt;IR&lt;/span&gt;基于位置的评估方法&lt;/h2&gt;
+&lt;p&gt;对于一个query给定m个对应的文档&lt;span class="math"&gt;\(\left\{d_j\right\}_{j=1}^m\)&lt;/span&gt;，有三种方式给出文档&amp;nbsp;和query的关系:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;给出每个doc和query的相关性分，一般有两级和多级的表示方法，相关性之间可以比较&lt;/li&gt;
+&lt;li&gt;对于某个query给出文档之间的偏序关系，&lt;span class="math"&gt;\(l_{u,v}=1\)&lt;/span&gt;表示u比v更相关&lt;/li&gt;
+&lt;li&gt;直接给出这个query下m篇文档的排列顺序&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;评估方法:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;span class="caps"&gt;MRR&lt;/span&gt; (Mean reciprocal rank): 对于query来说第一个相关文档的位置&lt;span class="math"&gt;\(r(q)\)&lt;/span&gt;，那么&lt;span class="math"&gt;\(1/r(q)\)&lt;/span&gt;就是这个query的&lt;span class="caps"&gt;MRR&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span class="caps"&gt;MAP&lt;/span&gt; (Mean Average precision): 首先P(k)指的是排序列表中topk个位置的精度，对每个query求AveP取平均得到&lt;span class="caps"&gt;MAP&lt;/span&gt;
+&lt;div class="math"&gt;$$P(k)=\frac{\mbox{topk中相关的文档个数}}{k}$$&lt;/div&gt;
+&lt;div class="math"&gt;$$\operatorname{AveP} = \frac{\sum_{k=1}^n (P(k) \times \operatorname{rel}(k))}{\mbox{number of relevant documents}}$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;span class="caps"&gt;NDCG&lt;/span&gt; (Normalised Discounted cumulative gain): 给定排序列表后p位置的&lt;span class="caps"&gt;DCG&lt;/span&gt;如下
+&lt;div class="math"&gt;$$ \mathrm{DCG_{p}} = rel_{1} + \sum_{i=2}^{p} \frac{rel_{i}}{\log_{2}i}. $$&lt;/div&gt;
+&lt;span class="caps"&gt;NDGC&lt;/span&gt;指的对&lt;span class="math"&gt;\(DCG_p\)&lt;/span&gt;进行了归一化，把&lt;span class="math"&gt;\(DCG_p\)&lt;/span&gt;除以了完全正确排序时的&lt;span class="math"&gt;\(DCG_p\)&lt;/span&gt;
+&lt;div class="math"&gt;$$ \mathrm{nDCG_{p}} = \frac{DCG_{p}}{IDCG{p}}. $$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;span class="caps"&gt;RC&lt;/span&gt; (Rank correlation): &lt;span class="caps"&gt;RC&lt;/span&gt;给出了两个完整排序列表的不一致性, 例如可以用
+&lt;a href="https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient"&gt;Kendall rank correlation coefficient&lt;/a&gt;衡量&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这些评估方法都是以单个query为基础来评估的，并且每个query在评估文档排列时都需要&amp;nbsp;考虑文档所处的位置。&lt;/p&gt;
+&lt;h2&gt;Learning to&amp;nbsp;Rank&lt;/h2&gt;
+&lt;p&gt;文中把利用机器学习技术来解决排序问题的方法称为Learning to Rank。一般的做法是给
+定query和doc抽取特征和真是label，特征包括doc本身的特征(PageRank值，点击率等等)
+，以及query和doc之间的相关性特征(&lt;span class="caps"&gt;BM25&lt;/span&gt;等)，然后用机器学习方法去学习如何从特征空
+间映射到label的空间。这些机器学习方法大体上可以分成三类：pointwise，pairwise，&amp;nbsp;listwise。下面主要谈谈自己对这三种方法的理解，具体的参见参考文献。&lt;/p&gt;
+&lt;h3&gt;pointwise&lt;/h3&gt;
+&lt;p&gt;pointwise方法比较简单粗暴，把当个doc和query的特征看成输入，然后以这个pair是否相
+关为目标来训练数据。关心单个文档和特定query的相关性。最后按照模型的相关性得分输&amp;nbsp;出给文档排序，得到query下doc的排序。&lt;/p&gt;
+&lt;p&gt;pointwise按照模型输出空间的不同又可以分成三类：回归，分类，ordinal regression（
+类似分类，但是在这种回归的学习目标是学习到目标空间的几个有序划分点，然后每一段代表&amp;nbsp;一个分类）。&lt;/p&gt;
+&lt;p&gt;回归方法最简单的理解就是把问题看成一个线性回归问题，那么对于输入向量&lt;span class="math"&gt;\(x\)&lt;/span&gt;可以用以下&lt;span class="math"&gt;\(f(x)\)&lt;/span&gt;拟合相关分:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$f_w(x) = w_0 + w_1x_1 + w_2x_2 + \cdots + w_nx_n$$&lt;/div&gt;
+&lt;p&gt;
+损失函数可以采用square loss,&amp;nbsp;y为真是相关性分：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$L(f(x), y) = (y-f(x))^2$$&lt;/div&gt;
+&lt;p&gt;看成分类问题时可以把是否相关看成两个分类，如果数据是多分类标注时就看成n个分类来学习，
+采用logistics regression，最大熵，&lt;span class="caps"&gt;SVM&lt;/span&gt;都可以很好的解决该分类问题。&lt;/p&gt;
+&lt;p&gt;pointwise存在的问题:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;训练过程只考虑了单篇文档，没有学习到两篇文档的相对关系&lt;/li&gt;
+&lt;li&gt;没有考虑到&lt;span class="caps"&gt;IR&lt;/span&gt;中评估性能的两个方面，没有考虑到一个query对应多个文档、loss函数&amp;nbsp;没有体现文档在排序列表中的位置&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;pairwise&lt;/h3&gt;
+&lt;p&gt;pairwise方法解决了pointwise方法存在的第一个问题（训练过程考虑文档的相对顺序，即&amp;nbsp;在这个query下某个doc1和doc2的相关性谁强）。关心特定query下两个文档之间的相对顺序。&lt;/p&gt;
+&lt;p&gt;pairwise的学习目标是要减少误分类的文档对，即数据给定的方式是&lt;span class="math"&gt;\((q, d_1, d_2)\)&lt;/span&gt;，然后
+如果&lt;span class="math"&gt;\(d_1\)&lt;/span&gt;比&lt;span class="math"&gt;\(d_2\)&lt;/span&gt;相关那么label为1，否则label为-1。&lt;/p&gt;
+&lt;p&gt;pairwise的中有些方法的方法感觉可以分成两种类型，一种是hypothesis就是建模两个文档
+之间的相对关系，假定两个文档&lt;span class="math"&gt;\(x_u\)&lt;/span&gt;和&lt;span class="math"&gt;\(x_v\)&lt;/span&gt;那么，&lt;span class="math"&gt;\(h(x_u,x_v)\)&lt;/span&gt;直接建模这两个文档的相对关系；
+第二种模式是hypothesis建模还是单个文档的分，然后再损失函数里面考虑两个文档的相对关系，
+假设&lt;span class="math"&gt;\(f(x_u)\)&lt;/span&gt;和&lt;span class="math"&gt;\(f(x_v)\)&lt;/span&gt;分别为两个文档的分数，然后如果&lt;span class="math"&gt;\(f(x_u)&amp;gt;f(x_v)\)&lt;/span&gt;表示u比v相关。&amp;nbsp;下面主要针对第二种模式给出一个经典算法RankNet。其他经典方法还有RankSVM。&lt;/p&gt;
+&lt;p&gt;在RankNet用&lt;span class="math"&gt;\(P_{u,v}\)&lt;/span&gt;表示&lt;span class="math"&gt;\(x_u\)&lt;/span&gt;比&lt;span class="math"&gt;\(x_v\)&lt;/span&gt;更相关的概率，对于特定query &lt;span class="math"&gt;\(q\)&lt;/span&gt;如果文档
+&lt;span class="math"&gt;\(x_u\)&lt;/span&gt;比&lt;span class="math"&gt;\(x_v\)&lt;/span&gt;更相关，那么我们要学习&lt;span class="math"&gt;\(\bar{y}_{u,v}=1\)&lt;/span&gt;，相反的时候我们希望
+&lt;span class="math"&gt;\(\bar{y}_{u,v}=0\)&lt;/span&gt;。基于上面描述的评分函数&lt;span class="math"&gt;\(f\)&lt;/span&gt;，&lt;span class="math"&gt;\(P\)&lt;/span&gt;可以写成如下形式：
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P_{u,v}(f) = \frac{\exp(f(x_u)-f(x_v))}{1+\exp(f(x_u)-f(x_v))}$$&lt;/div&gt;
+&lt;p&gt;可以用交叉熵来作为损失函数:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$L(f;x_u,x_v,y_{u,v}) = -y_{u,v}\log{P_{u,v}}(f)-(1-y_{u,v})\log{(1-{P_{u,v}}(f))}$$&lt;/div&gt;
+&lt;p&gt;评分函数可以用神经网络来建模，交叉熵可以求导，直接把梯度传递给神经网络就可以完成整个训练过程。&lt;/p&gt;
+&lt;p&gt;虽然pairwise在考虑了文档之间的相对顺序，但是还没有把文档在ranklist中的绝对位置考虑到损失里面，&amp;nbsp;而且没有考虑到多个文档同属于一个query这种性质。&lt;/p&gt;
+&lt;h3&gt;listwise&lt;/h3&gt;
+&lt;p&gt;listwise方法可以分成两种，一种模型的输出空间是文档列表中每个文档的相关性分数，&amp;nbsp;这里介绍softrank；另一种是建模整个文档列表的排列顺序，这里介绍ListNet。&lt;/p&gt;
+&lt;p&gt;listwise方法的最大优势是损失函数直接近似于&lt;span class="caps"&gt;IR&lt;/span&gt;的评估指标（&lt;span class="caps"&gt;MAP&lt;/span&gt;，&lt;span class="caps"&gt;NDGC&lt;/span&gt;等），&lt;span class="caps"&gt;IR&lt;/span&gt;的评估&amp;nbsp;指标一般非连续不可导，一般采用以下的替代方案:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;用连续可微的指标来逼近&lt;span class="caps"&gt;IR&lt;/span&gt;指标, softrank,&amp;nbsp;apprank&lt;/li&gt;
+&lt;li&gt;bound &lt;span class="caps"&gt;IR&lt;/span&gt;指标, &lt;span class="math"&gt;\(SVM^{\mbox{map}}\)&lt;/span&gt;, &lt;span class="math"&gt;\(SVM^{\mbox{ndgc}}\)&lt;/span&gt;,&amp;nbsp;PermuRank&lt;/li&gt;
+&lt;li&gt;优化complex objectives, AdaRank,&amp;nbsp;RankGP&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;SoftRank在文档排序分中引入随机性，用&lt;span class="caps"&gt;NDCG&lt;/span&gt;的期望来逼近原始的&lt;span class="caps"&gt;NDCG&lt;/span&gt;分数。假设给定query &lt;span class="math"&gt;\(q\)&lt;/span&gt;，
+对应的文档集合是&lt;span class="math"&gt;\(\mathbf{x}={x_j}_{j=1}^m\)&lt;/span&gt;，&lt;span class="math"&gt;\(x_j\)&lt;/span&gt;的得分&lt;span class="math"&gt;\(s_j\)&lt;/span&gt;不再当成一个确定值来用，而是
+当做一个随机变量，&lt;span class="math"&gt;\(s_j\)&lt;/span&gt;是一个均值为&lt;span class="math"&gt;\(f(x_j)\)&lt;/span&gt;方差为&lt;span class="math"&gt;\(\sigma_s\)&lt;/span&gt;（这个&lt;span class="math"&gt;\(f\)&lt;/span&gt;可以用神经网络建模，
+&lt;span class="math"&gt;\(sigma\)&lt;/span&gt;是超参数）:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(s_j)=N(s_j|f(x_j),\sigma_s^2)$$&lt;/div&gt;
+&lt;p&gt;
+文档&lt;span class="math"&gt;\(x_u\)&lt;/span&gt;排的比&lt;span class="math"&gt;\(x_v\)&lt;/span&gt;靠前的概率可以描述如下:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p_{u,v}=\int_0^\inf N(s|f(x_u)-f(x_v),2\sigma_s^2)ds$$&lt;/div&gt;
+&lt;p&gt;
+有了&lt;span class="math"&gt;\(p_{u,v}\)&lt;/span&gt;之后可以用迭代的方式表示用特定文档处于排序列表某个位置的概率。假设
+&lt;span class="math"&gt;\(x_j\)&lt;/span&gt;已经存在于列表中，此时需要加入&lt;span class="math"&gt;\(x_u\)&lt;/span&gt;，那么如果&lt;span class="math"&gt;\(x_u\)&lt;/span&gt;比&lt;span class="math"&gt;\(x_j\)&lt;/span&gt;靠前那么加入之后&lt;span class="math"&gt;\(x_j\)&lt;/span&gt;位置后移一位，
+否则&lt;span class="math"&gt;\(x_j\)&lt;/span&gt;位置不变。&lt;span class="math"&gt;\(p_j^u(r)\)&lt;/span&gt;表示&lt;span class="math"&gt;\(x_u\)&lt;/span&gt;加入后&lt;span class="math"&gt;\(x_j\)&lt;/span&gt;处于&lt;span class="math"&gt;\(r\)&lt;/span&gt;位置的概率:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p_j^u(r)=p_j^{(u-1)}(r-1)p_{u,j}+p_j^{(u-1)}(r)(1-p_{u,j})$$&lt;/div&gt;
+&lt;p&gt;
+SoftRank通过计算&lt;span class="caps"&gt;NDCG&lt;/span&gt;@m的期望来作为目标函数，又称之为SoftNDCG，通过最大化目标函数来学习&lt;span class="math"&gt;\(f\)&lt;/span&gt;:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mbox{SoftNDCG}\triangleq \frac{1}{Z_m}\sum_{j=1}^m(2^{y_i}-1)\sum_{r=0}^{m-1}\eta(r)p_j(r)$$&lt;/div&gt;
+&lt;p&gt;ListNet首先根据评分函数给文档打分，&lt;span class="math"&gt;\(\mathbf{s}=\{s_j\}_{j=1}^m\)&lt;/span&gt;其中&lt;span class="math"&gt;\(s_j=f(x_j\)&lt;/span&gt;
+，然后根据Luce model来定义任意文档排列&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;的概率:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(\pi|\mathbf{s})=\Pi_{j=1}^m\frac{\varphi(s_{\pi^{-1}(j)})}{\sum_{u=j}^m \varphi(s_{\pi^{-1}(u)})}$$&lt;/div&gt;
+&lt;p&gt;
+&lt;span class="math"&gt;\(\pi^{-1}(j)\)&lt;/span&gt;表示文档排列&lt;span class="math"&gt;\(\pi\)&lt;/span&gt;中第j位置的文档，&lt;span class="math"&gt;\(\varphi\)&lt;/span&gt;是转换函数可以是sigmoid、线性或者指数。
+上述建模好了当前评分函数&lt;span class="math"&gt;\(f\)&lt;/span&gt;下任意排列的概率分数，我们还需要给出真实的任意排列概率分数&lt;span class="math"&gt;\(P_y(\pi)\)&lt;/span&gt;，
+（如果真实的文档列表是按照相关性分数给出，那么可以直接用Luce model给出真实分布；如果给出的仅仅是个
+排序好的列表那么可以用delta函数给出分布，或者把位置转换成一个分数之后再利用Luce model）。通过
+计算两个分布的&lt;span class="caps"&gt;KL&lt;/span&gt;散度，可以建模损失函数:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$L(f;\mathbf{x},\pi_y)=D_{\mathrm{KL}}(P(\pi|\varphi(f(w,\mathbf{x})))\| P_y(\pi))$$&lt;/div&gt;
+&lt;p&gt;
+ListNet在训练过程中要计算的&lt;span class="caps"&gt;KL&lt;/span&gt;散度计算复杂度和&lt;span class="math"&gt;\(m\)&lt;/span&gt;呈指数关系，因为需要考虑所有排列。ListNet的
+原始文献中进一步基于top-k luce model给出top-k版本的&lt;span class="caps"&gt;KL&lt;/span&gt;散度，把计算复杂度降低到&lt;span class="math"&gt;\(m\)&lt;/span&gt;的多项式复杂度。&lt;/p&gt;
+&lt;p&gt;基于ListNet，提出了ListMLE，基本思想和ListNet很像。根据评分函数用luce model建模排列&amp;nbsp;的概率分布，把优化目标改成了最大化真实排列的最大似然概率:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$L(f;\mathbf{x},\pi_y)=-\log P(\pi_y|\varphi(f(w,\mathbf{x})))$$&lt;/div&gt;
+&lt;p&gt;
+ListMLE的训练数据需要给定query对应的整个排序列表，如果数据按pairwise或者pairwise方式给出&amp;nbsp;要想办法转换成一个完整列表。&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' &amp;&amp; location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="Learning to Rank"></category></entry><entry><title>CS224d笔记5——递归神经网络（Recusive Neural Network, RNN）</title><link href="https://wugh.github.io/posts/2016/05/cs224d-notes5-recusive-neural-networks/" rel="alternate"></link><published>2016-05-13T08:09:00+08:00</published><author><name>Guohua Wu</name></author><id>tag:wugh.github.io,2016-05-13:posts/2016/05/cs224d-notes5-recusive-neural-networks/</id><summary type="html">&lt;p&gt;这部分介绍递归神经网络（&lt;span class="caps"&gt;RNN&lt;/span&gt;），
 &lt;a href="https://en.wikipedia.org/wiki/Recursive_neural_network"&gt;递归神经网络&lt;/a&gt;通过在一个结构上递归地应用同一组参数来预测任意输入的结构，
 或者通过遍历输入的拓扑结构产生一个标量输出来创建网络。
 &lt;a href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/"&gt;上篇文章&lt;/a&gt;介绍的循环神经网络可以看成时间上的递归，&amp;nbsp;可以看成是结构递归的一种简化版递归神经网络。&lt;/p&gt;

@@ -48,6 +48,31 @@
   		<article>
 <header>
       <h1 class="entry-title">
+        <a href="https://wugh.github.io/posts/2016/10/learning-to-rank-an-introduction/">Learning to Rank入门</a>
+      </h1>
+    <p class="meta">
+<time datetime="2016-10-20T09:37:00+08:00" pubdate>2016-10-20(Thu)</time>    </p>
+</header>
+
+  <div class="entry-content"><p>下面主要是阅读刘铁岩老师的《Learning to Rank for Information Retrieval》的一些
+学习笔记。Learning to Ranking指的是根据训练数据用机器学习模型来解决排序问题。很
+多<span class="caps">IR</span>问题都可以看成是排序问题，例如文档检索、协同过滤、关键词抽取、定义查找，本
+文主要以文档检索为例子来描述Learning to&nbsp;Rank。</p>
+<h2>传统<span class="caps">IR</span>模型</h2>
+<p>传统的<span class="caps">IR</span>模型可以分成两类，一类是query-dependent，另一类是query-independent。</p>
+<p>query-dependent指的是检索的时候考虑query和doc之间的关心，衡量这个关系的不同方法
+产生了不同的模型,&nbsp;考虑doc和query的相关性:</p>
+<ol>
+<li>Boolean model: 对doc中的term做倒排，然后query是一个boolean表达式，对取回来的&nbsp;文档集合做交集并集等等</li>
+<li>Vector space model: 把doc和query都表示在一个统一的欧拉空间（每个term一个维度
+   ），每一个维度的值一般可以是<span class="caps">TF</span>-<span class="caps">IDF ...</span></li></ol></div>
+  <footer>
+    <a rel="full-article" href="https://wugh.github.io/posts/2016/10/learning-to-rank-an-introduction/">Read On &crarr;</a>
+  </footer>
+  		</article>
+  		<article>
+<header>
+      <h1 class="entry-title">
         <a href="https://wugh.github.io/posts/2016/05/cs224d-notes5-recusive-neural-networks/">CS224d笔记5——递归神经网络（Recusive Neural Network, RNN）</a>
       </h1>
     <p class="meta">
@@ -289,29 +314,6 @@ sports、politics和art。因为文本只能被分成4个类别，假设现在�
     <a rel="full-article" href="https://wugh.github.io/posts/2014/11/maxent/">Read On &crarr;</a>
   </footer>
   		</article>
-  		<article>
-<header>
-      <h1 class="entry-title">
-        <a href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">MDP入门</a>
-      </h1>
-    <p class="meta">
-<time datetime="2014-04-25T19:19:36+08:00" pubdate>2014-04-25(Fri)</time>    </p>
-</header>
-
-  <div class="entry-content"><h3>介绍</h3>
-<p><span class="caps">MDP</span>（Markov Decision
-Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</span>，具体的&nbsp;参数介绍如下：</p>
-<ul>
-<li><span class="math">\(S\)</span>：状态集合</li>
-<li><span class="math">\(A\)</span>：动作集合</li>
-<li><span class="math">\(P_{sa}\)</span>：状态转移概率分布，<span class="math">\(P_{sa}(s')\)</span>表示在<span class="math">\(s\)</span>状态下采取
-  <span class="math">\(s\)</span>动作，转移到<span class="math">\(s'\)</span>的概率，<span class="math">\(P_{sa}(s')\geq0\)</span></li>
-<li><span class="math">\(\gamma\)</span>：折扣系数取值范围<span class="math">\(0\leq\gamma\le1\)</span></li>
-<li><span class="math">\(R\)</span>：回报函数，<span class="math">\(R:S\mapsto&nbsp;\mathbb{R ...</span></li></ul></div>
-  <footer>
-    <a rel="full-article" href="https://wugh.github.io/posts/2014/04/an-introduction-to-mdp/">Read On &crarr;</a>
-  </footer>
-  		</article>
 <div class="pagination">
     <a class="prev" href="https://wugh.github.io/index2.html">&larr; Older</a>
 
@@ -321,6 +323,9 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
   <section>
     <h1>Recent Posts</h1>
     <ul id="recent_posts">
+      <li class="post">
+          <a href="https://wugh.github.io/posts/2016/10/learning-to-rank-an-introduction/">Learning to Rank入门</a>
+      </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2016/05/cs224d-notes5-recusive-neural-networks/">CS224d笔记5——递归神经网络（Recusive Neural Network, RNN）</a>
       </li>
@@ -332,9 +337,6 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
       </li>
       <li class="post">
           <a href="https://wugh.github.io/posts/2016/03/cs224d-notes3-neural-networks-and-backward-propagation/">CS224d笔记3——神经网络</a>
-      </li>
-      <li class="post">
-          <a href="https://wugh.github.io/posts/2016/02/cs224d-notes2-softmax-classification-and-window-classification/">CS224d笔记2——Softmax分类和窗口分类</a>
       </li>
     </ul>
   </section>
@@ -352,7 +354,7 @@ Process）由5元组构成<span class="math">\(MDP(S,A,{P_{sa}},\gamma,R)\)</spa
 
   <section>
   <h1>Tags</h1>
-    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/lstm.html">LSTM</a>,    <a href="https://wugh.github.io/tag/gru.html">GRU</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/di-gui-shen-jing-wang-luo.html">递归神经网络</a>,    <a href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/rnn.html">RNN</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/xun-huan-shen-jing-wang-luo.html">循环神经网络</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/yu-yan-mo-xing.html">语言模型</a>,    <a href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/qing-gan-fen-xi.html">情感分析</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/ju-fa-fen-xi.html">句法分析</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
+    <a href="https://wugh.github.io/tag/pelican.html">Pelican</a>,    <a href="https://wugh.github.io/tag/lu-yin.html">录音</a>,    <a href="https://wugh.github.io/tag/learning-to-rank.html">Learning to Rank</a>,    <a href="https://wugh.github.io/tag/pulse.html">pulse</a>,    <a href="https://wugh.github.io/tag/vim.html">vim</a>,    <a href="https://wugh.github.io/tag/ap.html">ap</a>,    <a href="https://wugh.github.io/tag/mp3.html">mp3</a>,    <a href="https://wugh.github.io/tag/lstm.html">LSTM</a>,    <a href="https://wugh.github.io/tag/fontconfig.html">fontconfig</a>,    <a href="https://wugh.github.io/tag/shen-du-xue-xi.html">深度学习</a>,    <a href="https://wugh.github.io/tag/gru.html">GRU</a>,    <a href="https://wugh.github.io/tag/jinja.html">Jinja</a>,    <a href="https://wugh.github.io/tag/mdp.html">MDP</a>,    <a href="https://wugh.github.io/tag/nei-he-bian-yi.html">内核编译</a>,    <a href="https://wugh.github.io/tag/portage.html">Portage</a>,    <a href="https://wugh.github.io/tag/di-gui-shen-jing-wang-luo.html">递归神经网络</a>,    <a href="https://wugh.github.io/tag/hou-xiang-chuan-bo.html">后向传播</a>,    <a href="https://wugh.github.io/tag/luan-ma.html">乱码</a>,    <a href="https://wugh.github.io/tag/word2vec.html">word2vec</a>,    <a href="https://wugh.github.io/tag/rnn.html">RNN</a>,    <a href="https://wugh.github.io/tag/gentoo.html">Gentoo</a>,    <a href="https://wugh.github.io/tag/xun-huan-shen-jing-wang-luo.html">循环神经网络</a>,    <a href="https://wugh.github.io/tag/wen-ben-fen-lei.html">文本分类</a>,    <a href="https://wugh.github.io/tag/yu-yan-mo-xing.html">语言模型</a>,    <a href="https://wugh.github.io/tag/shen-jing-wang-luo.html">神经网络</a>,    <a href="https://wugh.github.io/tag/latex.html">latex</a>,    <a href="https://wugh.github.io/tag/svm.html">SVM</a>,    <a href="https://wugh.github.io/tag/hexo.html">hexo</a>,    <a href="https://wugh.github.io/tag/hostapd.html">hostapd</a>,    <a href="https://wugh.github.io/tag/qing-gan-fen-xi.html">情感分析</a>,    <a href="https://wugh.github.io/tag/ge-shi-zhuan-huan.html">格式转换</a>,    <a href="https://wugh.github.io/tag/maxent.html">MaxEnt</a>,    <a href="https://wugh.github.io/tag/filter.html">Filter</a>,    <a href="https://wugh.github.io/tag/bpsuan-fa.html">bp算法</a>,    <a href="https://wugh.github.io/tag/softmax.html">softmax</a>,    <a href="https://wugh.github.io/tag/ju-fa-fen-xi.html">句法分析</a>,    <a href="https://wugh.github.io/tag/chuang-kou-fen-lei.html">窗口分类</a>  </section>
 
 
     <section>
